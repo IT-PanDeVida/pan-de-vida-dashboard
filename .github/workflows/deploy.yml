@@ -1,0 +1,41 @@
+name: Deploy Dashboard to Plesk
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard-app/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install & build
+        working-directory: dashboard-app
+        run: |
+          npm install
+          npm run build
+
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
+      - name: Sync dist to Plesk (preserve data/)
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+        run: |
+          lftp -c "
+          set sftp:auto-confirm yes;
+          open -u '$SFTP_USER','$SFTP_PASSWORD' sftp://$SFTP_HOST;
+          mirror --reverse --delete --verbose --exclude='^data/' --exclude='^data$' dashboard-app/dist /dashboard.pandevida.engineering;
+          bye
+          "
