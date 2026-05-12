@@ -1,19 +1,19 @@
 {
   "overview": {
-    "totalBeneficiaries": 2452,
-    "totalAccounts": 657,
-    "newFamilies": 39,
-    "totalDeliveries": 2436
+    "totalBeneficiaries": 2483,
+    "totalAccounts": 673,
+    "newFamilies": 54,
+    "totalDeliveries": 2584
   },
   "hotMeals": {
-    "plates": 1524,
-    "families": 130,
+    "plates": 1654,
+    "families": 134,
     "monthly": [
       83,
       313,
       743,
       385,
-      0,
+      130,
       0,
       0,
       0,
@@ -44,14 +44,14 @@
     ]
   },
   "clothing": {
-    "donations": 213,
-    "ub": 75,
+    "donations": 231,
+    "ub": 76,
     "monthly": [
       0,
       60,
       88,
       65,
-      0,
+      18,
       0,
       0,
       0,
@@ -71,16 +71,16 @@
       "paidPDV": 138
     },
     "other": {
-      "aids": 127,
-      "ub": 112,
-      "invested": 930.74
+      "aids": 132,
+      "ub": 117,
+      "invested": 1118.54
     },
     "monthly": [
       170,
       95,
       166,
       6,
-      0,
+      5,
       0,
       0,
       0,
@@ -95,7 +95,7 @@
     "schoolKitCost": 1,
     "backpacks": 1,
     "backpackCost": 1,
-    "vbsCamps": 14,
+    "vbsCamps": 15,
     "monthly": [
       2,
       0,
@@ -168,11 +168,12 @@
     },
     "urbanFarm": {
       "goal": null,
-      "done": 6
+      "done": 21
     },
     "monthly": [
       0,
       6,
+      14,
       0,
       0,
       0,
@@ -181,12 +182,12 @@
       0,
       0,
       0,
-      0,
-      0
+      1
     ],
     "urbanMonthly": [
       0,
       6,
+      14,
       0,
       0,
       0,
@@ -195,8 +196,7 @@
       0,
       0,
       0,
-      0,
-      0
+      1
     ]
   },
   "meps": null,
@@ -219,10 +219,10 @@
     ]
   },
   "evangelism": {
-    "bibles": 90,
-    "vbsCamps": 14,
-    "childrenVBS": 429,
-    "personasAlcanzadas": 1060,
+    "bibles": 91,
+    "vbsCamps": 15,
+    "childrenVBS": 472,
+    "personasAlcanzadas": 1093,
     "monthly": [
       0,
       0,
@@ -240,28 +240,28 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 657,
-      "beneficiaries": 2452,
-      "girls": 365,
-      "boys": 373,
-      "newFamilies": 39,
-      "newUB": 136
+      "accounts": 673,
+      "beneficiaries": 2483,
+      "girls": 196,
+      "boys": 194,
+      "newFamilies": 54,
+      "newUB": 164
     },
     "quito": {
-      "accounts": 364,
-      "beneficiaries": 1221,
-      "girls": 222,
-      "boys": 226,
-      "newFamilies": 26,
-      "newUB": 90
+      "accounts": 65,
+      "beneficiaries": 100,
+      "girls": 53,
+      "boys": 47,
+      "newFamilies": 40,
+      "newUB": 117
     },
     "imbabura": {
       "accounts": 275,
-      "beneficiaries": 1176,
+      "beneficiaries": 1177,
       "girls": 143,
       "boys": 147,
-      "newFamilies": 13,
-      "newUB": 46
+      "newFamilies": 14,
+      "newUB": 47
     }
   },
   "christmas": {
@@ -306,11 +306,11 @@
   },
   "level2": {
     "individualsServed": null,
-    "totalCost": 4394.24
+    "totalCost": 4582.04
   },
   "level3": {
     "individualsServed": null,
     "totalCost": null
   },
-  "lastUpdated": "2026-05-06T20:33:00.313Z"
+  "lastUpdated": "2026-05-12T19:34:31.574Z"
 }
