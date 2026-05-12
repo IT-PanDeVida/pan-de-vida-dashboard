@@ -27,15 +27,17 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
 
-      - name: Sync dist to Plesk (preserve data/)
+      - name: Sync dist to Plesk via FTPS (preserve data/)
         env:
-          SFTP_HOST: ${{ secrets.SFTP_HOST }}
-          SFTP_USER: ${{ secrets.SFTP_USER }}
-          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           lftp -c "
-          set sftp:auto-confirm yes;
-          open -u '$SFTP_USER','$SFTP_PASSWORD' sftp://$SFTP_HOST;
+          set ftp:ssl-force true;
+          set ftp:ssl-protect-data true;
+          set ssl:verify-certificate no;
+          open -u '$FTP_USER','$FTP_PASSWORD' ftp://$FTP_HOST;
           mirror --reverse --delete --verbose --exclude='^data/' --exclude='^data$' dashboard-app/dist /dashboard.pandevida.engineering;
           bye
           "
