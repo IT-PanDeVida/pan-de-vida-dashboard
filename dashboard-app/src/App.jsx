@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback } from "react";
 // ─── FALLBACK DATA (mirrors public/data/dashboard.json schema) ─
 // Used when the JSON hasn't been fetched yet or fetch fails.
 const FALLBACK_DATA = {
-  overview:  { totalBeneficiaries: 2337, totalAccounts: 623, newFamilies: 23, totalDeliveries: 2437 },
+  overview:  { totalBeneficiaries: 2337, totalAccounts: 623, newFamilies: 23, totalDeliveries: 2437, totalReached: 1668 },
   hotMeals:  { plates: 882, families: 100 },
   groceries: { bags: 133, ub: 80, avgCost: 12.70, totalCost: 1118.70, monthly: [44, 133, 45, 0, 0, 0] },
   clothing:  { donations: 96, ub: 39 },
@@ -35,13 +35,20 @@ const FALLBACK_DATA = {
     urbanFarm:      { goal: null, done: 0 },
   },
   meps: {
-    total: 286, active: 17, inactive: 76, finished: 113, aborted: 80, marketReady: 8,
-    byLocation: { quito: 286, otavalo: 285, mantaRiobamba: 1 },
+    total: 264, active: 16, inactive: 67, finished: 102, aborted: 79, marketReady: 17,
+    participants: 223,
+    fund: { year: 2026, disbursed: 278.99, repaid: 206.89, outstanding: 9107.31, repaymentRate: 74 },
+    locations: [
+      { name: "AZAMA", count: 28 }, { name: "CUMBASCONDE", count: 27 },
+      { name: "PIGULCA", count: 15 }, { name: "CHUCHUQUI", count: 8 },
+      { name: "GONZALÉS SUÁREZ Y PIJAL", count: 7 }, { name: null, count: 146 },
+    ],
+    monthly: [13, 79, 65, 281, 213, 37, 0, 0, 0, 0, 0, 0],
   },
   sharkTank:    { winners: 0, pdvCost: 0, monthly: new Array(12).fill(0) },
-  level1: { individualsServed: null, totalCost: null },
-  level2: { individualsServed: null, totalCost: null },
-  level3: { individualsServed: null, totalCost: null },
+  level1: { individualsServed: 356, totalCost: null },
+  level2: { individualsServed: 471, totalCost: null },
+  level3: { individualsServed: 223, totalCost: null },
   evangelism:   { bibles: 34, vbsCamps: 9, childrenVBS: 228, personasAlcanzadas: 593 },
   beneficiaries: {
     combined: { accounts: 623, beneficiaries: 2337, girls: 359, boys: 364, families: 23, newUB: 557 },
@@ -134,6 +141,14 @@ const i18n = {
     goal: "Goal", done: "Done",
     totalMEPs: "Total MEPs", active: "Active", inactive: "Inactive",
     finished: "Finished", aborted: "Aborted", marketReady: "Market Ready",
+    mepParticipants: "Participants served this year",
+    fundCapital: "Revolving Fund Capital",
+    capitalDisbursed: "Capital disbursed (loans)",
+    repaidByEntrepreneurs: "Repaid by entrepreneurs",
+    outstandingBalance: "Current outstanding balance",
+    repaymentRate: "Repayment rate",
+    noLocation: "No location recorded",
+    mepMarketReadyDesc: "Active businesses running for more than 9 months",
     sharkTankPlaceholder: "Data coming soon — this program's metrics are being integrated.",
     viewDetail: "View detail",
     byLocation: "By Location",
@@ -143,6 +158,10 @@ const i18n = {
     childrenVBS: "Kids served",
     personasAlcanzadas: "Individuals reached by the gospel",
     individualsServed: "Individuals served",
+    totalReached: "Total Individuals Reached",
+    totalReachedDesc: "Unique people in households served this year",
+    activeLifeFarms: "Active Life Farms",
+    activeLifeFarmsNote: "Shown separately — not added to the total",
     clothingDonationsCount: "Number of clothing donations",
     activeAccounts: "Active accounts", activeBeneficiaries: "Active beneficiaries",
     activeGirls: "Active girls (0–13)", activeBoys: "Active boys (0–13)",
@@ -221,6 +240,14 @@ const i18n = {
     goal: "Meta", done: "Realizado",
     totalMEPs: "Total MEPs", active: "Activos", inactive: "Inactivos",
     finished: "Finalizados", aborted: "Cancelados", marketReady: "Listos para Mercado",
+    mepParticipants: "Participantes servidos este año",
+    fundCapital: "Capital del Fondo Rotativo",
+    capitalDisbursed: "Capital desembolsado (préstamos)",
+    repaidByEntrepreneurs: "Reembolsado por emprendedores",
+    outstandingBalance: "Saldo pendiente actual",
+    repaymentRate: "Tasa de reembolso",
+    noLocation: "Sin ubicación registrada",
+    mepMarketReadyDesc: "Negocios activos con más de 9 meses de funcionamiento",
     sharkTankPlaceholder: "Datos próximamente — las métricas de este programa están siendo integradas.",
     viewDetail: "Ver detalle",
     byLocation: "Por Ubicación",
@@ -230,6 +257,10 @@ const i18n = {
     childrenVBS: "Niños servidos",
     personasAlcanzadas: "Individuos alcanzados por el evangelio",
     individualsServed: "Individuos servidos",
+    totalReached: "Total de Personas Alcanzadas",
+    totalReachedDesc: "Personas únicas en hogares servidos este año",
+    activeLifeFarms: "Huertos de Vida Activos",
+    activeLifeFarmsNote: "Se muestra aparte — no se suma al total",
     clothingDonationsCount: "Número de donaciones de ropa",
     activeAccounts: "Cuentas activas", activeBeneficiaries: "Beneficiarios activos",
     activeGirls: "Niñas activas (0–13)", activeBoys: "Niños activos (0–13)",
@@ -669,6 +700,24 @@ function OverviewPage({ t, onNavigate, data }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+      {/* Grand total — unique people reached this year, with active life farms as a separate line */}
+      <Card style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 24, borderLeft: `4px solid ${C.green}`, padding: "22px 26px" }}>
+        <div>
+          <div className="pdv-stat-label">{t.totalReached}</div>
+          <div style={{ fontSize: 44, fontWeight: 600, color: C.green, letterSpacing: "-0.03em", lineHeight: 1.05 }}>
+            {(D.overview?.totalReached ?? 0).toLocaleString()}
+          </div>
+          <div style={{ fontSize: 12, color: C.text4, marginTop: 4 }}>{t.totalReachedDesc}</div>
+        </div>
+        <div style={{ textAlign: "right", paddingLeft: 24, borderLeft: "1px solid rgba(0,0,0,0.08)", minWidth: 170 }}>
+          <div className="pdv-stat-label">{t.activeLifeFarms}</div>
+          <div style={{ fontSize: 30, fontWeight: 500, color: C.text1, letterSpacing: "-0.02em" }}>
+            {lifeFarmsTotal.toLocaleString()}
+          </div>
+          <div style={{ fontSize: 11, color: C.text4, marginTop: 4 }}>{t.activeLifeFarmsNote}</div>
+        </div>
+      </Card>
+
       {/* Top summary stats — navigate to beneficiaries */}
       <Grid cols={4}>
         {[
@@ -951,6 +1000,9 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
 function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
   const [tab, setTab] = useState(initialTab);
   const D = data ?? FALLBACK_DATA;
+  // Year the YTD fund flows (disbursed/repaid/rate) belong to — written by the sync.
+  const fundYear = D.meps?.fund?.year;
+  const ytd = (label) => (fundYear ? `${label} · ${fundYear}` : label);
   return (
     <div>
       <LevelBadge level="3" name={t.level3Name} color={C.green} />
@@ -990,11 +1042,28 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
       {tab === "revolving" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <TabDescription>{t.revolvingFundTabDesc}</TabDescription>
-          <Grid cols={3}>
-            <StatCard label={t.totalMEPs}   value={D.meps?.total       ?? 0} color={C.text1}  iconEl={<Icon.chart />} highlight={highlightKey === 'revolvingFund'} delay={0}   />
-            <StatCard label={t.active}      value={D.meps?.active      ?? 0} color={C.green}  iconEl={<Icon.check />} delay={60}  />
-            <StatCard label={t.marketReady} value={D.meps?.marketReady ?? 0} color={C.yellow} iconEl={<Icon.star />} highlight={highlightKey === 'marketReady'} delay={120} />
+          <Grid cols={4}>
+            <StatCard label={t.totalMEPs}        value={D.meps?.total        ?? 0} color={C.text1} iconEl={<Icon.chart />}  highlight={highlightKey === 'revolvingFund'} delay={0}   />
+            <StatCard label={t.active}           value={D.meps?.active       ?? 0} color={C.green} iconEl={<Icon.check />}  delay={60}  />
+            <StatCard label={t.marketReady}      value={D.meps?.marketReady  ?? 0} color={C.yellow} iconEl={<Icon.star />}  highlight={highlightKey === 'marketReady'} delay={120} />
+            <StatCard label={t.mepParticipants}  value={D.meps?.participants ?? 0} color={C.teal}  iconEl={<Icon.people />} delay={180} />
           </Grid>
+          <div style={{ fontSize: 12, color: C.text4, marginTop: -10 }}>
+            {t.marketReady}: {t.mepMarketReadyDesc}
+          </div>
+
+          {/* Revolving-fund capital — YTD flows; the outstanding balance is the current
+              portfolio snapshot (a balance has no YTD form) */}
+          <div>
+            <SectionTitle>{t.fundCapital}</SectionTitle>
+            <Grid cols={4}>
+              <StatCard label={ytd(t.capitalDisbursed)}      prefix="$" value={D.meps?.fund?.disbursed   ?? 0} color={C.purple} iconEl={<Icon.money />}  delay={0}   />
+              <StatCard label={ytd(t.repaidByEntrepreneurs)} prefix="$" value={D.meps?.fund?.repaid      ?? 0} color={C.green}  iconEl={<Icon.dollar />} delay={60}  />
+              <StatCard label={t.outstandingBalance}         prefix="$" value={D.meps?.fund?.outstanding ?? 0} color={C.orange} iconEl={<Icon.warn />}   delay={120} />
+              <StatCard label={ytd(t.repaymentRate)}         value={D.meps?.fund?.repaymentRate != null ? `${D.meps.fund.repaymentRate}%` : "—"} color={C.blue} iconEl={<Icon.chart />} delay={180} />
+            </Grid>
+          </div>
+
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <Card>
               <SectionTitle>{t.statusDist}</SectionTitle>
@@ -1008,30 +1077,32 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
             <Card>
               <SectionTitle>{t.byLocation}</SectionTitle>
               <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
-                {[
-                  { name: t.quito,         value: D.meps?.byLocation?.quito         ?? 0, color: C.blue },
-                  { name: t.otavalo,       value: D.meps?.byLocation?.otavalo       ?? 0, color: C.green },
-                  { name: t.mantaRiobamba, value: D.meps?.byLocation?.mantaRiobamba ?? 0, color: C.orange },
-                ].map((loc, i) => (
-                  <div key={i} className="pdv-loc-item">
-                    <div className="pdv-loc-row">
-                      <div className="pdv-loc-name">
-                        <div className="pdv-loc-dot" style={{ background: loc.color }} />
-                        {loc.name}
+                {(D.meps?.locations ?? []).map((loc, i) => {
+                  const palette = [C.blue, C.green, C.orange, C.purple, C.teal, C.pink];
+                  const color = loc.name == null ? "#bdc1c6" : palette[i % palette.length];
+                  return (
+                    <div key={i} className="pdv-loc-item">
+                      <div className="pdv-loc-row">
+                        <div className="pdv-loc-name">
+                          <div className="pdv-loc-dot" style={{ background: color }} />
+                          {loc.name ?? t.noLocation}
+                        </div>
+                        <span className="pdv-loc-val">{loc.count}</span>
                       </div>
-                      <span className="pdv-loc-val">{loc.value}</span>
+                      <div className="pdv-loc-track">
+                        <div
+                          className="pdv-loc-fill"
+                          style={{ background: color, width: `${(loc.count / (D.meps?.total || 1)) * 100}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="pdv-loc-track">
-                      <div
-                        className="pdv-loc-fill"
-                        style={{ background: loc.color, width: `${(loc.value / (D.meps?.total || 1)) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
           </div>
+
+          <MonthlyDistribution t={t} monthly={D.meps?.monthly} color={C.green} />
         </div>
       )}
 
@@ -1151,8 +1222,12 @@ export default function Dashboard() {
     fetch("/data/dashboard.json")
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(json => {
-        // Deep merge: keep FALLBACK_DATA keys not present in the fetched JSON
-        setDashData(prev => ({ ...prev, ...json }));
+        // Shallow merge, dropping null sections so a failed extract in the sync
+        // (e.g. an unreachable report) can't clobber the FALLBACK_DATA values.
+        const clean = Object.fromEntries(
+          Object.entries(json).filter(([, v]) => v != null),
+        );
+        setDashData(prev => ({ ...prev, ...clean }));
         if (json.lastUpdated) setLastUpdated(new Date(json.lastUpdated));
       })
       .catch(() => { /* network or file error — silently keep fallback */ });

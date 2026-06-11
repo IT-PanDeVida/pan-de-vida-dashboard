@@ -61,7 +61,8 @@ export const REPORT_IDS = {
   life_farms_multiplication: "00OUc0000083PWjMAM",  // HUERTOS DE VIDA MULTIPLICACIÓN
   life_farms_urban: "00OUc000009hW5tMAE",  // HUERTOS DE VIDA URBANO
   shark_tank_winners: "00OUc000009o4o1MAA",  // Ganadores Shark Tank
-  meps: "REPLACE_ME",           // pendiente — confirma el nombre del reporte MEPs
+  // (MEPs intentionally absent: no Salesforce report exists — computed via live SOQL
+  //  in sync-salesforce.js fetchMepMetrics, see buildMeps below)
 
   // ── Evangelización ─────────────────────────────────────────────────────────
   evangelism_bibles_es: "00OUc000007Jm6XMAS",  // Entregas Biblias Español
@@ -345,32 +346,32 @@ function extractLifeFarms(r) {
   };
 }
 
-function extractMEPs(r) {
-  if (!r.meps) return null;
-
-  // Summary report grouped by status — each grouping row is a status.
-  // Run inspect-report.js on the MEPs report to get exact grouping labels.
-  const groupings = r.meps?.groupingsDown?.groupings ?? [];
-  const byStatus = {};
-  groupings.forEach((g, i) => {
-    const label = (g.label ?? "").toLowerCase();
-    byStatus[label] = r.meps?.factMap?.[`${i}!T`]?.aggregates?.[0]?.value ?? 0;
-  });
-
-  const grandTotalVal = total(r.meps);
-
+// MEPs come from live SOQL metrics (fetchMepMetrics in sync-salesforce.js), not from
+// a Salesforce report — none exists. Businesses = Account RecordType 'Microbusiness'
+// grouped by Estado_MEP__c; capital = MEP_Finance_Transaction__c ledger sums;
+// marketReady = MEP_Finance__c businesses active >9 months.
+function buildMeps(m) {
+  if (!m?.mepStatus) return null; // metrics fetch failed — keep null, UI falls back
+  const s = m.mepStatus;
+  const fund = m.mepFund ?? {};
+  const disbursed = fund.disbursed ?? 0;
   return {
-    total: grandTotalVal,
-    active: byStatus["activo"] ?? byStatus["active"] ?? 0,
-    inactive: byStatus["inactivo"] ?? byStatus["inactive"] ?? 0,
-    finished: byStatus["finalizado"] ?? byStatus["finished"] ?? 0,
-    aborted: byStatus["cancelado"] ?? byStatus["aborted"] ?? 0,
-    marketReady: byStatus["listo para mercado"] ?? byStatus["market ready"] ?? 0,
-    byLocation: {
-      quito: 0,  // update if you have a location breakdown report
-      otavalo: 0,
-      mantaRiobamba: 0,
+    total: Object.values(s).reduce((a, b) => a + b, 0),
+    active: s["activo"] ?? 0,
+    inactive: s["inactivo"] ?? 0,
+    finished: s["finalizado"] ?? 0,
+    aborted: s["abortado"] ?? 0,
+    marketReady: m.mepMarketReady ?? 0,
+    participants: m.level3Served ?? null, // distinct people served by the program this year
+    fund: {
+      year: fund.year ?? null, // disbursed/repaid/rate are YTD for this year; outstanding is current
+      disbursed,
+      repaid: fund.repaid ?? 0,
+      outstanding: fund.outstanding ?? 0,
+      repaymentRate: disbursed > 0 ? Math.round(((fund.repaid ?? 0) / disbursed) * 100) : null,
     },
+    locations: m.mepLocations ?? [], // [{ name: string|null, count }] — null = no location recorded
+    monthly: m.mepMonthly ?? new Array(12).fill(0),
   };
 }
 
@@ -479,7 +480,11 @@ function extractEmergency(r) {
 }
 
 // ─── Master transform ──────────────────────────────────────────────────────────
-export function transformAll(r) {
+// `metrics` carries values computed live via SOQL in sync-salesforce.js (no single
+// Salesforce report provides them). Shape:
+//   { level1Served, level2Served, level3Served, totalReached,            (fetchLevelMetrics)
+//     mepStatus, mepMarketReady, mepFund, mepLocations, mepMonthly }     (fetchMepMetrics)
+export function transformAll(r, metrics = {}) {
   const hotMeals = extractHotMeals(r);
   const groceries = extractGroceries(r);
   const clothing = extractClothing(r);
@@ -487,7 +492,7 @@ export function transformAll(r) {
   const education = extractEducation(r);
   const shelter = extractShelter(r);
   const lifeFarms = extractLifeFarms(r);
-  const meps = extractMEPs(r);
+  const meps = buildMeps(metrics);
   const sharkTank = extractSharkTank(r);
   const evangelism = extractEvangelism(r);
   const bene = extractBeneficiaries(r);
@@ -513,13 +518,18 @@ export function transformAll(r) {
     totalAccounts: bene?.combined?.accounts ?? 0,
     newFamilies: newFamiliesUIO + newFamiliesIMB2,
     totalDeliveries,
+    // Grand total = distinct people in households served this year (family reach,
+    // deduplicated). Computed live via SOQL; the active-life-farms count is shown
+    // beside it on the overview but NOT added in (different unit: farms, not people).
+    totalReached: metrics.totalReached ?? null,
   };
 
   // ── Level cross-program aggregates (Overview cards) ──────────────────────────
   // totalCost: sum of every cost component currently tracked in Salesforce.
-  // individualsServed: needs a per-level deduplicated UB report from Salesforce —
-  // summing each program's `ub` would double-count people who received services
-  // from more than one program. Leaving null until a dedicated report exists.
+  // individualsServed: distinct beneficiaries served in each level, deduplicated
+  // (COUNT_DISTINCT(Contact) + not-registered persons by N.r. id). Computed live via
+  // SOQL in sync-salesforce.js and passed in as `metrics` — a plain sum of each
+  // program's UB would double-count people served by more than one program.
   const level1Cost = (groceries?.totalCost ?? 0);
   const level2Cost =
     (health?.clinic?.paidVozManos ?? 0) +
@@ -530,15 +540,15 @@ export function transformAll(r) {
   const level3Cost = 0; // no cost components tracked yet (life farms / MEPs)
 
   const level1 = {
-    individualsServed: null, // TODO: needs deduped report across hotMeals/groceries/clothing UBs
+    individualsServed: metrics.level1Served ?? null, // Hunger + Emergency (deduped)
     totalCost: level1Cost > 0 ? level1Cost : null,
   };
   const level2 = {
-    individualsServed: null, // TODO: needs deduped report across health/education/shelter UBs
+    individualsServed: metrics.level2Served ?? null, // Health + Education + Shelter (deduped)
     totalCost: level2Cost > 0 ? level2Cost : null,
   };
   const level3 = {
-    individualsServed: null, // TODO: needs deduped report across life farms / MEPs participants
+    individualsServed: metrics.level3Served ?? null, // Microbusiness/MEP (deduped)
     totalCost: null, // TODO: add cost components when life farms / MEPs report cost
   };
 

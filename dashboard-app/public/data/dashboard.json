@@ -1,20 +1,21 @@
 {
   "overview": {
-    "totalBeneficiaries": 2512,
-    "totalAccounts": 683,
-    "newFamilies": 61,
-    "totalDeliveries": 2969
+    "totalBeneficiaries": 2551,
+    "totalAccounts": 691,
+    "newFamilies": 70,
+    "totalDeliveries": 3334,
+    "totalReached": 1668
   },
   "hotMeals": {
-    "plates": 1987,
-    "families": 141,
+    "plates": 2282,
+    "families": 145,
     "monthly": [
       83,
       313,
       743,
       386,
-      462,
-      0,
+      596,
+      161,
       0,
       0,
       0,
@@ -24,17 +25,17 @@
     ]
   },
   "groceries": {
-    "bags": 234,
-    "ub": 123,
-    "avgCost": 17.314977578475336,
-    "totalCost": 3861.24,
+    "bags": 282,
+    "ub": 130,
+    "avgCost": 14.880258302583027,
+    "totalCost": 4032.55,
     "monthly": [
       29,
       48,
       79,
       63,
-      15,
-      0,
+      22,
+      41,
       0,
       0,
       0,
@@ -44,15 +45,15 @@
     ]
   },
   "clothing": {
-    "donations": 266,
-    "ub": 85,
+    "donations": 288,
+    "ub": 88,
     "monthly": [
       0,
       60,
       88,
       64,
       54,
-      0,
+      22,
       0,
       0,
       0,
@@ -95,7 +96,7 @@
     "schoolKitCost": 1,
     "backpacks": 1,
     "backpackCost": 1,
-    "vbsCamps": 20,
+    "vbsCamps": 22,
     "monthly": [
       2,
       0,
@@ -148,7 +149,7 @@
   "lifeFarms": {
     "idealFarm": {
       "goal": 30,
-      "done": 44
+      "done": 47
     },
     "fullSizeFarm": {
       "goal": 10,
@@ -156,15 +157,15 @@
     },
     "totalChampions": {
       "goal": 40,
-      "done": 54
+      "done": 57
     },
     "basicFarm": {
       "goal": 118,
-      "done": 151
+      "done": 154
     },
     "multiplication": {
       "goal": 108,
-      "done": 112
+      "done": 108
     },
     "urbanFarm": {
       "goal": null,
@@ -199,7 +200,66 @@
       1
     ]
   },
-  "meps": null,
+  "meps": {
+    "total": 264,
+    "active": 16,
+    "inactive": 67,
+    "finished": 102,
+    "aborted": 79,
+    "marketReady": 17,
+    "participants": 223,
+    "fund": {
+      "year": 2026,
+      "disbursed": 278.99,
+      "repaid": 206.89,
+      "outstanding": 9107.31,
+      "repaymentRate": 74
+    },
+    "locations": [
+      {
+        "name": "AZAMA",
+        "count": 28
+      },
+      {
+        "name": "CUMBASCONDE",
+        "count": 27
+      },
+      {
+        "name": "PIGULCA",
+        "count": 15
+      },
+      {
+        "name": "CHUCHUQUI",
+        "count": 8
+      },
+      {
+        "name": "GONZALÉS SUÁREZ Y PIJAL",
+        "count": 7
+      },
+      {
+        "name": "CARABUELA",
+        "count": 5
+      },
+      {
+        "name": null,
+        "count": 146
+      }
+    ],
+    "monthly": [
+      13,
+      79,
+      65,
+      281,
+      213,
+      37,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
   "sharkTank": {
     "winners": 9,
     "pdvCost": 2509.98,
@@ -219,10 +279,10 @@
     ]
   },
   "evangelism": {
-    "bibles": 96,
-    "vbsCamps": 20,
-    "childrenVBS": 599,
-    "personasAlcanzadas": 1410,
+    "bibles": 105,
+    "vbsCamps": 22,
+    "childrenVBS": 658,
+    "personasAlcanzadas": 1499,
     "monthly": [
       0,
       0,
@@ -240,28 +300,28 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 683,
-      "beneficiaries": 2512,
+      "accounts": 691,
+      "beneficiaries": 2551,
       "girls": 198,
-      "boys": 194,
-      "newFamilies": 61,
-      "newUB": 192
+      "boys": 203,
+      "newFamilies": 70,
+      "newUB": 233
     },
     "quito": {
       "accounts": 65,
-      "beneficiaries": 100,
-      "girls": 53,
-      "boys": 47,
-      "newFamilies": 45,
-      "newUB": 135
+      "beneficiaries": 99,
+      "girls": 51,
+      "boys": 48,
+      "newFamilies": 47,
+      "newUB": 143
     },
     "imbabura": {
-      "accounts": 279,
-      "beneficiaries": 1188,
-      "girls": 145,
-      "boys": 147,
-      "newFamilies": 16,
-      "newUB": 57
+      "accounts": 286,
+      "beneficiaries": 1221,
+      "girls": 147,
+      "boys": 155,
+      "newFamilies": 23,
+      "newUB": 90
     }
   },
   "christmas": {
@@ -301,16 +361,16 @@
     ]
   },
   "level1": {
-    "individualsServed": null,
-    "totalCost": 3861.24
+    "individualsServed": 356,
+    "totalCost": 4032.55
   },
   "level2": {
-    "individualsServed": null,
+    "individualsServed": 471,
     "totalCost": 4907.3
   },
   "level3": {
-    "individualsServed": null,
+    "individualsServed": 223,
     "totalCost": null
   },
-  "lastUpdated": "2026-05-28T15:54:44.992Z"
+  "lastUpdated": "2026-06-11T13:27:34.034Z"
 }
