@@ -149,6 +149,12 @@ const i18n = {
     repaymentRate: "Repayment rate",
     noLocation: "No location recorded",
     mepMarketReadyDesc: "Active businesses running for more than 9 months",
+    goals2026: "2026 Plan",
+    goals2026Sub: "Beneficiary Aid & Services Plan — annual goals",
+    goals2026Note: "Targets are set by PDV planning (not stored in Salesforce). Progress bars compare live Salesforce data against each annual goal.",
+    progressYtd: "Progress this year",
+    buTarget: "People benefited (BU)",
+    goalTracked: "tracked live",
     sharkTankPlaceholder: "Data coming soon — this program's metrics are being integrated.",
     viewDetail: "View detail",
     byLocation: "By Location",
@@ -248,6 +254,12 @@ const i18n = {
     repaymentRate: "Tasa de reembolso",
     noLocation: "Sin ubicación registrada",
     mepMarketReadyDesc: "Negocios activos con más de 9 meses de funcionamiento",
+    goals2026: "Plan 2026",
+    goals2026Sub: "Plan de Ayudas y Servicios a Beneficiarios — metas anuales",
+    goals2026Note: "Las metas las define la planificación de PDV (no viven en Salesforce). Las barras de avance comparan los datos vivos de Salesforce contra cada meta anual.",
+    progressYtd: "Avance este año",
+    buTarget: "Personas beneficiadas (BU)",
+    goalTracked: "con seguimiento en vivo",
     sharkTankPlaceholder: "Datos próximamente — las métricas de este programa están siendo integradas.",
     viewDetail: "Ver detalle",
     byLocation: "Por Ubicación",
@@ -330,6 +342,7 @@ const Icon = {
   shirt:         () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><path d="M1 5l4-3 2 2a3 3 0 0 0 6 0l2-2 4 3-2 3h-3v10H5V8H2L1 5z"/></svg>,
   dollar:        () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><path d="M10 2v16M7 5.5A3 3 0 0 1 10 4c1.66 0 3 1.12 3 2.5S11.66 9 10 9s-3 1.12-3 2.5S8.34 14 10 14c1.66 0 3-.84 3-2.5"/></svg>,
   warn:          () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><path d="M10 3L18 17H2L10 3z"/><line x1="10" y1="9" x2="10" y2="12"/><circle cx="10" cy="14.5" r="0.5" fill="currentColor"/></svg>,
+  target:        () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r="0.8" fill="currentColor"/></svg>,
 };
 
 // ─── PRIMITIVES ───────────────────────────────────────────────
@@ -1205,6 +1218,304 @@ function BeneficiariesPage({ t, data, highlightKey }) {
   );
 }
 
+// ─── 2026 GOALS (Plan de Ayudas y Servicios a Beneficiarios) ──
+// UI-level catalog: these targets come from PDV's annual planning and are NOT
+// stored in Salesforce. Where a goal maps cleanly onto a metric the dashboard
+// already syncs, `live(D)` returns the running value and the card shows a
+// progress bar against the annual goal; the rest render as target cards.
+const GOALS_2026 = [
+  {
+    id: "hambre",
+    color: C.orange,
+    title: { en: "1 · Hunger Relief", es: "1 · Alivio del Hambre" },
+    items: [
+      {
+        title: { en: "Meals at the PDV facilities", es: "Comidas en las instalaciones de PDV" },
+        detail: {
+          en: "Three Sundays a month, 100 people per Sunday — Quito only. $4 per meal covers all operating costs except in-kind donations.",
+          es: "Tres domingos al mes, 100 personas por domingo — exclusivo Quito. $4 por comida cubre los costos operativos menos donaciones en especie.",
+        },
+        chips: [
+          { en: "300 meals / month", es: "300 comidas / mes" },
+          { en: "3,600 meals / year", es: "3.600 comidas / año" },
+          { en: "$4 each", es: "$4 c/u" },
+        ],
+        bu: { en: "332 families · 1,094 people", es: "332 familias · 1.094 personas" },
+        where: { en: "Quito", es: "Quito" },
+        goal: 3600,
+        live: (D) => D.hotMeals?.plates,
+      },
+      {
+        title: { en: "Grocery kits", es: "Kits de víveres" },
+        detail: {
+          en: "Staple-grocery kits for vulnerable families in Quito and Otavalo.",
+          es: "Kits de víveres básicos para familias vulnerables en Quito y Otavalo.",
+        },
+        chips: [
+          { en: "100 kits / month", es: "100 kits / mes" },
+          { en: "1,200 kits / year", es: "1.200 kits / año" },
+        ],
+        bu: { en: "600 families", es: "600 familias" },
+        where: { en: "Quito & Otavalo", es: "Quito y Otavalo" },
+        goal: 1200,
+        live: (D) => D.groceries?.bags,
+      },
+      {
+        title: { en: "Used clothing + snack (mercy donations)", es: "Ropa usada + snack (donaciones de misericordia)" },
+        detail: {
+          en: "In-kind used clothing plus a snack, handed out every Tuesday to people who come seeking help. $1 each.",
+          es: "Ropa usada en especie más un snack, entregados todos los martes a las personas que vienen en busca de ayuda. $1 cada una.",
+        },
+        chips: [
+          { en: "50 donations / month", es: "50 donaciones / mes" },
+          { en: "600 donations / year", es: "600 donaciones / año" },
+          { en: "$1 each", es: "$1 c/u" },
+        ],
+        bu: { en: "600 people", es: "600 personas" },
+        where: { en: "Quito", es: "Quito" },
+        goal: 600,
+        live: (D) => D.clothing?.donations,
+      },
+      {
+        title: { en: "Hygiene kits", es: "Kits de higiene" },
+        detail: {
+          en: "60 hygiene kits for children aged 0–12.",
+          es: "60 kits de higiene para niños de 0 a 12 años.",
+        },
+        chips: [
+          { en: "60 kits / year", es: "60 kits / año" },
+          { en: "$10 each", es: "$10 c/u" },
+        ],
+        bu: { en: "60 children", es: "60 niños" },
+        where: { en: "Quito", es: "Quito" },
+      },
+      {
+        title: { en: "Children's diapers", es: "Pañales para niños" },
+        detail: {
+          en: "12 packs of 48 units per year.",
+          es: "12 paquetes de 48 unidades al año.",
+        },
+        chips: [
+          { en: "12 packs / year", es: "12 paquetes / año" },
+          { en: "$10 each", es: "$10 c/u" },
+        ],
+        bu: { en: "12 children", es: "12 niños" },
+        where: { en: "Quito", es: "Quito" },
+      },
+      {
+        title: { en: "Adult diapers", es: "Pañales para adultos" },
+        detail: {
+          en: "12 packs of 20 units per year.",
+          es: "12 paquetes de 20 unidades al año.",
+        },
+        chips: [
+          { en: "12 packs / year", es: "12 paquetes / año" },
+          { en: "$16 each", es: "$16 c/u" },
+        ],
+        bu: { en: "12 adults", es: "12 adultos" },
+        where: { en: "Quito", es: "Quito" },
+      },
+      {
+        title: { en: "Bible distribution", es: "Distribución de Biblias" },
+        detail: {
+          en: "60 Quichua Bibles ($17 each, Otavalo) and 180 Spanish Bibles ($4 each, Quito & Otavalo).",
+          es: "60 Biblias en quichua ($17 c/u, Otavalo) y 180 Biblias en español ($4 c/u, Quito y Otavalo).",
+        },
+        chips: [
+          { en: "240 Bibles / year", es: "240 Biblias / año" },
+        ],
+        bu: { en: "240 people", es: "240 personas" },
+        where: { en: "Quito & Otavalo", es: "Quito y Otavalo" },
+        goal: 240,
+        live: (D) => D.evangelism?.bibles,
+      },
+      {
+        title: { en: "Families in extreme need", es: "Familias en situación de extrema necesidad" },
+        detail: {
+          en: "Help for 10 families: mattresses, beds, blankets, pillows, refrigerator, stove, gas cylinder, among others.",
+          es: "Ayuda a 10 familias: colchones, camas, mantas, almohadas, refrigerador, estufa, cilindro de gas, entre otros.",
+        },
+        chips: [
+          { en: "10 families / year", es: "10 familias / año" },
+        ],
+        bu: { en: "10 families", es: "10 familias" },
+        where: { en: "Quito & Otavalo", es: "Quito y Otavalo" },
+      },
+    ],
+  },
+  {
+    id: "educacion",
+    color: C.blue,
+    title: { en: "2 · Education", es: "2 · Educación" },
+    items: [
+      {
+        title: { en: "School kits", es: "Kits escolares" },
+        detail: {
+          en: "Backpack, school supplies and vitamins for 300 children aged 6–12, including delivery in the Quito and Otavalo areas (plus transport). $25 per child.",
+          es: "Mochila, útiles escolares y vitaminas para 300 niños de 6 a 12 años, incluida la entrega en Quito y Otavalo (más transporte). $25 por niño.",
+        },
+        chips: [
+          { en: "300 kits / year", es: "300 kits / año" },
+          { en: "$25 per child", es: "$25 por niño" },
+        ],
+        bu: { en: "300 children & teens (6–18)", es: "300 niños y adolescentes (6–18)" },
+        where: { en: "Quito & Otavalo", es: "Quito y Otavalo" },
+        goal: 300,
+        live: (D) => D.education?.schoolKits,
+      },
+      {
+        title: { en: "Sunday school / VBS programs", es: "Escuelas dominicales / programas EBV" },
+        detail: {
+          en: "Materials for 32 Sunday-school / VBS programs run by mission teams, $100 per program. Average attendance: 25 children (some repeat programs).",
+          es: "Materiales para 32 escuelas dominicales / programas EBV (equipos misioneros), $100 por programa. Asistencia promedio: 25 niños (algunos repiten programas).",
+        },
+        chips: [
+          { en: "32 programs / year", es: "32 programas / año" },
+          { en: "$100 per program", es: "$100 por programa" },
+        ],
+        bu: { en: "300 children & teens (6–18)", es: "300 niños y adolescentes (6–18)" },
+        where: { en: "Quito & Otavalo", es: "Quito y Otavalo" },
+        goal: 32,
+        live: (D) => D.education?.vbsCamps,
+      },
+    ],
+  },
+  {
+    id: "salud",
+    color: C.teal,
+    title: { en: "3 · Health", es: "3 · Salud" },
+    items: [
+      {
+        title: { en: "Medical care at Clínica la Y", es: "Atención médica en Clínica la Y" },
+        detail: {
+          en: "Basic-diagnosis medical care under the HCJB agreement ($40,000); PDV covers special cases that cannot afford the copay.",
+          es: "Atención médica de diagnóstico básico bajo el convenio con HCJB ($40.000); PDV cubre los casos especiales que no pueden pagar el copago.",
+        },
+        chips: [
+          { en: "20 people / week", es: "20 personas / semana" },
+          { en: "1,600 appointments / year", es: "1.600 citas / año" },
+        ],
+        bu: { en: "650 people attended", es: "650 personas atendidas" },
+        where: { en: "Quito", es: "Quito" },
+        goal: 1600,
+        live: (D) => D.health?.clinic?.consultations,
+      },
+      {
+        title: { en: "Specific medical interventions & procedures", es: "Intervenciones y procedimientos médicos específicos" },
+        detail: {
+          en: "Medicine, medical exams and tests, and other medical services including dental care and equipment.",
+          es: "Medicinas, exámenes y pruebas médicas, y otros servicios médicos incluidos los dentales y equipos.",
+        },
+        chips: [
+          { en: "24 deliveries / year", es: "24 entregas / año" },
+        ],
+        bu: { en: "24 people", es: "24 personas" },
+        where: { en: "Quito", es: "Quito" },
+        goal: 24,
+        live: (D) => D.health?.other?.aids,
+      },
+    ],
+  },
+  {
+    id: "condvida",
+    color: C.purple,
+    title: { en: "4 · Living Conditions Improvement", es: "4 · Mejoramiento de Condiciones de Vida" },
+    items: [
+      {
+        title: { en: "Home-improvement projects", es: "Proyectos de mejora del hogar" },
+        detail: {
+          en: "Living-conditions or home-improvement projects — 8 projects at $500 each.",
+          es: "Proyectos de mejora de las condiciones de vida o del hogar — 8 proyectos a $500 cada uno.",
+        },
+        chips: [
+          { en: "8 projects / year", es: "8 proyectos / año" },
+          { en: "$500 each", es: "$500 c/u" },
+        ],
+        bu: { en: "8 people", es: "8 personas" },
+        where: { en: "Quito & Otavalo", es: "Quito y Otavalo" },
+      },
+    ],
+  },
+];
+
+function GoalCard({ g, color, t, L, data }) {
+  const live = g.live ? g.live(data) : null;
+  const tracked = g.goal != null && typeof live === "number";
+  const pct = tracked ? Math.min(Math.round((live / g.goal) * 100), 200) : 0;
+  const over = tracked && live >= g.goal;
+  const barColor = over ? C.green : color;
+  return (
+    <Card style={{ borderLeft: `3px solid ${color}`, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div>
+        <div style={{ fontSize: 14.5, fontWeight: 600, color: C.text1, lineHeight: 1.35 }}>{g.title[L]}</div>
+        <div style={{ fontSize: 12.5, color: C.text4, marginTop: 4, lineHeight: 1.55 }}>{g.detail[L]}</div>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {g.chips.map((c, i) => (
+          <span key={i} style={{
+            fontSize: 11.5, fontWeight: 600, color, background: bgOf(color),
+            padding: "3px 10px", borderRadius: 999, whiteSpace: "nowrap",
+          }}>{c[L]}</span>
+        ))}
+        <span style={{
+          fontSize: 11.5, fontWeight: 600, color: C.text4, background: "#f1f3f4",
+          padding: "3px 10px", borderRadius: 999, whiteSpace: "nowrap",
+        }}>{g.where[L]}</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <span style={{
+          fontSize: 11, fontWeight: 600, color: C.text4,
+          textTransform: "uppercase", letterSpacing: "0.06em",
+        }}>{t.buTarget}</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: C.text1 }}>{g.bu[L]}</span>
+      </div>
+      {tracked && (
+        <div style={{ marginTop: 2 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: C.text4 }}>{t.progressYtd}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 600, color: over ? C.green : C.text1 }}>
+              {live.toLocaleString()} <span style={{ color: C.text4, fontWeight: 500 }}>/ {g.goal.toLocaleString()}</span>
+              <span style={{ marginLeft: 8, color: over ? C.green : C.text4 }}>{pct}%</span>
+            </span>
+          </div>
+          <div className="pdv-loc-track">
+            <div className="pdv-loc-fill" style={{ background: barColor, width: `${Math.min(pct, 100)}%` }} />
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function GoalsPage({ t, lang, data }) {
+  const D = data ?? FALLBACK_DATA;
+  const L = lang === "es" ? "es" : "en";
+  const trackedCount = GOALS_2026.flatMap((s) => s.items).filter((g) => g.goal != null && g.live).length;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+      <Card style={{ borderLeft: `4px solid ${C.green}`, padding: "18px 24px" }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: C.text1 }}>{t.goals2026Sub}</div>
+        <div style={{ fontSize: 12.5, color: C.text4, marginTop: 4, lineHeight: 1.55 }}>
+          {t.goals2026Note} ({trackedCount} {t.goalTracked})
+        </div>
+      </Card>
+      {GOALS_2026.map((sec) => (
+        <div key={sec.id}>
+          <SectionTitle style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ width: 9, height: 9, borderRadius: "50%", background: sec.color, display: "inline-block" }} />
+            {sec.title[L]}
+          </SectionTitle>
+          <Grid cols={2}>
+            {sec.items.map((g, i) => (
+              <GoalCard key={i} g={g} color={sec.color} t={t} L={L} data={D} />
+            ))}
+          </Grid>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── ROOT ─────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -1240,6 +1551,7 @@ export default function Dashboard() {
     level3:        `${t.level3} · ${t.level3Name}`,
     evangelism:    t.evangelism,
     beneficiaries: t.beneficiaries,
+    goals:         t.goals2026,
   };
 
   // navigate(page, tab?, highlightKey?) — used from Overview clickable cards
@@ -1339,6 +1651,12 @@ export default function Dashboard() {
               active={page === "beneficiaries"}
               onClick={() => go("beneficiaries")}
             />
+            <NavItem
+              iconEl={<Icon.target />}
+              label={t.goals2026}
+              active={page === "goals"}
+              onClick={() => go("goals")}
+            />
           </nav>
 
           {/* Language toggle */}
@@ -1380,6 +1698,7 @@ export default function Dashboard() {
           {page === "level3"        && <Level3Page        t={t} key={navTab} initialTab={navTab || "lifefarms"}  data={dashData} highlightKey={highlightKey} />}
           {page === "evangelism"    && <EvangelismPage    t={t} data={dashData} highlightKey={highlightKey} />}
           {page === "beneficiaries" && <BeneficiariesPage t={t} data={dashData} highlightKey={highlightKey} />}
+          {page === "goals"         && <GoalsPage         t={t} lang={lang} data={dashData} />}
         </main>
       </div>
     </>
