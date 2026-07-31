@@ -66,25 +66,25 @@
     "totalServices": 431,
     "totalUB": 205,
     "clinic": {
-      "consultations": 546,
-      "ub": 225,
+      "consultations": 650,
+      "ub": 246,
       "paidVozManos": 3323.5,
-      "paidPDV": 428
+      "paidPDV": 574
     },
     "other": {
-      "aids": 182,
-      "ub": 167,
-      "invested": 2012.45
+      "aids": 185,
+      "ub": 170,
+      "invested": 2076.45
     },
     "monthly": [
       170,
       95,
       166,
       131,
-      11,
+      112,
       155,
       0,
-      0,
+      6,
       0,
       0,
       0,
@@ -365,12 +365,12 @@
     "totalCost": 6366.1
   },
   "level2": {
-    "individualsServed": 526,
-    "totalCost": 5765.95
+    "individualsServed": 535,
+    "totalCost": 5975.95
   },
   "level3": {
     "individualsServed": 268,
     "totalCost": null
   },
-  "lastUpdated": "2026-07-31T21:13:47.843Z"
+  "lastUpdated": "2026-07-31T21:24:48.630Z"
 }
