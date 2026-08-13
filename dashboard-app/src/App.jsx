@@ -37,7 +37,7 @@ const FALLBACK_DATA = {
   meps: {
     total: 264, active: 16, inactive: 67, finished: 102, aborted: 79, marketReady: 17,
     participants: 223,
-    fund: { year: 2026, disbursed: 278.99, repaid: 206.89, outstanding: 9107.31, repaymentRate: 74 },
+    fund: { year: 2026, disbursed: 278.99, repaid: 206.89, totalDisbursed: 31184.19, totalRepaid: 23747.63, outstanding: 9107.31, repaymentRate: 71, loansMonthly: new Array(12).fill(0) },
     locations: [
       { name: "AZAMA", count: 28 }, { name: "CUMBASCONDE", count: 27 },
       { name: "PIGULCA", count: 15 }, { name: "CHUCHUQUI", count: 8 },
@@ -51,9 +51,9 @@ const FALLBACK_DATA = {
   level3: { individualsServed: 223, totalCost: null },
   evangelism:   { bibles: 34, vbsCamps: 9, childrenVBS: 228, personasAlcanzadas: 593 },
   beneficiaries: {
-    combined: { accounts: 623, beneficiaries: 2337, girls: 359, boys: 364, families: 23, newUB: 557 },
-    quito:    { accounts: 349, beneficiaries: 1166, girls: 212, boys: 215, families: 11, newUB: 415 },
-    imbabura: { accounts: 274, beneficiaries: 1171, girls: 147, boys: 149, families: 12, newUB: 142 },
+    combined: { accounts: 623, beneficiaries: 2337, girls: 359, boys: 364, newFamilies: 23, newUB: 557 },
+    quito:    { accounts: 349, beneficiaries: 1166, girls: 212, boys: 215, newFamilies: 11, newUB: 415 },
+    imbabura: { accounts: 274, beneficiaries: 1171, girls: 147, boys: 149, newFamilies: 12, newUB: 142 },
   },
 };
 
@@ -110,6 +110,7 @@ const i18n = {
     noDataYet: "No data recorded yet for this period",
     monthlyDistribution: "Monthly Distribution",
     jan: "Jan", feb: "Feb", mar: "Mar", apr: "Apr", may: "May", jun: "Jun",
+    jul: "Jul", aug: "Aug", sep: "Sep", oct: "Oct", nov: "Nov", dec: "Dec",
     health: "Health", education: "Education", shelter: "Living Conditions",
     medicalAttention: "Medical appointments", ubMedical: "Individuals served",
     paidByVozManos: "Paid by Voz y Manos", paidByPDV: "Paid by Pan de Vida",
@@ -137,11 +138,11 @@ const i18n = {
     multiplicationFarm: "Multiplication",
     multiplicationDesc: "Selected cases + support",
     urbanFarms: "Urban Life Farms", urbanFarmsTabDesc: "Family-run home gardens adapted for urban areas.", urbanFarmsCount: "Urban Life Farms Count",
-    sharkTankWinners: "Shark Tank Winners", sharkTankPdvCost: "PDV Cost",
+    sharkTankWinners: "Shark Tank Winners (all time)", sharkTankPdvCost: "PDV Cost",
     goal: "Goal", done: "Done",
     totalMEPs: "Total MEPs", active: "Active", inactive: "Inactive",
     finished: "Finished", aborted: "Aborted", marketReady: "Market Ready",
-    mepParticipants: "Participants served this year",
+    mepParticipants: "People served this year",
     fundCapital: "Revolving Fund Capital",
     capitalDisbursed: "Capital disbursed (loans)",
     repaidByEntrepreneurs: "Repaid by entrepreneurs",
@@ -161,7 +162,7 @@ const i18n = {
     quito: "Quito", otavalo: "Otavalo", mantaRiobamba: "Manta & Riobamba",
     biblesDelivered: "Bibles distributed",
     vbsCampsHeld: "VBS CAMPS HELD",
-    childrenVBS: "Kids served",
+    childrenVBS: "VBS attendances (total)",
     personasAlcanzadas: "Individuals reached by the gospel",
     individualsServed: "Individuals served",
     totalReached: "Total Individuals Reached",
@@ -178,6 +179,31 @@ const i18n = {
     championsLabel: "Champions (Full Size)",
     growthLabel: "Growth Pipeline",
     clinicTitle: "Medical Care Provided By Clinica la Y",
+    totalLifeFarms: "Total Life Farms (all types)",
+    newThisYear: "New this year",
+    newFarmsMonthly: "New Farms Added Per Month",
+    vbsUnique: "Unique VBS attendees",
+    professionsOfFaith: "Professions of Faith",
+    professionsOfFaithAllTime: "all time",
+    biblesMonthlyTitle: "Bibles Distributed Per Month",
+    vbsMonthlyTitle: "VBS Attendance Per Month",
+    pofMonthlyTitle: "Professions of Faith Per Month",
+    mepActivitiesTitle: "Monthly Program Activities",
+    mepActivitiesNote: "Services delivered by the Microbusiness program — trainings, community meetings, technical assistance, supervision visits, and farm support. These are not capital loans.",
+    loansMonthlyTitle: "Loans Disbursed Per Month",
+    totalCapitalDisbursed: "Total capital disbursed (all time)",
+    totalRepaidLabel: "Repaid by entrepreneurs (all time)",
+    programRepaymentRate: "Program repayment rate",
+    repaymentRateFormula: "Repayment rate = (total disbursed − current outstanding) ÷ total disbursed.",
+    thisYear: "This year",
+    disbursedWord: "disbursed",
+    repaidWord: "repaid",
+    otherCommunities: "Other communities",
+    mepParticipantsDesc: "Unique people who received program services this year (trainings, meetings, visits, farm support) — not the number of businesses.",
+    sharkNewThisYear: "New winners this year",
+    sharkMonthlyTitle: "New Winners Per Month",
+    sharkOperatingNote: "Tracking which winning businesses are still operating (vs. closed) requires linking each winner to their Microbusiness record in Salesforce — that link doesn't exist yet.",
+    hotMealsFamiliesNote: "Families served counts only registered beneficiary families. Many plates are served at open community events and to walk-ins who are not registered, so the same families also receive meals repeatedly through the year.",
     hotMealsTabDesc: "Freshly prepared meals served on-site to families and children at outreach events and weekly community gatherings.",
     groceriesTabDesc: "Bags of staple groceries delivered to vulnerable families to cover basic monthly nutrition needs.",
     clothingTabDesc: "Donated clothing distributed to families in our service communities, sorted and given according to need.",
@@ -215,6 +241,7 @@ const i18n = {
     noDataYet: "Sin datos registrados aún para este período",
     monthlyDistribution: "Distribución Mensual",
     jan: "Ene", feb: "Feb", mar: "Mar", apr: "Abr", may: "May", jun: "Jun",
+    jul: "Jul", aug: "Ago", sep: "Sep", oct: "Oct", nov: "Nov", dec: "Dic",
     health: "Salud", education: "Educación", shelter: "Condiciones de Vida",
     medicalAttention: "Citas médicas", ubMedical: "Individuos servidos",
     paidByVozManos: "Pagado por Voz y Manos", paidByPDV: "Pagado por Pan de Vida",
@@ -242,11 +269,11 @@ const i18n = {
     multiplicationFarm: "Multiplicación",
     multiplicationDesc: "Casos seleccionados + apoyo",
     urbanFarms: "Huertos de Vida Urbanos", urbanFarmsTabDesc: "Huertos familiares adaptados para zonas urbanas.", urbanFarmsCount: "Cantidad de Huertos Urbanos",
-    sharkTankWinners: "Ganadores Shark Tank", sharkTankPdvCost: "Costo PDV",
+    sharkTankWinners: "Ganadores Shark Tank (histórico)", sharkTankPdvCost: "Costo PDV",
     goal: "Meta", done: "Realizado",
     totalMEPs: "Total MEPs", active: "Activos", inactive: "Inactivos",
     finished: "Finalizados", aborted: "Cancelados", marketReady: "Listos para Mercado",
-    mepParticipants: "Participantes servidos este año",
+    mepParticipants: "Personas servidas este año",
     fundCapital: "Capital del Fondo Rotativo",
     capitalDisbursed: "Capital desembolsado (préstamos)",
     repaidByEntrepreneurs: "Reembolsado por emprendedores",
@@ -266,7 +293,7 @@ const i18n = {
     quito: "Quito", otavalo: "Otavalo", mantaRiobamba: "Manta y Riobamba",
     biblesDelivered: "Biblias distribuidas",
     vbsCampsHeld: "CAMPAMENTOS EBV REALIZADOS",
-    childrenVBS: "Niños servidos",
+    childrenVBS: "Asistencias EBV (total)",
     personasAlcanzadas: "Individuos alcanzados por el evangelio",
     individualsServed: "Individuos servidos",
     totalReached: "Total de Personas Alcanzadas",
@@ -283,6 +310,31 @@ const i18n = {
     championsLabel: "Campeones (Tamaño Completo)",
     growthLabel: "Pipeline de Crecimiento",
     clinicTitle: "Atención Médica Provista por Clínica la Y",
+    totalLifeFarms: "Total Huertos de Vida (todos los tipos)",
+    newThisYear: "Nuevos este año",
+    newFarmsMonthly: "Nuevos Huertos por Mes",
+    vbsUnique: "Asistentes únicos EBV",
+    professionsOfFaith: "Profesiones de Fe",
+    professionsOfFaithAllTime: "histórico",
+    biblesMonthlyTitle: "Biblias Distribuidas por Mes",
+    vbsMonthlyTitle: "Asistencia EBV por Mes",
+    pofMonthlyTitle: "Profesiones de Fe por Mes",
+    mepActivitiesTitle: "Actividades Mensuales del Programa",
+    mepActivitiesNote: "Servicios entregados por el programa de Microemprendimiento — capacitaciones, reuniones comunitarias, asistencia técnica, visitas de supervisión y apoyo a huertos. No son préstamos de capital.",
+    loansMonthlyTitle: "Préstamos Desembolsados por Mes",
+    totalCapitalDisbursed: "Capital total desembolsado (histórico)",
+    totalRepaidLabel: "Reembolsado por emprendedores (histórico)",
+    programRepaymentRate: "Tasa de reembolso del programa",
+    repaymentRateFormula: "Tasa de reembolso = (total desembolsado − saldo pendiente) ÷ total desembolsado.",
+    thisYear: "Este año",
+    disbursedWord: "desembolsados",
+    repaidWord: "reembolsados",
+    otherCommunities: "Otras comunidades",
+    mepParticipantsDesc: "Personas únicas que recibieron servicios del programa este año (capacitaciones, reuniones, visitas, apoyo a huertos) — no es el número de negocios.",
+    sharkNewThisYear: "Nuevos ganadores este año",
+    sharkMonthlyTitle: "Nuevos Ganadores por Mes",
+    sharkOperatingNote: "Para saber cuáles negocios ganadores siguen operando (vs. cerrados) se necesita vincular cada ganador con su registro de Micronegocio en Salesforce — ese vínculo aún no existe.",
+    hotMealsFamiliesNote: "Familias servidas cuenta solo familias beneficiarias registradas. Muchos platos se sirven en eventos comunitarios abiertos y a personas no registradas, y las mismas familias reciben comidas repetidamente durante el año.",
     hotMealsTabDesc: "Comidas recién preparadas servidas en el lugar a familias y niños en eventos de extensión y reuniones comunitarias semanales.",
     groceriesTabDesc: "Fundas de víveres básicos entregadas a familias vulnerables para cubrir las necesidades alimenticias mensuales.",
     clothingTabDesc: "Ropa donada distribuida a familias de las comunidades que servimos, clasificada y entregada según la necesidad.",
@@ -448,21 +500,18 @@ function BarChart({ data, color = C.blue }) {
   );
 }
 
-function MonthlyDistribution({ t, monthly, color = C.blue }) {
+function MonthlyDistribution({ t, monthly, color = C.blue, title, note }) {
   const m = Array.isArray(monthly) ? monthly : [];
+  // All 12 months are rendered — the chart previously stopped at June, which hid
+  // July+ data and made the bars disagree with the year-to-date headline totals.
+  const labels = [t.jan, t.feb, t.mar, t.apr, t.may, t.jun, t.jul, t.aug, t.sep, t.oct, t.nov, t.dec];
   return (
     <Card>
-      <SectionTitle>{t.monthlyDistribution}</SectionTitle>
+      <SectionTitle>{title ?? t.monthlyDistribution}</SectionTitle>
+      {note && <p className="pdv-info-text" style={{ marginTop: -6, marginBottom: 12 }}>{note}</p>}
       <BarChart
         color={color}
-        data={[
-          { label: t.jan, value: m[0] ?? 0 },
-          { label: t.feb, value: m[1] ?? 0 },
-          { label: t.mar, value: m[2] ?? 0 },
-          { label: t.apr, value: m[3] ?? 0 },
-          { label: t.may, value: m[4] ?? 0 },
-          { label: t.jun, value: m[5] ?? 0 },
-        ]}
+        data={labels.map((label, i) => ({ label, value: m[i] ?? 0 }))}
       />
     </Card>
   );
@@ -705,7 +754,7 @@ function OverviewPage({ t, onNavigate, data }) {
       { label: t.lifeFarms,          val: lifeFarmsTotal,               navKey: "lifeFarms"    },
       { label: t.revolvingFund,      val: D.meps?.total           ?? 0, navKey: "revolvingFund"},
       { label: t.marketReady,        val: D.meps?.marketReady     ?? 0, navKey: "marketReady" },
-      { label: t.sharkTank,          val: "—",                          navKey: "sharkTank"    },
+      { label: t.sharkTank,          val: D.sharkTank?.winners    ?? 0, navKey: "sharkTank"    },
       { label: t.individualsServed,  val: fmtCount(D.level3?.individualsServed), navKey: "individualsServedL3" },
       { label: t.totalCost,          val: fmtMoney(D.level3?.totalCost),          navKey: "totalCostL3" },
     ]},
@@ -718,7 +767,7 @@ function OverviewPage({ t, onNavigate, data }) {
         <div>
           <div className="pdv-stat-label">{t.totalReached}</div>
           <div style={{ fontSize: 44, fontWeight: 600, color: C.green, letterSpacing: "-0.03em", lineHeight: 1.05 }}>
-            {(D.overview?.totalReached ?? 0).toLocaleString()}
+            {D.overview?.totalReached != null ? D.overview.totalReached.toLocaleString() : "—"}
           </div>
           <div style={{ fontSize: 12, color: C.text4, marginTop: 4 }}>{t.totalReachedDesc}</div>
         </div>
@@ -859,6 +908,7 @@ function Level1Page({ t, initialTab = "hotmeals", data, highlightKey }) {
             <StatCard label={t.hotMealsDelivered} value={D.hotMeals?.plates   ?? 0} color={C.red}    iconEl={<Icon.bag />}    highlight={highlightKey === 'hotMeals'} delay={0}  />
             <StatCard label={t.familiesHotMeals}  value={D.hotMeals?.families ?? 0} color={C.orange} iconEl={<Icon.people />} delay={60} />
           </Grid>
+          <div style={{ fontSize: 12, color: C.text4, marginTop: -10 }}>{t.hotMealsFamiliesNote}</div>
           <MonthlyDistribution t={t} monthly={D.hotMeals?.monthly} color={C.red} />
         </div>
       )}
@@ -1013,9 +1063,21 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
 function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
   const [tab, setTab] = useState(initialTab);
   const D = data ?? FALLBACK_DATA;
-  // Year the YTD fund flows (disbursed/repaid/rate) belong to — written by the sync.
+  // Year the YTD fund flows (disbursed/repaid) belong to — written by the sync.
   const fundYear = D.meps?.fund?.year;
-  const ytd = (label) => (fundYear ? `${label} · ${fundYear}` : label);
+  const money = (n) => (n ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const lf = D.lifeFarms ?? {};
+  const lfTotal = lf.total ??
+    ((lf.idealFarm?.done ?? 0) + (lf.fullSizeFarm?.done ?? 0) + (lf.basicFarm?.done ?? 0) +
+     (lf.multiplication?.done ?? 0) + (lf.urbanFarm?.done ?? 0));
+  const lfNew = lf.newThisYear ?? {};
+  const lfNewTotal = (lfNew.ideal ?? 0) + (lfNew.full ?? 0) + (lfNew.basic ?? 0) +
+    (lfNew.multiplication ?? 0) + (lfNew.urban ?? 0);
+  const urbanNewTotal = Array.isArray(lf.urbanMonthly)
+    ? lf.urbanMonthly.reduce((a, b) => a + (b ?? 0), 0)
+    : 0;
+  const withNew = (desc, n) => `${desc ? desc + " · " : ""}${t.newThisYear}: ${n ?? 0}`;
   return (
     <div>
       <LevelBadge level="3" name={t.level3Name} color={C.green} />
@@ -1029,17 +1091,22 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
       {tab === "lifefarms" && (
         <div className={highlightKey === 'lifeFarms' ? 'pdv-highlight' : ''} style={{ display: "flex", flexDirection: "column", gap: 20, padding: highlightKey === 'lifeFarms' ? 8 : 0, borderRadius: 24 }}>
           <TabDescription>{t.lifeFarmsTabDesc}</TabDescription>
+          <Grid cols={2}>
+            <StatCard label={t.totalLifeFarms} value={lfTotal} color={C.green} iconEl={<Icon.leaf />} delay={0} />
+            <StatCard label={`${t.lifeFarms} — ${t.newThisYear}`} value={lfNewTotal} color={C.teal} iconEl={<Icon.chart />} delay={60} />
+          </Grid>
           <SectionTitle>{t.championsLabel}</SectionTitle>
           <Grid cols={3}>
-            <ProgressBar label={t.idealFarm}     description={t.idealFarmDesc}    goal={D.lifeFarms?.idealFarm?.goal      ?? 30}  done={D.lifeFarms?.idealFarm?.done      ?? 0}  color={C.yellow} />
-            <ProgressBar label={t.fullSizeFarm}  description={t.fullSizeFarmDesc} goal={D.lifeFarms?.fullSizeFarm?.goal   ?? 10}  done={D.lifeFarms?.fullSizeFarm?.done   ?? 0}  color={C.blue}   />
-            <ProgressBar label={t.totalChampions}                                  goal={D.lifeFarms?.totalChampions?.goal ?? 40}  done={D.lifeFarms?.totalChampions?.done ?? 0}  color={C.green}  />
+            <ProgressBar label={t.idealFarm}     description={withNew(t.idealFarmDesc, lfNew.ideal)}    goal={D.lifeFarms?.idealFarm?.goal      ?? 30}  done={D.lifeFarms?.idealFarm?.done      ?? 0}  color={C.yellow} />
+            <ProgressBar label={t.fullSizeFarm}  description={withNew(t.fullSizeFarmDesc, lfNew.full)} goal={D.lifeFarms?.fullSizeFarm?.goal   ?? 10}  done={D.lifeFarms?.fullSizeFarm?.done   ?? 0}  color={C.blue}   />
+            <ProgressBar label={t.totalChampions} description={withNew("", (lfNew.ideal ?? 0) + (lfNew.full ?? 0))} goal={D.lifeFarms?.totalChampions?.goal ?? 40}  done={D.lifeFarms?.totalChampions?.done ?? 0}  color={C.green}  />
           </Grid>
           <SectionTitle style={{ marginTop: 8 }}>{t.growthLabel}</SectionTitle>
           <Grid cols={2}>
-            <ProgressBar label={t.basicFarm}          description={t.basicFarmDesc}      goal={D.lifeFarms?.basicFarm?.goal      ?? 118} done={D.lifeFarms?.basicFarm?.done      ?? 0} color={C.orange} />
-            <ProgressBar label={t.multiplicationFarm} description={t.multiplicationDesc} goal={D.lifeFarms?.multiplication?.goal ?? 108} done={D.lifeFarms?.multiplication?.done ?? 0} color={C.purple} />
+            <ProgressBar label={t.basicFarm}          description={withNew(t.basicFarmDesc, lfNew.basic)}          goal={D.lifeFarms?.basicFarm?.goal      ?? 118} done={D.lifeFarms?.basicFarm?.done      ?? 0} color={C.orange} />
+            <ProgressBar label={t.multiplicationFarm} description={withNew(t.multiplicationDesc, lfNew.multiplication)} goal={D.lifeFarms?.multiplication?.goal ?? 108} done={D.lifeFarms?.multiplication?.done ?? 0} color={C.purple} />
           </Grid>
+          <MonthlyDistribution t={t} monthly={lf.monthly} color={C.green} title={t.newFarmsMonthly} />
         </div>
       )}
 
@@ -1048,7 +1115,9 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
           <TabDescription>{t.urbanFarmsTabDesc}</TabDescription>
           <Grid cols={4}>
             <StatCard label={t.urbanFarmsCount} value={D.lifeFarms?.urbanFarm?.done ?? 0} color={C.green} iconEl={<Icon.leaf />} delay={0} />
+            <StatCard label={t.newThisYear} value={urbanNewTotal} color={C.teal} iconEl={<Icon.chart />} delay={60} />
           </Grid>
+          <MonthlyDistribution t={t} monthly={lf.urbanMonthly} color={C.green} title={t.newFarmsMonthly} />
         </div>
       )}
 
@@ -1059,22 +1128,30 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
             <StatCard label={t.totalMEPs}        value={D.meps?.total        ?? 0} color={C.text1} iconEl={<Icon.chart />}  highlight={highlightKey === 'revolvingFund'} delay={0}   />
             <StatCard label={t.active}           value={D.meps?.active       ?? 0} color={C.green} iconEl={<Icon.check />}  delay={60}  />
             <StatCard label={t.marketReady}      value={D.meps?.marketReady  ?? 0} color={C.yellow} iconEl={<Icon.star />}  highlight={highlightKey === 'marketReady'} delay={120} />
-            <StatCard label={t.mepParticipants}  value={D.meps?.participants ?? 0} color={C.teal}  iconEl={<Icon.people />} delay={180} />
+            <StatCard label={t.mepParticipants}  value={D.meps?.participants ?? "—"} color={C.teal}  iconEl={<Icon.people />} delay={180} />
           </Grid>
           <div style={{ fontSize: 12, color: C.text4, marginTop: -10 }}>
             {t.marketReady}: {t.mepMarketReadyDesc}
+            <br />
+            {t.mepParticipants}: {t.mepParticipantsDesc}
           </div>
 
-          {/* Revolving-fund capital — YTD flows; the outstanding balance is the current
-              portfolio snapshot (a balance has no YTD form) */}
+          {/* Revolving-fund capital — program-wide totals; the repayment rate is
+              (total disbursed − outstanding) ÷ total disbursed. YTD flows shown below. */}
           <div>
             <SectionTitle>{t.fundCapital}</SectionTitle>
             <Grid cols={4}>
-              <StatCard label={ytd(t.capitalDisbursed)}      prefix="$" value={D.meps?.fund?.disbursed   ?? 0} color={C.purple} iconEl={<Icon.money />}  delay={0}   />
-              <StatCard label={ytd(t.repaidByEntrepreneurs)} prefix="$" value={D.meps?.fund?.repaid      ?? 0} color={C.green}  iconEl={<Icon.dollar />} delay={60}  />
-              <StatCard label={t.outstandingBalance}         prefix="$" value={D.meps?.fund?.outstanding ?? 0} color={C.orange} iconEl={<Icon.warn />}   delay={120} />
-              <StatCard label={ytd(t.repaymentRate)}         value={D.meps?.fund?.repaymentRate != null ? `${D.meps.fund.repaymentRate}%` : "—"} color={C.blue} iconEl={<Icon.chart />} delay={180} />
+              <StatCard label={t.totalCapitalDisbursed}  prefix="$" value={money(D.meps?.fund?.totalDisbursed)} color={C.purple} iconEl={<Icon.money />}  delay={0}   />
+              <StatCard label={t.totalRepaidLabel}       prefix="$" value={money(D.meps?.fund?.totalRepaid)}    color={C.green}  iconEl={<Icon.dollar />} delay={60}  />
+              <StatCard label={t.outstandingBalance}     prefix="$" value={money(D.meps?.fund?.outstanding)}    color={C.orange} iconEl={<Icon.warn />}   delay={120} />
+              <StatCard label={t.programRepaymentRate}   value={D.meps?.fund?.repaymentRate != null ? `${D.meps.fund.repaymentRate}%` : "—"} color={C.blue} iconEl={<Icon.chart />} delay={180} />
             </Grid>
+            <div style={{ fontSize: 12, color: C.text4, marginTop: 10 }}>
+              {t.repaymentRateFormula}
+              {fundYear != null && (
+                <> {t.thisYear} ({fundYear}): ${money(D.meps?.fund?.disbursed)} {t.disbursedWord} · ${money(D.meps?.fund?.repaid)} {t.repaidWord}.</>
+              )}
+            </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1092,13 +1169,17 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 8 }}>
                 {(D.meps?.locations ?? []).map((loc, i) => {
                   const palette = [C.blue, C.green, C.orange, C.purple, C.teal, C.pink];
-                  const color = loc.name == null ? "#bdc1c6" : palette[i % palette.length];
+                  const isBucket = loc.name == null || loc.name === "__OTHERS__";
+                  const color = isBucket ? "#bdc1c6" : palette[i % palette.length];
+                  const label = loc.name == null ? t.noLocation
+                    : loc.name === "__OTHERS__" ? t.otherCommunities
+                    : loc.name;
                   return (
                     <div key={i} className="pdv-loc-item">
                       <div className="pdv-loc-row">
                         <div className="pdv-loc-name">
                           <div className="pdv-loc-dot" style={{ background: color }} />
-                          {loc.name ?? t.noLocation}
+                          {label}
                         </div>
                         <span className="pdv-loc-val">{loc.count}</span>
                       </div>
@@ -1115,7 +1196,8 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
             </Card>
           </div>
 
-          <MonthlyDistribution t={t} monthly={D.meps?.monthly} color={C.green} />
+          <MonthlyDistribution t={t} monthly={D.meps?.fund?.loansMonthly} color={C.purple} title={t.loansMonthlyTitle} />
+          <MonthlyDistribution t={t} monthly={D.meps?.monthly} color={C.green} title={t.mepActivitiesTitle} note={t.mepActivitiesNote} />
         </div>
       )}
 
@@ -1124,8 +1206,13 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
           <TabDescription>{t.sharkTankTabDesc}</TabDescription>
           <Grid cols={4}>
             <StatCard label={t.sharkTankWinners} value={D.sharkTank?.winners ?? 0} color={C.teal} iconEl={<Icon.star />} delay={0} />
-            <StatCard label={t.sharkTankPdvCost} value={(D.sharkTank?.pdvCost ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} prefix="$" color={C.green} iconEl={<Icon.money />} delay={60} />
+            <StatCard label={t.sharkNewThisYear} value={D.sharkTank?.winnersThisYear ?? 0} color={C.blue} iconEl={<Icon.chart />} delay={60} />
+            <StatCard label={t.sharkTankPdvCost} value={(D.sharkTank?.pdvCost ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} prefix="$" color={C.green} iconEl={<Icon.money />} delay={120} />
           </Grid>
+          <MonthlyDistribution t={t} monthly={D.sharkTank?.monthly} color={C.teal} title={t.sharkMonthlyTitle} />
+          <Card>
+            <p className="pdv-info-text">{t.sharkOperatingNote}</p>
+          </Card>
         </div>
       )}
     </div>
@@ -1153,9 +1240,16 @@ function EvangelismPage({ t, data, highlightKey }) {
         <StatCard label={t.biblesDelivered}     value={D.evangelism?.bibles              ?? 0} color={C.purple} iconEl={<Icon.book />}   highlight={highlightKey === 'bibles'} delay={0}   />
         <StatCard label={t.vbsCampsHeld}        value={D.evangelism?.vbsCamps            ?? 0} color={C.blue}   iconEl={<Icon.tent />}   highlight={highlightKey === 'vbsCamps'} delay={80}  />
         <StatCard label={t.childrenVBS}         value={D.evangelism?.childrenVBS         ?? 0} color={C.red}    iconEl={<Icon.child />}  highlight={highlightKey === 'childrenVBS'} delay={160} />
-        <StatCard label={t.personasAlcanzadas}  value={D.evangelism?.personasAlcanzadas  ?? 0} color={C.green}  iconEl={<Icon.people />} highlight={highlightKey === 'personasAlcanzadas'} delay={240} />
+        <StatCard label={t.vbsUnique}           value={D.evangelism?.vbsUnique           ?? "—"} color={C.orange} iconEl={<Icon.people />} delay={240} />
       </Grid>
-      <MonthlyDistribution t={t} monthly={D.evangelism?.monthly} color={C.purple} />
+      <Grid cols={3}>
+        <StatCard label={t.personasAlcanzadas}  value={D.evangelism?.personasAlcanzadas  ?? 0} color={C.green}  iconEl={<Icon.people />} highlight={highlightKey === 'personasAlcanzadas'} delay={0} />
+        <StatCard label={`${t.professionsOfFaith} (${t.thisYear.toLowerCase()})`} value={D.evangelism?.professionsOfFaith ?? "—"} color={C.yellow} iconEl={<Icon.star />} delay={60} />
+        <StatCard label={`${t.professionsOfFaith} (${t.professionsOfFaithAllTime})`} value={D.evangelism?.professionsOfFaithAllTime ?? "—"} color={C.teal} iconEl={<Icon.check />} delay={120} />
+      </Grid>
+      <MonthlyDistribution t={t} monthly={D.evangelism?.biblesMonthly ?? D.evangelism?.monthly} color={C.purple} title={t.biblesMonthlyTitle} />
+      <MonthlyDistribution t={t} monthly={D.evangelism?.vbsMonthly} color={C.red} title={t.vbsMonthlyTitle} />
+      <MonthlyDistribution t={t} monthly={D.evangelism?.pofMonthly} color={C.yellow} title={t.pofMonthlyTitle} />
     </div>
   );
 }
