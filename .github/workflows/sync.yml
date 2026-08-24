@@ -47,12 +47,41 @@ jobs:
         working-directory: scripts
         run: npm install
 
-      - name: Escribir la llave privada de Salesforce
+      - name: Escribir y validar la llave privada de Salesforce
         env:
           SF_PRIVATE_KEY: ${{ secrets.SF_PRIVATE_KEY }}
         run: |
-          printf '%s\n' "$SF_PRIVATE_KEY" > scripts/server.key
-          chmod 600 scripts/server.key
+          node - <<'JS'
+          const crypto = require("crypto");
+          const fs = require("fs");
+          // El secret puede llegar con saltos de línea reales, con "\n" literales
+          // o todo en una sola línea, según cómo se haya pegado en GitHub.
+          // Reconstruimos el PEM a partir del base64 en los tres casos.
+          const raw = (process.env.SF_PRIVATE_KEY || "").trim();
+          const type = /BEGIN RSA PRIVATE KEY/.test(raw) ? "RSA PRIVATE KEY" : "PRIVATE KEY";
+          const body = raw
+            .replace(/-----(BEGIN|END)[A-Z ]*-----/g, "")
+            .replace(/\\n/g, "")
+            .replace(/\s+/g, "");
+          if (!body) {
+            console.log("::error::SF_PRIVATE_KEY llegó vacío o sin cuerpo base64.");
+            process.exit(1);
+          }
+          const pem = `-----BEGIN ${type}-----\n${body.replace(/(.{64})/g, "$1\n").replace(/\n$/, "")}\n-----END ${type}-----\n`;
+          let key;
+          try {
+            key = crypto.createPrivateKey(pem);
+          } catch (e) {
+            console.log(`::error::SF_PRIVATE_KEY no es una llave válida (${e.message}). Pega de nuevo el contenido completo de scripts/server.key, incluidas las líneas BEGIN y END.`);
+            process.exit(1);
+          }
+          fs.writeFileSync("scripts/server.key", pem, { mode: 0o600 });
+          // La huella es de la parte PÚBLICA: no es secreta, y sirve para confirmar
+          // que el secret corresponde al server.crt cargado en la Connected App.
+          const pub = crypto.createPublicKey(key).export({ type: "spki", format: "der" });
+          console.log("Llave OK:", key.asymmetricKeyType, `${key.asymmetricKeyDetails?.modulusLength ?? "?"} bits`);
+          console.log("Huella SHA256 (pública):", crypto.createHash("sha256").update(pub).digest("base64"));
+          JS
 
       - name: Correr el sync de Salesforce
         working-directory: scripts
