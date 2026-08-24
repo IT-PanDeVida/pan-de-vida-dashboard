@@ -128,15 +128,26 @@ async function fetchReport(instanceUrl, accessToken, reportId) {
   return res.json();
 }
 
-// ─── Safe fetch (logs errors but doesn't abort the whole sync) ─────────────────
+// ─── Safe fetch (retries transient errors; logs but doesn't abort the sync) ────
+// A failed report otherwise turns into a silent 0 in the dashboard (total(null)
+// returns 0), which is how a flaky fetch once published "0 full-size farms".
+// Failures that survive the retries are recorded in FAILED_REPORTS and written
+// to dashboard.json as syncWarnings so a bad sync is visible in the data itself.
+const FAILED_REPORTS = [];
 async function safeReport(instanceUrl, accessToken, reportId, reportName) {
-  try {
-    const data = await fetchReport(instanceUrl, accessToken, reportId);
-    console.log(`  ✓ ${reportName} (${reportId})`);
-    return data;
-  } catch (err) {
-    console.warn(`  ✗ ${reportName} (${reportId}): ${err.message}`);
-    return null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const data = await fetchReport(instanceUrl, accessToken, reportId);
+      console.log(`  ✓ ${reportName} (${reportId})${attempt > 1 ? ` [attempt ${attempt}]` : ""}`);
+      return data;
+    } catch (err) {
+      if (attempt === 3) {
+        console.warn(`  ✗ ${reportName} (${reportId}): ${err.message}`);
+        FAILED_REPORTS.push(reportName);
+        return null;
+      }
+      await new Promise((res) => setTimeout(res, 1500 * attempt));
+    }
   }
 }
 
@@ -166,7 +177,11 @@ async function aggValue(instanceUrl, accessToken, soql) {
 // Window = current calendar year. Program→level mapping mirrors report-map.js.
 async function fetchLevelMetrics(instanceUrl, accessToken) {
   const Y = new Date().getFullYear();
-  const win = `pmdm__DeliveryDate__c >= ${Y}-01-01 AND pmdm__DeliveryDate__c <= ${Y}-12-31`;
+  // Quantity >= 1 keeps the same convention as the reports and fetchSectionMetrics:
+  // zero/blank-quantity rows are planned-but-not-delivered and would inflate the
+  // distinct-people counts.
+  const win = `pmdm__DeliveryDate__c >= ${Y}-01-01 AND pmdm__DeliveryDate__c <= ${Y}-12-31 ` +
+    `AND pmdm__Quantity__c >= 1`;
   const SD = "pmdm__ServiceDelivery__c";
   const prog = "pmdm__Service__r.pmdm__Program__r.Name";
   const levelFilters = {
@@ -193,6 +208,210 @@ async function fetchLevelMetrics(instanceUrl, accessToken) {
   return metrics;
 }
 
+// ─── Section metrics (live SOQL) ────────────────────────────────────────────────
+// Several Salesforce reports proved unreliable as dashboard sources (verified
+// against the org in Aug 2026):
+//   • "Resumen ES Salud" carries a CUSTOM Jan 1 – Mar 31 date filter, so its
+//     totals (431 services / 205 people) only cover Q1 — the clinic and
+//     other-aids reports cover the full year, hence total < parts.
+//   • "Contactos y Cuentas UIO" was narrowed to ages 5–13 plus a created-date
+//     window, collapsing Quito to ~94 people.
+//   • The shelter and life-farm reports have no delivery-date column, so no
+//     monthly series can be derived from their rows.
+// These metrics are computed straight from the objects instead, so a report
+// edit in Salesforce can no longer silently skew the dashboard.
+async function fetchSectionMetrics(instanceUrl, accessToken) {
+  const Y = new Date().getFullYear();
+  const SD = "pmdm__ServiceDelivery__c";
+  // Quantity >= 1 mirrors the standard filter on all PDV reports: rows with a
+  // zero/blank quantity are planned-but-not-delivered entries and would inflate
+  // the distinct-people counts (sums are unaffected either way).
+  const win = `pmdm__DeliveryDate__c >= ${Y}-01-01 AND pmdm__DeliveryDate__c <= ${Y}-12-31 ` +
+    `AND pmdm__Quantity__c >= 1`;
+
+  const monthlyFrom = (records, key = "e") => {
+    const out = new Array(12).fill(0);
+    for (const rec of records ?? []) {
+      const idx = (Number(rec.m) || 0) - 1;
+      if (idx >= 0 && idx < 12) out[idx] = Number(rec[key]) || 0;
+    }
+    return out;
+  };
+  // Sum of Quantity per calendar month (this year) for service deliveries
+  const monthlySoql = async (filter) => {
+    const j = await runSoql(instanceUrl, accessToken,
+      `SELECT CALENDAR_MONTH(pmdm__DeliveryDate__c) m, SUM(pmdm__Quantity__c) e FROM ${SD} ` +
+      `WHERE ${win} AND (${filter}) GROUP BY CALENDAR_MONTH(pmdm__DeliveryDate__c)`);
+    return monthlyFrom(j.records);
+  };
+  const agg = (soql) => aggValue(instanceUrl, accessToken, soql);
+
+  // Each section runs in its own try/catch so one failing query (field rename,
+  // row limit, permission change) only reverts THAT section to its report-based
+  // fallback instead of discarding every metric — several of those fallbacks are
+  // the known-broken reports this function exists to bypass.
+  const out = {};
+
+  // ── Health: program-wide, full year (replaces the Q1-filtered resumen) ──────
+  try {
+    const HEALTH = `pmdm__Service__r.pmdm__Program__r.Name = 'Programa de Salud (Health)'`;
+    out.healthServices = await agg(
+      `SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${win} AND ${HEALTH}`);
+    const healthContacts = await agg(
+      `SELECT COUNT_DISTINCT(pmdm__Contact__c) e FROM ${SD} WHERE ${win} AND ${HEALTH}`);
+    const healthNotReg = await agg(
+      `SELECT COUNT_DISTINCT(N_r_Identification__c) e FROM ${SD} WHERE ${win} AND pmdm__Contact__c = null AND ${HEALTH}`);
+    out.healthUB = healthContacts + healthNotReg;
+    out.healthMonthly = await monthlySoql(HEALTH);
+  } catch (err) { console.warn(`  ✗ health metrics: ${err.message}`); }
+
+  // ── Shelter: the four categories the dashboard tracks ───────────────────────
+  // The Salesforce reports filter on the delivery NAME ("CUST_NAME contains ..."),
+  // which silently drops records whose auto-name was edited, and they lack a date
+  // column. Totals, unique beneficiaries, and the monthly series are all computed
+  // here from the service lookup instead so the tab stays internally consistent.
+  try {
+    const SHELTER_KEYS = {
+      "Mobiliario (Condiciones de Vida)": "furniture",
+      "Electrodomésticos (Condiciones de Vida)": "appliances",
+      "Enseres del hogar (Condiciones de Vida)": "household",
+      "Electrónicos y suministros (Condiciones de Vida)": "electronics",
+    };
+    const SHELTER4 = `pmdm__Service__r.Name IN ('${Object.keys(SHELTER_KEYS).join("','")}')`;
+    const shelterMonthly = await monthlySoql(SHELTER4);
+    // Pre-seed all four keys: the GROUP BY only returns categories with rows this
+    // year, and a missing key must mean "0 this year", not "fall back to reports".
+    const shelterCategories = Object.fromEntries(
+      Object.values(SHELTER_KEYS).map((k) => [k, { services: 0, ub: 0 }]));
+    const sc = await runSoql(instanceUrl, accessToken,
+      `SELECT pmdm__Service__r.Name s, SUM(pmdm__Quantity__c) q, COUNT_DISTINCT(pmdm__Contact__c) u ` +
+      `FROM ${SD} WHERE ${win} AND ${SHELTER4} GROUP BY pmdm__Service__r.Name`);
+    for (const rec of sc.records ?? []) {
+      const key = SHELTER_KEYS[rec.s];
+      if (key) shelterCategories[key] = { services: Number(rec.q) || 0, ub: Number(rec.u) || 0 };
+    }
+    out.shelterMonthly = shelterMonthly;
+    out.shelterCategories = shelterCategories;
+  } catch (err) { console.warn(`  ✗ shelter metrics: ${err.message}`); }
+
+  // ── Evangelism ───────────────────────────────────────────────────────────────
+  try {
+    const BIBLES = `pmdm__Service__r.Name IN ('Biblias','Biblias Quichua','Biblia de niño (Educación)')`;
+    const bibles = await agg(`SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${win} AND ${BIBLES}`);
+    const biblesMonthly = await monthlySoql(BIBLES);
+    const VBS = `pmdm__Service__r.Name = 'Campamentos VBS (Educación)'`;
+    const vbsAttendees = await agg(`SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${win} AND ${VBS}`);
+    // Unique attendees intentionally ignores the Quantity >= 1 convention: ~2,700
+    // per-child VBS rows carry a blank/zero quantity (attendance was logged, the
+    // quantity wasn't), and each still represents a real child linked to a camp.
+    const vbsUnique = await agg(
+      `SELECT COUNT_DISTINCT(pmdm__Contact__c) e FROM ${SD} ` +
+      `WHERE pmdm__DeliveryDate__c >= ${Y}-01-01 AND pmdm__DeliveryDate__c <= ${Y}-12-31 AND ${VBS}`);
+    const vbsMonthly = await monthlySoql(VBS);
+    const POF = `pmdm__Service__r.Name = 'Profesion de Fe (Educación)'`;
+    const professionsOfFaith = await agg(`SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${win} AND ${POF}`);
+    const professionsOfFaithAllTime = await agg(
+      `SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${POF} AND pmdm__Quantity__c >= 1`);
+    const pofMonthly = await monthlySoql(POF);
+    out.evangelism = {
+      bibles, biblesMonthly,
+      vbsAttendees, vbsUnique, vbsMonthly,
+      professionsOfFaith, professionsOfFaithAllTime, pofMonthly,
+    };
+  } catch (err) { console.warn(`  ✗ evangelism metrics: ${err.message}`); }
+
+  // ── Life farms: new farms added per month this year, per type ────────────────
+  // One service-delivery row = one farm set up (verified: rows ≈ distinct
+  // households per month). Running totals still come from the reports, which
+  // apply the official active-account filters.
+  const FARM_KEYS = {
+    "Huerto de Vida Ideal": "ideal",
+    "Huerto de Vida Completo": "full",
+    "Huerto de Vida Basico": "basic",
+    "Huerto de Vida Multiplicacion": "multiplication",
+    "Huerto de Vida Urbano": "urban",
+  };
+  try {
+    const farmsMonthly = { combined: new Array(12).fill(0) };
+    for (const key of Object.values(FARM_KEYS)) farmsMonthly[key] = new Array(12).fill(0);
+    const fm = await runSoql(instanceUrl, accessToken,
+      `SELECT pmdm__Service__r.Name s, CALENDAR_MONTH(pmdm__DeliveryDate__c) m, COUNT(Id) e FROM ${SD} ` +
+      `WHERE ${win} AND pmdm__Service__r.Name IN ('${Object.keys(FARM_KEYS).join("','")}') ` +
+      `GROUP BY pmdm__Service__r.Name, CALENDAR_MONTH(pmdm__DeliveryDate__c)`);
+    for (const rec of fm.records ?? []) {
+      const key = FARM_KEYS[rec.s];
+      const idx = (Number(rec.m) || 0) - 1;
+      if (!key || idx < 0 || idx > 11) continue;
+      const n = Number(rec.e) || 0;
+      farmsMonthly[key][idx] += n;
+      farmsMonthly.combined[idx] += n;
+    }
+    out.farmsMonthly = farmsMonthly;
+
+    // All-time running totals as a fallback for the farm REPORTS, which have
+    // proven flaky (a transient fetch failure once published "0 full-size
+    // farms" while 12 were added this year). Distinct households ≈ farms.
+    const farmsTotals = {};
+    const ft = await runSoql(instanceUrl, accessToken,
+      `SELECT pmdm__Service__r.Name s, COUNT_DISTINCT(Contact_Assigned_Household__c) e FROM ${SD} ` +
+      `WHERE pmdm__Quantity__c >= 1 AND pmdm__Service__r.Name IN ('${Object.keys(FARM_KEYS).join("','")}') ` +
+      `GROUP BY pmdm__Service__r.Name`);
+    for (const rec of ft.records ?? []) {
+      const key = FARM_KEYS[rec.s];
+      if (key) farmsTotals[key] = Number(rec.e) || 0;
+    }
+    out.farmsTotals = farmsTotals;
+  } catch (err) { console.warn(`  ✗ life-farm metrics: ${err.message}`); }
+
+  // ── Beneficiaries: regional splits straight from Contact ────────────────────
+  // MailingState is entered in mixed case ('Pichincha' / 'PICHINCHA'), so the
+  // groups are normalized here. Unique people = distinct Contact_Number__c,
+  // families = distinct Account.APA_Number__c — same definitions as the
+  // "Contactos y Cuentas" reports.
+  try {
+    const BEN = `RecordType.Name = 'Beneficiary' AND Status__c = 'active'`;
+    const regionOf = (st) => {
+      const s = String(st ?? "").toLowerCase();
+      if (s === "pichincha") return "quito";
+      if (s === "imbabura") return "imbabura";
+      return "other";
+    };
+    const bene = {
+      combined: { ub: 0, fam: 0, girls: 0, boys: 0 },
+      quito: { ub: 0, fam: 0, girls: 0, boys: 0 },
+      imbabura: { ub: 0, fam: 0, girls: 0, boys: 0 },
+    };
+    const cmb = (await runSoql(instanceUrl, accessToken,
+      `SELECT COUNT_DISTINCT(Contact_Number__c) ub, COUNT_DISTINCT(Account.APA_Number__c) fam ` +
+      `FROM Contact WHERE ${BEN}`)).records?.[0] ?? {};
+    bene.combined.ub = Number(cmb.ub) || 0;
+    bene.combined.fam = Number(cmb.fam) || 0;
+    const byState = await runSoql(instanceUrl, accessToken,
+      `SELECT MailingState st, COUNT_DISTINCT(Contact_Number__c) ub, COUNT_DISTINCT(Account.APA_Number__c) fam ` +
+      `FROM Contact WHERE ${BEN} GROUP BY MailingState`);
+    for (const rec of byState.records ?? []) {
+      const region = regionOf(rec.st);
+      if (region === "other") continue;
+      bene[region].ub += Number(rec.ub) || 0;
+      bene[region].fam += Number(rec.fam) || 0;
+    }
+    const children = await runSoql(instanceUrl, accessToken,
+      `SELECT MailingState st, Gender__c g, COUNT_DISTINCT(Contact_Number__c) e FROM Contact ` +
+      `WHERE ${BEN} AND Current_Age__c <= 13 AND Gender__c IN ('Female','Male') ` +
+      `GROUP BY MailingState, Gender__c`);
+    for (const rec of children.records ?? []) {
+      const field = String(rec.g).toLowerCase() === "female" ? "girls" : "boys";
+      const n = Number(rec.e) || 0;
+      bene.combined[field] += n;
+      const region = regionOf(rec.st);
+      if (region !== "other") bene[region][field] += n;
+    }
+    out.beneficiaries = bene;
+  } catch (err) { console.warn(`  ✗ beneficiary metrics: ${err.message}`); }
+
+  return out;
+}
+
 // ─── Revolving Fund / MEP metrics (live SOQL) ───────────────────────────────────
 // There is no Salesforce report for MEPs (REPORT_IDS.meps was never created); the
 // program is modeled across three objects, queried directly:
@@ -216,13 +435,18 @@ async function fetchMepMetrics(instanceUrl, accessToken) {
     status[String(rec.s ?? "").toLowerCase()] = Number(rec.e) || 0;
   }
 
-  // Market ready = active businesses older than 9 months (formula field, filterable)
+  // Market ready = active businesses older than 9 months (formula field, filterable).
+  // COUNT_DISTINCT on the business account, not COUNT(Id): MEP_Finance__c holds one
+  // record per loan, and a business with several qualifying loans was being counted
+  // once per loan (which produced marketReady=17 > active=16 on the dashboard).
   const marketReady = await aggValue(instanceUrl, accessToken,
-    `SELECT COUNT(Id) e FROM MEP_Finance__c WHERE Business_active_longer_than_9_months__c = 'SI'`);
+    `SELECT COUNT_DISTINCT(Account_Name__c) e FROM MEP_Finance__c WHERE Business_active_longer_than_9_months__c = 'SI'`);
 
-  // Revolving-fund capital. Disbursed/repaid are YTD flows (transaction date =
-  // Registration_Date__c); outstanding is the CURRENT portfolio balance — a snapshot
-  // across all loans, which has no YTD form.
+  // Revolving-fund capital. Disbursed/repaid are tracked both as YTD flows and
+  // as all-time program totals (transaction date = Registration_Date__c);
+  // outstanding is the CURRENT portfolio balance — a snapshot across all loans.
+  // The headline repayment rate is program-wide, per Erin's definition:
+  // (total capital disbursed − current outstanding) ÷ total capital disbursed.
   const TX = "MEP_Finance_Transaction__c";
   const loan = `Transaction_Type__c = 'Revolving Fund Loan'`;
   const txWin = `Registration_Date__c >= ${Y}-01-01 AND Registration_Date__c <= ${Y}-12-31`;
@@ -230,12 +454,31 @@ async function fetchMepMetrics(instanceUrl, accessToken) {
     `SELECT SUM(Amount__c) e FROM ${TX} WHERE ${loan} AND Amount_Flow__c = 'outgoing' AND ${txWin}`));
   const repaid = Math.abs(await aggValue(instanceUrl, accessToken,
     `SELECT SUM(Amount__c) e FROM ${TX} WHERE ${loan} AND Amount_Flow__c = 'incoming' AND ${txWin}`));
+  const totalDisbursed = Math.abs(await aggValue(instanceUrl, accessToken,
+    `SELECT SUM(Amount__c) e FROM ${TX} WHERE ${loan} AND Amount_Flow__c = 'outgoing'`));
+  const totalRepaid = Math.abs(await aggValue(instanceUrl, accessToken,
+    `SELECT SUM(Amount__c) e FROM ${TX} WHERE ${loan} AND Amount_Flow__c = 'incoming'`));
   const outstanding = Math.abs(await aggValue(instanceUrl, accessToken,
     `SELECT SUM(Balance_Revolving_Fund_Loan__c) e FROM MEP_Finance__c`));
 
-  // Top communities (Ubicacion_MEP__c is null on ~55% of businesses — kept as a bucket)
+  // Loans actually made each month this year (Erin: the activity chart was being
+  // read as "capital loans per month" — this series is the real one).
+  const loansMonthly = new Array(12).fill(0);
+  const lm = await runSoql(instanceUrl, accessToken,
+    `SELECT CALENDAR_MONTH(Registration_Date__c) m, COUNT(Id) e FROM ${TX} ` +
+    `WHERE ${loan} AND Amount_Flow__c = 'outgoing' AND ${txWin} ` +
+    `GROUP BY CALENDAR_MONTH(Registration_Date__c)`);
+  for (const rec of lm.records ?? []) {
+    const idx = (Number(rec.m) || 0) - 1;
+    if (idx >= 0 && idx < 12) loansMonthly[idx] = Number(rec.e) || 0;
+  }
+
+  // Communities (Ubicacion_MEP__c is null on ~55% of businesses — kept as a
+  // bucket). Named communities beyond the top 6 are rolled into "__OTHERS__"
+  // so the list always sums to the total business count.
   const locations = [];
   let noLocation = 0;
+  let otherCommunities = 0;
   const loc = await runSoql(instanceUrl, accessToken,
     `SELECT Ubicacion_MEP__c l, COUNT(Id) e FROM Account WHERE ${MB} ` +
     `GROUP BY Ubicacion_MEP__c ORDER BY COUNT(Id) DESC`);
@@ -243,7 +486,9 @@ async function fetchMepMetrics(instanceUrl, accessToken) {
     const count = Number(rec.e) || 0;
     if (rec.l == null) noLocation += count;
     else if (locations.length < 6) locations.push({ name: String(rec.l), count });
+    else otherCommunities += count;
   }
+  if (otherCommunities > 0) locations.push({ name: "__OTHERS__", count: otherCommunities });
   if (noLocation > 0) locations.push({ name: null, count: noLocation });
 
   // Monthly program activity this year (services delivered)
@@ -251,6 +496,7 @@ async function fetchMepMetrics(instanceUrl, accessToken) {
   const mo = await runSoql(instanceUrl, accessToken,
     `SELECT CALENDAR_MONTH(pmdm__DeliveryDate__c) m, COUNT(Id) e FROM pmdm__ServiceDelivery__c ` +
     `WHERE pmdm__DeliveryDate__c >= ${Y}-01-01 AND pmdm__DeliveryDate__c <= ${Y}-12-31 ` +
+    `AND pmdm__Quantity__c >= 1 ` +
     `AND pmdm__Service__r.pmdm__Program__r.Name = 'Programa de Microemprendimiento (Microbusiness)' ` +
     `GROUP BY CALENDAR_MONTH(pmdm__DeliveryDate__c)`);
   for (const rec of mo.records ?? []) {
@@ -261,7 +507,7 @@ async function fetchMepMetrics(instanceUrl, accessToken) {
   return {
     mepStatus: status,
     mepMarketReady: marketReady,
-    mepFund: { year: Y, disbursed, repaid, outstanding },
+    mepFund: { year: Y, disbursed, repaid, totalDisbursed, totalRepaid, outstanding, loansMonthly },
     mepLocations: locations,
     mepMonthly: monthly,
   };
@@ -300,6 +546,21 @@ async function main() {
     console.warn(`  ✗ Cross-level metrics: ${err.message} (levels will stay null)`);
   }
 
+  // Section metrics that bypass unreliable Salesforce reports (see fetchSectionMetrics)
+  console.log("\nComputing section metrics (SOQL)...");
+  let sectionMetrics = {};
+  try {
+    sectionMetrics = await fetchSectionMetrics(instanceUrl, accessToken);
+    console.log(
+      `  ✓ health: services=${sectionMetrics.healthServices} people=${sectionMetrics.healthUB} | ` +
+      `bibles=${sectionMetrics.evangelism?.bibles} vbs=${sectionMetrics.evangelism?.vbsAttendees}` +
+      `(${sectionMetrics.evangelism?.vbsUnique} unique) pof=${sectionMetrics.evangelism?.professionsOfFaith} | ` +
+      `beneficiaries: quito=${sectionMetrics.beneficiaries?.quito?.ub} imbabura=${sectionMetrics.beneficiaries?.imbabura?.ub}`,
+    );
+  } catch (err) {
+    console.warn(`  ✗ Section metrics: ${err.message} (report-based fallbacks will be used)`);
+  }
+
   // Revolving Fund / MEP metrics (no Salesforce report exists for these)
   console.log("\nComputing Revolving Fund / MEP metrics (SOQL)...");
   let mepMetrics = {};
@@ -319,8 +580,13 @@ async function main() {
 
   // Transform raw Salesforce responses into our dashboard schema
   console.log("\nTransforming data...");
-  const dashboardData = transformAll(rawReports, { ...levelMetrics, ...mepMetrics });
+  const dashboardData = transformAll(rawReports, { ...levelMetrics, ...mepMetrics, ...sectionMetrics });
   dashboardData.lastUpdated = new Date().toISOString();
+  // Reports that failed even after retries — visible in the JSON so a partly
+  // broken sync can't masquerade as a clean one.
+  dashboardData.syncWarnings = FAILED_REPORTS.length
+    ? FAILED_REPORTS.map((name) => `report fetch failed: ${name}`)
+    : [];
 
   // Write output
   writeFileSync(OUTPUT_FILE, JSON.stringify(dashboardData, null, 2), "utf8");

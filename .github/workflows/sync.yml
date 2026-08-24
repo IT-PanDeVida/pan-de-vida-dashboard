@@ -2,62 +2,93 @@ name: Sync Salesforce to Dashboard
 
 on:
   schedule:
-    # 10:00 UTC and 22:00 UTC = ~6 AM and 6 PM Eastern Time (US)
-    # GitHub cron is UTC and does not adjust for DST.
-    - cron: '0 10,22 * * *'
+    # 11:17 UTC = 06:17 en Ecuador (UTC-5, sin horario de verano).
+    # El minuto :17 evita la hora en punto, donde GitHub encola y retrasa los crons.
+    # Para correr dos veces al día: '17 11,23 * * *'
+    - cron: '17 11 * * *'
   workflow_dispatch:
+
+# Si un run se retrasa, no dejar que dos syncs se pisen empujando commits a la vez.
+concurrency:
+  group: salesforce-sync
+  cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # necesario para commitear dashboard.json
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Install sync deps
+      - name: Verificar que los secrets existan
+        env:
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_PRIVATE_KEY: ${{ secrets.SF_PRIVATE_KEY }}
+        run: |
+          missing=""
+          [ -z "$SF_USERNAME" ]    && missing="$missing SF_USERNAME"
+          [ -z "$SF_CLIENT_ID" ]   && missing="$missing SF_CLIENT_ID"
+          [ -z "$SF_PRIVATE_KEY" ] && missing="$missing SF_PRIVATE_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Faltan secrets del repo:$missing — agrégalos en Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+          echo "Secrets presentes."
+
+      - name: Instalar dependencias del sync
         working-directory: scripts
         run: npm install
 
-      - name: Write Salesforce private key
+      - name: Escribir la llave privada de Salesforce
         env:
           SF_PRIVATE_KEY: ${{ secrets.SF_PRIVATE_KEY }}
         run: |
           printf '%s\n' "$SF_PRIVATE_KEY" > scripts/server.key
           chmod 600 scripts/server.key
 
-      - name: Run Salesforce sync
+      - name: Correr el sync de Salesforce
         working-directory: scripts
         env:
           SF_LOGIN_URL: https://login.salesforce.com
           SF_USERNAME: ${{ secrets.SF_USERNAME }}
           SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
           SF_PRIVATE_KEY_PATH: ./server.key
-          OUTPUT_PATH: ../dashboard.json
+          OUTPUT_PATH: ../dashboard-app/public/data/dashboard.json
         run: node sync-salesforce.js
 
-      - name: Install lftp
-        run: sudo apt-get update && sudo apt-get install -y lftp
+      - name: Borrar la llave privada
+        if: always()
+        run: rm -f scripts/server.key
 
-      - name: Upload dashboard.json to Plesk via FTPS
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      - name: Avisar si el sync dejó advertencias
         run: |
-          timeout 120 lftp -c "
-          set ftp:ssl-force true;
-          set ftp:ssl-protect-data true;
-          set ftp:passive-mode on;
-          set ftp:fix-pasv-address yes;
-          set ssl:verify-certificate no;
-          set net:timeout 20;
-          set net:max-retries 3;
-          set net:reconnect-interval-base 5;
-          debug 1;
-          open -u '$FTP_USER','$FTP_PASSWORD' ftp://$FTP_HOST;
-          put dashboard.json -o /dashboard.pandevida.engineering/data/dashboard.json;
-          bye
+          node -e "
+            const d = require('./dashboard-app/public/data/dashboard.json');
+            const w = d.syncWarnings || [];
+            if (w.length) {
+              console.log('::warning::' + w.length + ' advertencia(s) del sync: ' + JSON.stringify(w));
+            } else {
+              console.log('Sin advertencias.');
+            }
           "
+
+      - name: Commitear los datos nuevos (dispara el deploy en Vercel)
+        run: |
+          if git diff --quiet -- dashboard-app/public/data/dashboard.json; then
+            echo "dashboard.json sin cambios — no hay nada que publicar."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dashboard-app/public/data/dashboard.json
+          git commit -m "chore(data): sync Salesforce ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+          git push
+          echo "Publicado. Vercel reconstruye solo con el push a main."

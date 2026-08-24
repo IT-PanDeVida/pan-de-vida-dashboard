@@ -43,7 +43,9 @@ export const REPORT_IDS = {
   health_clinic_pdv_cost: "00OUc0000076PULMA2",  // COSTO A.MEDICA PDV
   health_other: "00OUc0000076R6LMAU",  // Otras ayudas médicas (medicina,...)
   health_other_bu: "00OUc0000076UnNMAU",  // BU otras ayudas médicas
-  health_resumen: "00OUc0000076XBlMAM",  // Resumen ES Salud (totales)
+  // health_resumen (00OUc0000076XBlMAM) intentionally removed: the report carries a
+  // custom Jan 1 – Mar 31 date filter, so its totals only cover Q1. Health totals
+  // are computed via live SOQL instead (fetchSectionMetrics in sync-salesforce.js).
   education_kits: "00OUc000007IJTBMA4",  // Kits Escolares
   education_kits_cost: "00OUc000007IucPMAS",  // Útiles Escolares AVG Cost
   education_backpacks: "00OUc000007IKAjMAO",  // Mochilas
@@ -149,8 +151,11 @@ function monthlyByDate(report, opts = {}) {
     qtyIdx = colNames.findIndex(n => /quantity/i.test(n) || /quantity/i.test(colInfo[n]?.label ?? ""));
   }
 
-  // Restrict to a calendar year if requested.
-  const year = opts.year ?? null;
+  // Restrict to a calendar year. Defaults to the CURRENT year: several reports
+  // (Shark Tank, urban farms) are all-time, and without this their 2024/2025
+  // rows land in the same 12 buckets as this year's (e.g. a Nov 2024 winner
+  // showing up in this year's November). Pass year: null for all-time binning.
+  const year = opts.year === undefined ? new Date().getFullYear() : opts.year;
 
   for (const [key, entry] of Object.entries(report.factMap ?? {})) {
     // Tabular reports keep rows under T!T; summary reports keep them under
@@ -205,11 +210,13 @@ function extractGroceries(r) {
   // VIVERES AVG COST report (groceries_avg_cost) contains all grocery metrics:
   //   aggregate[0] = Sum of Quantity  (bags delivered)
   //   aggregate[1] = Sum of Total Cost ($)
-  //   aggregate[2] = Average Total Cost (avg cost per bag)
+  //   aggregate[2] = Average Total Cost (avg cost per DELIVERY RECORD — not per bag:
+  //                  some records deliver several bags, so avgCost × bags ≠ totalCost)
   //   aggregate[3] = RowCount (unique beneficiaries — verify against groceries_bu)
   const bags = total(r.groceries_avg_cost, 0);
   const totalCost = total(r.groceries_avg_cost, 1);
-  const avgCost = total(r.groceries_avg_cost, 2);
+  // Average unit cost per kit, so that avgCost × bags = totalCost holds on the card.
+  const avgCost = bags > 0 ? totalCost / bags : 0;
   const ubBU = total(r.groceries_bu, 1); // aggregate[1] = Record Count = unique beneficiaries (97)
   return {
     bags,
@@ -221,6 +228,9 @@ function extractGroceries(r) {
 }
 
 function extractClothing(r) {
+  // Note: monthly[0] (January) = 0 is genuine — verified Aug 2026 via SOQL that
+  // Salesforce has no clothing service deliveries dated January this year. If
+  // January distributions happened, they were never recorded (data-entry gap).
   return {
     donations: total(r.clothing),
     ub: total(r.clothing_bu, 1), // aggregate[1] = Record Count = unique beneficiaries (50)
@@ -228,7 +238,7 @@ function extractClothing(r) {
   };
 }
 
-function extractHealth(r) {
+function extractHealth(r, m = {}) {
   const clinicConsultations = total(r.health_clinic_atenciones);
   const clinicUB = total(r.health_clinic_bu, 1); // aggregate[1] = Record Count = unique beneficiaries (86)
   const clinicVozManos = total(r.health_clinic_monto, 1);  // aggregate[1] = formula "unico" = $3,571.50 (Voz y Manos)
@@ -238,13 +248,14 @@ function extractHealth(r) {
   const otherUB = total(r.health_other, 2); // aggregate[2] = Record Count = unique beneficiaries (77)
   const otherInvested = total(r.health_other, 1); // aggregate[1] = total cost
 
-  // Use Resumen ES Salud for official totals (matches Power BI dashboard)
-  // aggregate[0] = Sum of Quantity (total services delivered)
-  // totalUB = number of unique beneficiary groupings (people who received any health service)
-  const totalServices = r.health_resumen ? total(r.health_resumen, 0) : clinicConsultations + otherAids;
-  const totalUB = r.health_resumen
-    ? (r.health_resumen?.groupingsDown?.groupings?.length ?? Math.max(clinicUB, otherUB))
-    : Math.max(clinicUB, otherUB);
+  // Program-wide totals come from live SOQL (fetchSectionMetrics): total services =
+  // sum of quantity across the Health program this year; total people = distinct
+  // contacts + distinct not-registered persons (deduplicated across clinic/other,
+  // which is why it is NOT clinicUB + otherUB). The old "Resumen ES Salud" report
+  // was dropped as a source — it carried a custom Q1-only date filter, which made
+  // the headline (431/205) smaller than its own components (650 consultations).
+  const totalServices = m.healthServices ?? (clinicConsultations + otherAids);
+  const totalUB = m.healthUB ?? Math.max(clinicUB, otherUB);
 
   return {
     totalServices,
@@ -260,7 +271,7 @@ function extractHealth(r) {
       ub: otherUB,
       invested: otherInvested,
     },
-    monthly: sumMonthly(
+    monthly: m.healthMonthly ?? sumMonthly(
       monthlyByDate(r.health_clinic_atenciones),
       monthlyByDate(r.health_other),
     ),
@@ -287,31 +298,36 @@ function extractEducation(r) {
   };
 }
 
-function extractShelter(r) {
-  // Each shelter report:
+function extractShelter(r, m = {}) {
+  // Category totals come from live SOQL over the service lookup (fetchSectionMetrics):
+  // the Salesforce reports filter on the delivery NAME, which drops records whose
+  // auto-name was edited, and they carry no date column for monthlies. The reports
+  // remain as fallbacks:
   //   aggregate[0] = Sum of Quantity (total items/services)
   //   aggregate[1] = Unique Count (unique beneficiaries / families served)
-  // Run inspect-report.js on each ID to verify aggregate indices.
-  const furniture = total(r.shelter_furniture);
-  const furnitureUB = total(r.shelter_furniture, 1);
-  const appliances = total(r.shelter_appliances);
-  const appliancesUB = total(r.shelter_appliances, 1);
-  const household = total(r.shelter_household);
-  const householdUB = total(r.shelter_household, 1);
-  const electronics = total(r.shelter_electronics);
-  const electronicsUB = total(r.shelter_electronics, 1);
+  const cat = (key, report) => m.shelterCategories?.[key] ?? {
+    services: total(report),
+    ub: total(report, 1),
+  };
+  const furniture = cat("furniture", r.shelter_furniture);
+  const appliances = cat("appliances", r.shelter_appliances);
+  const household = cat("household", r.shelter_household);
+  const electronics = cat("electronics", r.shelter_electronics);
 
-  const services = furniture + appliances + household + electronics;
-  const ub = furnitureUB + appliancesUB + householdUB + electronicsUB;
+  const services = furniture.services + appliances.services + household.services + electronics.services;
+  const ub = furniture.ub + appliances.ub + household.ub + electronics.ub;
 
   return {
     services,
     ub,
-    furniture: { services: furniture, ub: furnitureUB },
-    appliances: { services: appliances, ub: appliancesUB },
-    household: { services: household, ub: householdUB },
-    electronics: { services: electronics, ub: electronicsUB },
-    monthly: sumMonthly(
+    furniture,
+    appliances,
+    household,
+    electronics,
+    // The four shelter reports have no delivery-date column, so their rows can't
+    // be binned by month (this is why the tab's chart was empty). The monthly
+    // series comes from live SOQL over the same four service categories.
+    monthly: m.shelterMonthly ?? sumMonthly(
       monthlyByDate(r.shelter_furniture),
       monthlyByDate(r.shelter_appliances),
       monthlyByDate(r.shelter_household),
@@ -320,13 +336,22 @@ function extractShelter(r) {
   };
 }
 
-function extractLifeFarms(r) {
-  // Each report = count of farms in that category (grand total row count)
-  const idealDone = total(r.life_farms_ideal);
-  const fullDone = total(r.life_farms_full);
-  const basicDone = total(r.life_farms_basic);
-  const multiDone = total(r.life_farms_multiplication);
-  const urbanDone = total(r.life_farms_urban);
+function extractLifeFarms(r, m = {}) {
+  // Each report = running total of farms in that category (grand total row count).
+  // "New per month" can't come from these reports (most lack a date column), so it
+  // comes from live SOQL over this year's farm service deliveries (fetchSectionMetrics).
+  // A report that fails to fetch (or was emptied in Salesforce) yields 0 from
+  // total(); the SOQL all-time distinct-household counts (farmsTotals) back it up
+  // so a flaky fetch can't publish "0 farms" next to "12 new this year".
+  const ft = m.farmsTotals ?? {};
+  const idealDone = total(r.life_farms_ideal) || ft.ideal || 0;
+  const fullDone = total(r.life_farms_full) || ft.full || 0;
+  const basicDone = total(r.life_farms_basic) || ft.basic || 0;
+  const multiDone = total(r.life_farms_multiplication) || ft.multiplication || 0;
+  const urbanDone = total(r.life_farms_urban) || ft.urban || 0;
+
+  const fm = m.farmsMonthly ?? {};
+  const sum = (arr) => (Array.isArray(arr) ? arr.reduce((a, b) => a + (b ?? 0), 0) : 0);
 
   return {
     idealFarm: { goal: 30, done: idealDone },
@@ -335,14 +360,23 @@ function extractLifeFarms(r) {
     basicFarm: { goal: 118, done: basicDone },
     multiplication: { goal: 108, done: multiDone },
     urbanFarm: { goal: null, done: urbanDone },
-    monthly: sumMonthly(
+    total: idealDone + fullDone + basicDone + multiDone + urbanDone,
+    newThisYear: {
+      ideal: sum(fm.ideal),
+      full: sum(fm.full),
+      basic: sum(fm.basic),
+      multiplication: sum(fm.multiplication),
+      urban: sum(fm.urban),
+    },
+    // New farms set up per month this year (all types / urban only)
+    monthly: fm.combined ?? sumMonthly(
       monthlyByDate(r.life_farms_ideal),
       monthlyByDate(r.life_farms_full),
       monthlyByDate(r.life_farms_basic),
       monthlyByDate(r.life_farms_multiplication),
       monthlyByDate(r.life_farms_urban)
     ),
-    urbanMonthly: monthlyByDate(r.life_farms_urban),
+    urbanMonthly: fm.urban ?? monthlyByDate(r.life_farms_urban),
   };
 }
 
@@ -355,6 +389,7 @@ function buildMeps(m) {
   const s = m.mepStatus;
   const fund = m.mepFund ?? {};
   const disbursed = fund.disbursed ?? 0;
+  const totalDisbursed = fund.totalDisbursed ?? 0;
   return {
     total: Object.values(s).reduce((a, b) => a + b, 0),
     active: s["activo"] ?? 0,
@@ -364,27 +399,41 @@ function buildMeps(m) {
     marketReady: m.mepMarketReady ?? 0,
     participants: m.level3Served ?? null, // distinct people served by the program this year
     fund: {
-      year: fund.year ?? null, // disbursed/repaid/rate are YTD for this year; outstanding is current
+      year: fund.year ?? null, // disbursed/repaid are YTD flows; total* are all-time program totals
       disbursed,
       repaid: fund.repaid ?? 0,
+      totalDisbursed,
+      totalRepaid: fund.totalRepaid ?? 0,
       outstanding: fund.outstanding ?? 0,
-      repaymentRate: disbursed > 0 ? Math.round(((fund.repaid ?? 0) / disbursed) * 100) : null,
+      // Program-wide repayment rate (Erin's definition): share of all capital ever
+      // disbursed that is no longer outstanding. The YTD flows are too small to
+      // rate meaningfully (e.g. $278.99 disbursed in 2026).
+      repaymentRate: totalDisbursed > 0
+        ? Math.round(((totalDisbursed - (fund.outstanding ?? 0)) / totalDisbursed) * 100)
+        : null,
+      loansMonthly: fund.loansMonthly ?? new Array(12).fill(0), // loans made per month this year
     },
-    locations: m.mepLocations ?? [], // [{ name: string|null, count }] — null = no location recorded
+    locations: m.mepLocations ?? [], // [{ name, count }] — null = no location recorded, "__OTHERS__" = smaller communities
     monthly: m.mepMonthly ?? new Array(12).fill(0),
   };
 }
 
 function extractSharkTank(r) {
   if (!r.shark_tank_winners) return null;
+  // The Shark Tank report is ALL-TIME (winners span 2024/2025/2026), so the
+  // headline is a running total. monthlyByDate defaults to the current year,
+  // which keeps prior-year winners out of this year's chart.
+  const monthly = monthlyByDate(r.shark_tank_winners);
   return {
-    winners: total(r.shark_tank_winners),       // aggregate[0] = Sum of Quantity = winner count
+    winners: total(r.shark_tank_winners),       // aggregate[0] = Sum of Quantity = winner count (all-time)
     pdvCost: total(r.shark_tank_winners, 1),    // aggregate[1] = Sum of Cost PDV
-    monthly: monthlyByDate(r.shark_tank_winners),
+    winnersThisYear: monthly.reduce((a, b) => a + b, 0),
+    monthly,
   };
 }
 
-function extractEvangelism(r) {
+function extractEvangelism(r, m = {}) {
+  const ev = m.evangelism ?? {};
   const biblesES = total(r.evangelism_bibles_es);
   const biblesQU = total(r.evangelism_bibles_qu);
   const biblesNinos = total(r.evangelism_bibles_ninos);
@@ -392,24 +441,28 @@ function extractEvangelism(r) {
   //   aggregate[3] = Record Count = unique dates = camps held
   //   aggregate[0] = Sum of Quantity = total children who attended
   const vbsCamps = total(r.education_vbs, 3);    // aggregate[3] = unique delivery dates = camps held
-  const childrenVBS = total(r.education_vbs, 0);    // aggregate[0] = Sum of Quantity = children attended
   const personasAlcanzadas = total(r.evangelism_personas); // aggregate[0] = Record Count = people reached
 
+  // Totals and monthly series come from live SOQL (fetchSectionMetrics) so the
+  // headline numbers and the charts always agree; the reports are the fallback.
+  // The bible reports have no date column, which is why the old monthly chart
+  // was permanently empty.
   return {
-    bibles: biblesES + biblesQU + biblesNinos,
+    bibles: ev.bibles ?? (biblesES + biblesQU + biblesNinos),
     vbsCamps,
-    childrenVBS,
+    childrenVBS: ev.vbsAttendees ?? total(r.education_vbs, 0), // total attendances (children can repeat camps)
+    vbsUnique: ev.vbsUnique ?? null,                           // distinct children who attended a VBS camp
+    professionsOfFaith: ev.professionsOfFaith ?? null,         // this year ("Profesion de Fe (Educación)" service)
+    professionsOfFaithAllTime: ev.professionsOfFaithAllTime ?? null,
     personasAlcanzadas,
-    monthly: sumMonthly(
-      monthlyByDate(r.evangelism_bibles_es),
-      monthlyByDate(r.evangelism_bibles_qu),
-      monthlyByDate(r.evangelism_bibles_ninos),
-      monthlyByDate(r.evangelism_personas),
-    ),
+    biblesMonthly: ev.biblesMonthly ?? new Array(12).fill(0),
+    vbsMonthly: ev.vbsMonthly ?? new Array(12).fill(0),        // attendances per month
+    pofMonthly: ev.pofMonthly ?? new Array(12).fill(0),
+    monthly: ev.biblesMonthly ?? new Array(12).fill(0),        // kept for backward compatibility
   };
 }
 
-function extractBeneficiaries(r) {
+function extractBeneficiaries(r, m = {}) {
   // Confirmed aggregate indices via live inspection:
   //   nuevos_apas_uio / nuevos_apas_imb2 grand total (T!T):
   //     [0] = Sum of Current Age (irrelevant)
@@ -420,10 +473,17 @@ function extractBeneficiaries(r) {
   //   beneficiaries_* reports grand total (T!T):
   //     [1] = Unique Count of Contact Number (APA) → total beneficiaries
   //     [2] = Unique Count of APA Number           → total accounts (families)
-  const newUBUIO = total(r.nuevos_apas_uio, 1);  // Quito: 44 new beneficiaries
-  const newFamiliesUIO = total(r.nuevos_apas_uio, 2);  // Quito: 15 new families
-  const newUBIMB2 = total(r.nuevos_apas_imb2, 1);  // Imbabura: 41 new beneficiaries
-  const newFamiliesIMB2 = total(r.nuevos_apas_imb2, 2);  // Imbabura: 12 new families
+  const newUBUIO = total(r.nuevos_apas_uio, 1);  // Quito: new beneficiaries this year
+  const newFamiliesUIO = total(r.nuevos_apas_uio, 2);  // Quito: new families this year
+  const newUBIMB2 = total(r.nuevos_apas_imb2, 1);  // Imbabura: new beneficiaries this year
+  const newFamiliesIMB2 = total(r.nuevos_apas_imb2, 2);  // Imbabura: new families this year
+
+  // Regional totals and girls/boys come from live SOQL (fetchSectionMetrics).
+  // The regional REPORTS proved unreliable: "Contactos y Cuentas UIO" was edited
+  // in Salesforce with age (5–13) and created-date filters, collapsing Quito to
+  // ~94 people — and the report-based girls/boys only covered two provinces.
+  // The reports remain as fallbacks if the SOQL metrics fail.
+  const sb = m.beneficiaries;
 
   // Girls and boys aged 0–13, extracted from per-contact detail rows
   // (Contact.Gender__c + Contact.Current_Age__c columns in the report)
@@ -432,26 +492,29 @@ function extractBeneficiaries(r) {
 
   return {
     combined: {
-      accounts: total(r.beneficiaries_combined, 2),
-      beneficiaries: total(r.beneficiaries_combined, 1),
-      girls: childrenQ.girls + childrenIMB.girls,
-      boys: childrenQ.boys + childrenIMB.boys,
+      // Report first (its unique-count semantics are the official definition and
+      // count blank APA numbers as a family); SOQL backs it up so a failed or
+      // silently-edited report can't zero out the dashboard's headline numbers.
+      accounts: total(r.beneficiaries_combined, 2) || sb?.combined?.fam || 0,
+      beneficiaries: total(r.beneficiaries_combined, 1) || sb?.combined?.ub || 0,
+      girls: sb?.combined?.girls ?? (childrenQ.girls + childrenIMB.girls),
+      boys: sb?.combined?.boys ?? (childrenQ.boys + childrenIMB.boys),
       newFamilies: newFamiliesUIO + newFamiliesIMB2,
       newUB: newUBUIO + newUBIMB2,
     },
     quito: {
-      accounts: total(r.beneficiaries_quito, 2),
-      beneficiaries: total(r.beneficiaries_quito, 1),
-      girls: childrenQ.girls,
-      boys: childrenQ.boys,
+      accounts: sb?.quito?.fam ?? total(r.beneficiaries_quito, 2),
+      beneficiaries: sb?.quito?.ub ?? total(r.beneficiaries_quito, 1),
+      girls: sb?.quito?.girls ?? childrenQ.girls,
+      boys: sb?.quito?.boys ?? childrenQ.boys,
       newFamilies: newFamiliesUIO,
       newUB: newUBUIO,
     },
     imbabura: {
-      accounts: total(r.beneficiaries_imbabura, 2),
-      beneficiaries: total(r.beneficiaries_imbabura, 1),
-      girls: childrenIMB.girls,
-      boys: childrenIMB.boys,
+      accounts: sb?.imbabura?.fam ?? total(r.beneficiaries_imbabura, 2),
+      beneficiaries: sb?.imbabura?.ub ?? total(r.beneficiaries_imbabura, 1),
+      girls: sb?.imbabura?.girls ?? childrenIMB.girls,
+      boys: sb?.imbabura?.boys ?? childrenIMB.boys,
       newFamilies: newFamiliesIMB2,
       newUB: newUBIMB2,
     },
@@ -483,19 +546,21 @@ function extractEmergency(r) {
 // `metrics` carries values computed live via SOQL in sync-salesforce.js (no single
 // Salesforce report provides them). Shape:
 //   { level1Served, level2Served, level3Served, totalReached,            (fetchLevelMetrics)
-//     mepStatus, mepMarketReady, mepFund, mepLocations, mepMonthly }     (fetchMepMetrics)
+//     mepStatus, mepMarketReady, mepFund, mepLocations, mepMonthly,      (fetchMepMetrics)
+//     healthServices, healthUB, healthMonthly, shelterMonthly,           (fetchSectionMetrics)
+//     evangelism, farmsMonthly, beneficiaries }
 export function transformAll(r, metrics = {}) {
   const hotMeals = extractHotMeals(r);
   const groceries = extractGroceries(r);
   const clothing = extractClothing(r);
-  const health = extractHealth(r);
+  const health = extractHealth(r, metrics);
   const education = extractEducation(r);
-  const shelter = extractShelter(r);
-  const lifeFarms = extractLifeFarms(r);
+  const shelter = extractShelter(r, metrics);
+  const lifeFarms = extractLifeFarms(r, metrics);
   const meps = buildMeps(metrics);
   const sharkTank = extractSharkTank(r);
-  const evangelism = extractEvangelism(r);
-  const bene = extractBeneficiaries(r);
+  const evangelism = extractEvangelism(r, metrics);
+  const bene = extractBeneficiaries(r, metrics);
   const christmas = extractChristmas(r);
   const emergency = extractEmergency(r);
 
