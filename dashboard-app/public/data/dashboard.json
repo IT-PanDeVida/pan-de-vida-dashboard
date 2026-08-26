@@ -1,8 +1,8 @@
 {
   "overview": {
-    "totalBeneficiaries": 2714,
-    "totalAccounts": 735,
-    "newFamilies": 110,
+    "totalBeneficiaries": 2718,
+    "totalAccounts": 736,
+    "newFamilies": 111,
     "totalDeliveries": 6841,
     "totalReached": 1946
   },
@@ -27,8 +27,8 @@
   "groceries": {
     "bags": 826,
     "ub": 419,
-    "avgCost": 15.581815980629539,
-    "totalCost": 12870.58,
+    "avgCost": 15.578910411622276,
+    "totalCost": 12868.18,
     "monthly": [
       29,
       48,
@@ -374,12 +374,12 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 735,
-      "beneficiaries": 2714,
-      "girls": 403,
+      "accounts": 736,
+      "beneficiaries": 2718,
+      "girls": 404,
       "boys": 418,
-      "newFamilies": 110,
-      "newUB": 363
+      "newFamilies": 111,
+      "newUB": 367
     },
     "quito": {
       "accounts": 407,
@@ -390,12 +390,12 @@
       "newUB": 219
     },
     "imbabura": {
-      "accounts": 308,
-      "beneficiaries": 1309,
-      "girls": 155,
+      "accounts": 309,
+      "beneficiaries": 1313,
+      "girls": 156,
       "boys": 162,
-      "newFamilies": 40,
-      "newUB": 144
+      "newFamilies": 41,
+      "newUB": 148
     }
   },
   "christmas": {
@@ -436,7 +436,7 @@
   },
   "level1": {
     "individualsServed": 680,
-    "totalCost": 12870.58
+    "totalCost": 12868.18
   },
   "level2": {
     "individualsServed": 623,
@@ -446,6 +446,6 @@
     "individualsServed": 279,
     "totalCost": null
   },
-  "lastUpdated": "2026-08-25T11:46:58.312Z",
+  "lastUpdated": "2026-08-26T11:48:04.842Z",
   "syncWarnings": []
 }
