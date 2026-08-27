@@ -3,12 +3,12 @@
     "totalBeneficiaries": 2718,
     "totalAccounts": 736,
     "newFamilies": 111,
-    "totalDeliveries": 6841,
-    "totalReached": 1946
+    "totalDeliveries": 6931,
+    "totalReached": 1951
   },
   "hotMeals": {
-    "plates": 3717,
-    "families": 186,
+    "plates": 3779,
+    "families": 188,
     "monthly": [
       83,
       313,
@@ -17,7 +17,7 @@
       602,
       556,
       537,
-      497,
+      559,
       0,
       0,
       0,
@@ -45,8 +45,8 @@
     ]
   },
   "clothing": {
-    "donations": 463,
-    "ub": 122,
+    "donations": 491,
+    "ub": 123,
     "monthly": [
       0,
       60,
@@ -55,7 +55,7 @@
       54,
       70,
       101,
-      26,
+      54,
       0,
       0,
       0,
@@ -215,14 +215,14 @@
     "finished": 102,
     "aborted": 79,
     "marketReady": 10,
-    "participants": 279,
+    "participants": 283,
     "fund": {
       "year": 2026,
       "disbursed": 278.99,
-      "repaid": 292.64,
+      "repaid": 315.64,
       "totalDisbursed": 31184.19,
-      "totalRepaid": 23747.63,
-      "outstanding": 9021.56,
+      "totalRepaid": 23770.63,
+      "outstanding": 8998.56,
       "repaymentRate": 71,
       "loansMonthly": [
         0,
@@ -281,7 +281,7 @@
       223,
       220,
       226,
-      113,
+      161,
       0,
       0,
       0,
@@ -314,7 +314,7 @@
     "vbsUnique": 431,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 1910,
+    "personasAlcanzadas": 1915,
     "biblesMonthly": [
       12,
       41,
@@ -435,7 +435,7 @@
     ]
   },
   "level1": {
-    "individualsServed": 680,
+    "individualsServed": 681,
     "totalCost": 12868.18
   },
   "level2": {
@@ -443,9 +443,9 @@
     "totalCost": 205630.91
   },
   "level3": {
-    "individualsServed": 279,
+    "individualsServed": 283,
     "totalCost": null
   },
-  "lastUpdated": "2026-08-26T11:48:04.842Z",
+  "lastUpdated": "2026-08-27T21:03:13.792Z",
   "syncWarnings": []
 }
