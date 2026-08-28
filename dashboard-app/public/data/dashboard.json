@@ -1,10 +1,10 @@
 {
   "overview": {
-    "totalBeneficiaries": 2718,
+    "totalBeneficiaries": 2719,
     "totalAccounts": 736,
     "newFamilies": 111,
-    "totalDeliveries": 6931,
-    "totalReached": 1951
+    "totalDeliveries": 6932,
+    "totalReached": 1952
   },
   "hotMeals": {
     "plates": 3779,
@@ -63,8 +63,8 @@
     ]
   },
   "health": {
-    "totalServices": 1155,
-    "totalUB": 584,
+    "totalServices": 1156,
+    "totalUB": 585,
     "clinic": {
       "consultations": 650,
       "ub": 246,
@@ -72,9 +72,9 @@
       "paidPDV": 574
     },
     "other": {
-      "aids": 505,
-      "ub": 490,
-      "invested": 3283.41
+      "aids": 506,
+      "ub": 491,
+      "invested": 3302.87
     },
     "monthly": [
       170,
@@ -84,7 +84,7 @@
       112,
       155,
       6,
-      320,
+      321,
       0,
       0,
       0,
@@ -281,7 +281,7 @@
       223,
       220,
       226,
-      161,
+      173,
       0,
       0,
       0,
@@ -314,7 +314,7 @@
     "vbsUnique": 431,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 1915,
+    "personasAlcanzadas": 1916,
     "biblesMonthly": [
       12,
       41,
@@ -375,8 +375,8 @@
   "beneficiaries": {
     "combined": {
       "accounts": 736,
-      "beneficiaries": 2718,
-      "girls": 404,
+      "beneficiaries": 2719,
+      "girls": 403,
       "boys": 418,
       "newFamilies": 111,
       "newUB": 367
@@ -392,7 +392,7 @@
     "imbabura": {
       "accounts": 309,
       "beneficiaries": 1313,
-      "girls": 156,
+      "girls": 155,
       "boys": 162,
       "newFamilies": 41,
       "newUB": 148
@@ -439,13 +439,13 @@
     "totalCost": 12868.18
   },
   "level2": {
-    "individualsServed": 623,
-    "totalCost": 205630.91
+    "individualsServed": 624,
+    "totalCost": 205650.37
   },
   "level3": {
     "individualsServed": 283,
     "totalCost": null
   },
-  "lastUpdated": "2026-08-27T21:03:13.792Z",
+  "lastUpdated": "2026-08-28T21:26:37.040Z",
   "syncWarnings": []
 }
