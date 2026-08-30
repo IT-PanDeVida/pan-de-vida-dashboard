@@ -4,7 +4,7 @@
     "totalAccounts": 736,
     "newFamilies": 111,
     "totalDeliveries": 6932,
-    "totalReached": 1969
+    "totalReached": 1985
   },
   "hotMeals": {
     "plates": 3779,
@@ -161,22 +161,22 @@
     },
     "basicFarm": {
       "goal": 118,
-      "done": 157
+      "done": 159
     },
     "multiplication": {
       "goal": 108,
-      "done": 124
+      "done": 126
     },
     "urbanFarm": {
       "goal": null,
       "done": 25
     },
-    "total": 370,
+    "total": 374,
     "newThisYear": {
       "ideal": 12,
       "full": 12,
-      "basic": 24,
-      "multiplication": 42,
+      "basic": 26,
+      "multiplication": 46,
       "urban": 24
     },
     "monthly": [
@@ -187,7 +187,7 @@
       13,
       18,
       19,
-      7,
+      13,
       0,
       0,
       0,
@@ -215,7 +215,7 @@
     "finished": 102,
     "aborted": 79,
     "marketReady": 10,
-    "participants": 288,
+    "participants": 294,
     "fund": {
       "year": 2026,
       "disbursed": 278.99,
@@ -281,7 +281,7 @@
       223,
       220,
       226,
-      180,
+      190,
       0,
       0,
       0,
@@ -314,7 +314,7 @@
     "vbsUnique": 431,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 1933,
+    "personasAlcanzadas": 1949,
     "biblesMonthly": [
       12,
       41,
@@ -443,9 +443,9 @@
     "totalCost": 205650.37
   },
   "level3": {
-    "individualsServed": 288,
+    "individualsServed": 294,
     "totalCost": null
   },
-  "lastUpdated": "2026-08-29T15:39:30.793Z",
+  "lastUpdated": "2026-08-30T15:22:14.884Z",
   "syncWarnings": []
 }
