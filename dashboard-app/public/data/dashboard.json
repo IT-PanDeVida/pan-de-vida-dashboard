@@ -1,10 +1,10 @@
 {
   "overview": {
-    "totalBeneficiaries": 2730,
-    "totalAccounts": 739,
-    "newFamilies": 114,
+    "totalBeneficiaries": 2735,
+    "totalAccounts": 740,
+    "newFamilies": 115,
     "totalDeliveries": 7004,
-    "totalReached": 1985
+    "totalReached": 1991
   },
   "hotMeals": {
     "plates": 3851,
@@ -165,18 +165,18 @@
     },
     "multiplication": {
       "goal": 108,
-      "done": 126
+      "done": 127
     },
     "urbanFarm": {
       "goal": null,
       "done": 37
     },
-    "total": 386,
+    "total": 387,
     "newThisYear": {
       "ideal": 12,
       "full": 12,
       "basic": 26,
-      "multiplication": 46,
+      "multiplication": 47,
       "urban": 36
     },
     "monthly": [
@@ -187,7 +187,7 @@
       14,
       22,
       23,
-      16,
+      17,
       0,
       0,
       0,
@@ -215,7 +215,7 @@
     "finished": 102,
     "aborted": 79,
     "marketReady": 10,
-    "participants": 306,
+    "participants": 307,
     "fund": {
       "year": 2026,
       "disbursed": 278.99,
@@ -281,7 +281,7 @@
       224,
       224,
       230,
-      193,
+      202,
       0,
       0,
       0,
@@ -308,13 +308,13 @@
     ]
   },
   "evangelism": {
-    "bibles": 321,
+    "bibles": 323,
     "vbsCamps": 33,
-    "childrenVBS": 1336,
+    "childrenVBS": 1340,
     "vbsUnique": 431,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 1949,
+    "personasAlcanzadas": 1955,
     "biblesMonthly": [
       12,
       41,
@@ -323,7 +323,7 @@
       46,
       27,
       31,
-      127,
+      129,
       0,
       0,
       0,
@@ -337,7 +337,7 @@
       236,
       123,
       143,
-      405,
+      409,
       0,
       0,
       0,
@@ -365,7 +365,7 @@
       46,
       27,
       31,
-      127,
+      129,
       0,
       0,
       0,
@@ -374,20 +374,20 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 739,
-      "beneficiaries": 2730,
-      "girls": 404,
-      "boys": 422,
-      "newFamilies": 114,
-      "newUB": 378
+      "accounts": 740,
+      "beneficiaries": 2735,
+      "girls": 405,
+      "boys": 421,
+      "newFamilies": 115,
+      "newUB": 383
     },
     "quito": {
-      "accounts": 410,
-      "beneficiaries": 1359,
-      "girls": 244,
-      "boys": 257,
-      "newFamilies": 73,
-      "newUB": 230
+      "accounts": 411,
+      "beneficiaries": 1364,
+      "girls": 245,
+      "boys": 256,
+      "newFamilies": 74,
+      "newUB": 235
     },
     "imbabura": {
       "accounts": 309,
@@ -443,9 +443,9 @@
     "totalCost": 205650.37
   },
   "level3": {
-    "individualsServed": 306,
+    "individualsServed": 307,
     "totalCost": null
   },
-  "lastUpdated": "2026-08-31T18:01:29.636Z",
+  "lastUpdated": "2026-09-01T15:28:32.600Z",
   "syncWarnings": []
 }
