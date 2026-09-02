@@ -215,7 +215,7 @@
     "finished": 102,
     "aborted": 79,
     "marketReady": 10,
-    "participants": 307,
+    "participants": 308,
     "fund": {
       "year": 2026,
       "disbursed": 278.99,
@@ -279,10 +279,10 @@
       65,
       281,
       224,
-      224,
+      226,
       230,
       202,
-      0,
+      2,
       0,
       0,
       0
@@ -443,9 +443,9 @@
     "totalCost": 205650.37
   },
   "level3": {
-    "individualsServed": 307,
+    "individualsServed": 308,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-01T15:28:32.600Z",
+  "lastUpdated": "2026-09-02T15:07:58.086Z",
   "syncWarnings": []
 }
