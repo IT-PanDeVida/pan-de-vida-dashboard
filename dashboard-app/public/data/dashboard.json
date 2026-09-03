@@ -3,11 +3,11 @@
     "totalBeneficiaries": 2735,
     "totalAccounts": 740,
     "newFamilies": 115,
-    "totalDeliveries": 7004,
-    "totalReached": 1991
+    "totalDeliveries": 7048,
+    "totalReached": 1999
   },
   "hotMeals": {
-    "plates": 3851,
+    "plates": 3868,
     "families": 188,
     "monthly": [
       83,
@@ -17,7 +17,7 @@
       602,
       556,
       537,
-      631,
+      648,
       0,
       0,
       0,
@@ -25,10 +25,10 @@
     ]
   },
   "groceries": {
-    "bags": 826,
+    "bags": 828,
     "ub": 419,
-    "avgCost": 15.578910411622276,
-    "totalCost": 12868.18,
+    "avgCost": 15.562004830917875,
+    "totalCost": 12885.34,
     "monthly": [
       29,
       48,
@@ -37,7 +37,7 @@
       62,
       134,
       17,
-      394,
+      396,
       0,
       0,
       0,
@@ -45,7 +45,7 @@
     ]
   },
   "clothing": {
-    "donations": 491,
+    "donations": 492,
     "ub": 123,
     "monthly": [
       0,
@@ -55,7 +55,7 @@
       54,
       70,
       101,
-      54,
+      55,
       0,
       0,
       0,
@@ -63,8 +63,8 @@
     ]
   },
   "health": {
-    "totalServices": 1156,
-    "totalUB": 585,
+    "totalServices": 1180,
+    "totalUB": 592,
     "clinic": {
       "consultations": 650,
       "ub": 246,
@@ -72,8 +72,8 @@
       "paidPDV": 574
     },
     "other": {
-      "aids": 506,
-      "ub": 491,
+      "aids": 530,
+      "ub": 515,
       "invested": 3302.87
     },
     "monthly": [
@@ -84,7 +84,7 @@
       112,
       155,
       6,
-      321,
+      345,
       0,
       0,
       0,
@@ -215,7 +215,7 @@
     "finished": 102,
     "aborted": 79,
     "marketReady": 10,
-    "participants": 308,
+    "participants": 310,
     "fund": {
       "year": 2026,
       "disbursed": 278.99,
@@ -281,8 +281,8 @@
       224,
       226,
       230,
-      202,
-      2,
+      210,
+      4,
       0,
       0,
       0
@@ -308,13 +308,13 @@
     ]
   },
   "evangelism": {
-    "bibles": 323,
+    "bibles": 328,
     "vbsCamps": 33,
     "childrenVBS": 1340,
     "vbsUnique": 431,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 1955,
+    "personasAlcanzadas": 1963,
     "biblesMonthly": [
       12,
       41,
@@ -323,7 +323,7 @@
       46,
       27,
       31,
-      129,
+      134,
       0,
       0,
       0,
@@ -365,7 +365,7 @@
       46,
       27,
       31,
-      129,
+      134,
       0,
       0,
       0,
@@ -435,17 +435,17 @@
     ]
   },
   "level1": {
-    "individualsServed": 681,
-    "totalCost": 12868.18
+    "individualsServed": 686,
+    "totalCost": 12885.34
   },
   "level2": {
-    "individualsServed": 624,
+    "individualsServed": 629,
     "totalCost": 205650.37
   },
   "level3": {
-    "individualsServed": 308,
+    "individualsServed": 310,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-02T15:07:58.086Z",
+  "lastUpdated": "2026-09-03T15:01:39.412Z",
   "syncWarnings": []
 }
