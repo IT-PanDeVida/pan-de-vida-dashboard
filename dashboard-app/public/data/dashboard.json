@@ -1,10 +1,10 @@
 {
   "overview": {
-    "totalBeneficiaries": 2735,
-    "totalAccounts": 740,
-    "newFamilies": 115,
-    "totalDeliveries": 7048,
-    "totalReached": 1999
+    "totalBeneficiaries": 2744,
+    "totalAccounts": 743,
+    "newFamilies": 118,
+    "totalDeliveries": 7053,
+    "totalReached": 2002
   },
   "hotMeals": {
     "plates": 3868,
@@ -45,7 +45,7 @@
     ]
   },
   "clothing": {
-    "donations": 492,
+    "donations": 493,
     "ub": 123,
     "monthly": [
       0,
@@ -54,7 +54,7 @@
       64,
       54,
       70,
-      101,
+      102,
       55,
       0,
       0,
@@ -63,8 +63,8 @@
     ]
   },
   "health": {
-    "totalServices": 1180,
-    "totalUB": 592,
+    "totalServices": 1184,
+    "totalUB": 593,
     "clinic": {
       "consultations": 650,
       "ub": 246,
@@ -72,9 +72,9 @@
       "paidPDV": 574
     },
     "other": {
-      "aids": 530,
-      "ub": 515,
-      "invested": 3302.87
+      "aids": 534,
+      "ub": 519,
+      "invested": 3439.62
     },
     "monthly": [
       170,
@@ -83,7 +83,7 @@
       131,
       112,
       155,
-      6,
+      10,
       345,
       0,
       0,
@@ -165,18 +165,18 @@
     },
     "multiplication": {
       "goal": 108,
-      "done": 127
+      "done": 128
     },
     "urbanFarm": {
       "goal": null,
       "done": 37
     },
-    "total": 387,
+    "total": 388,
     "newThisYear": {
       "ideal": 12,
       "full": 12,
       "basic": 26,
-      "multiplication": 47,
+      "multiplication": 48,
       "urban": 36
     },
     "monthly": [
@@ -185,7 +185,7 @@
       18,
       8,
       14,
-      22,
+      23,
       23,
       17,
       0,
@@ -215,7 +215,7 @@
     "finished": 102,
     "aborted": 79,
     "marketReady": 10,
-    "participants": 310,
+    "participants": 312,
     "fund": {
       "year": 2026,
       "disbursed": 278.99,
@@ -279,10 +279,10 @@
       65,
       281,
       224,
-      226,
+      227,
       230,
       227,
-      10,
+      14,
       0,
       0,
       0
@@ -308,13 +308,13 @@
     ]
   },
   "evangelism": {
-    "bibles": 329,
+    "bibles": 328,
     "vbsCamps": 33,
     "childrenVBS": 1340,
-    "vbsUnique": 431,
+    "vbsUnique": 432,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 1963,
+    "personasAlcanzadas": 1966,
     "biblesMonthly": [
       12,
       41,
@@ -323,7 +323,7 @@
       46,
       27,
       31,
-      135,
+      134,
       0,
       0,
       0,
@@ -365,7 +365,7 @@
       46,
       27,
       31,
-      135,
+      134,
       0,
       0,
       0,
@@ -374,12 +374,12 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 740,
-      "beneficiaries": 2735,
-      "girls": 405,
-      "boys": 421,
-      "newFamilies": 115,
-      "newUB": 383
+      "accounts": 743,
+      "beneficiaries": 2744,
+      "girls": 407,
+      "boys": 422,
+      "newFamilies": 118,
+      "newUB": 392
     },
     "quito": {
       "accounts": 411,
@@ -390,12 +390,12 @@
       "newUB": 235
     },
     "imbabura": {
-      "accounts": 309,
-      "beneficiaries": 1313,
-      "girls": 155,
-      "boys": 162,
-      "newFamilies": 41,
-      "newUB": 148
+      "accounts": 312,
+      "beneficiaries": 1322,
+      "girls": 157,
+      "boys": 163,
+      "newFamilies": 44,
+      "newUB": 157
     }
   },
   "christmas": {
@@ -439,13 +439,13 @@
     "totalCost": 12885.34
   },
   "level2": {
-    "individualsServed": 629,
-    "totalCost": 205650.37
+    "individualsServed": 630,
+    "totalCost": 205787.12
   },
   "level3": {
-    "individualsServed": 310,
+    "individualsServed": 312,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-04T14:59:35.847Z",
+  "lastUpdated": "2026-09-05T13:53:06.189Z",
   "syncWarnings": []
 }
