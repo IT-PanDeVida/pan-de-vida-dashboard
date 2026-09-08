@@ -3,11 +3,11 @@
     "totalBeneficiaries": 2744,
     "totalAccounts": 743,
     "newFamilies": 118,
-    "totalDeliveries": 7054,
+    "totalDeliveries": 7144,
     "totalReached": 2002
   },
   "hotMeals": {
-    "plates": 3868,
+    "plates": 3953,
     "families": 188,
     "monthly": [
       83,
@@ -18,17 +18,17 @@
       556,
       537,
       648,
-      0,
+      85,
       0,
       0,
       0
     ]
   },
   "groceries": {
-    "bags": 829,
+    "bags": 831,
     "ub": 419,
-    "avgCost": 15.563437876960194,
-    "totalCost": 12902.09,
+    "avgCost": 15.567280385078218,
+    "totalCost": 12936.41,
     "monthly": [
       29,
       48,
@@ -38,7 +38,7 @@
       134,
       18,
       396,
-      0,
+      2,
       0,
       0,
       0
@@ -63,8 +63,8 @@
     ]
   },
   "health": {
-    "totalServices": 1184,
-    "totalUB": 593,
+    "totalServices": 1185,
+    "totalUB": 594,
     "clinic": {
       "consultations": 650,
       "ub": 246,
@@ -72,9 +72,9 @@
       "paidPDV": 574
     },
     "other": {
-      "aids": 534,
-      "ub": 519,
-      "invested": 3439.62
+      "aids": 535,
+      "ub": 520,
+      "invested": 3443.37
     },
     "monthly": [
       170,
@@ -85,18 +85,18 @@
       155,
       10,
       345,
-      0,
+      1,
       0,
       0,
       0
     ]
   },
   "education": {
-    "schoolKits": 315,
-    "schoolKitCost": 315,
-    "backpacks": 315,
-    "backpackCost": 315,
-    "vbsCamps": 33,
+    "schoolKits": 316,
+    "schoolKitCost": 316,
+    "backpacks": 316,
+    "backpackCost": 316,
+    "vbsCamps": 34,
     "monthly": [
       2,
       0,
@@ -106,7 +106,7 @@
       0,
       0,
       628,
-      0,
+      2,
       0,
       0,
       0
@@ -309,8 +309,8 @@
   },
   "evangelism": {
     "bibles": 328,
-    "vbsCamps": 33,
-    "childrenVBS": 1340,
+    "vbsCamps": 34,
+    "childrenVBS": 1366,
     "vbsUnique": 432,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
@@ -338,7 +338,7 @@
       123,
       143,
       409,
-      0,
+      26,
       0,
       0,
       0
@@ -435,17 +435,17 @@
     ]
   },
   "level1": {
-    "individualsServed": 686,
-    "totalCost": 12902.09
+    "individualsServed": 687,
+    "totalCost": 12936.41
   },
   "level2": {
-    "individualsServed": 630,
-    "totalCost": 205787.12
+    "individualsServed": 631,
+    "totalCost": 207052.87
   },
   "level3": {
     "individualsServed": 312,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-07T16:30:31.955Z",
+  "lastUpdated": "2026-09-08T15:10:03.370Z",
   "syncWarnings": []
 }
