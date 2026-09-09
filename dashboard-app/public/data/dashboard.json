@@ -1,10 +1,10 @@
 {
   "overview": {
-    "totalBeneficiaries": 2744,
-    "totalAccounts": 743,
-    "newFamilies": 118,
-    "totalDeliveries": 7144,
-    "totalReached": 2002
+    "totalBeneficiaries": 2747,
+    "totalAccounts": 744,
+    "newFamilies": 119,
+    "totalDeliveries": 7222,
+    "totalReached": 2005
   },
   "hotMeals": {
     "plates": 3953,
@@ -63,8 +63,8 @@
     ]
   },
   "health": {
-    "totalServices": 1185,
-    "totalUB": 594,
+    "totalServices": 1215,
+    "totalUB": 609,
     "clinic": {
       "consultations": 650,
       "ub": 246,
@@ -72,9 +72,9 @@
       "paidPDV": 574
     },
     "other": {
-      "aids": 535,
-      "ub": 520,
-      "invested": 3443.37
+      "aids": 565,
+      "ub": 549,
+      "invested": 3840.52
     },
     "monthly": [
       170,
@@ -84,18 +84,18 @@
       112,
       155,
       10,
-      345,
-      1,
+      350,
+      26,
       0,
       0,
       0
     ]
   },
   "education": {
-    "schoolKits": 316,
-    "schoolKitCost": 316,
-    "backpacks": 316,
-    "backpackCost": 316,
+    "schoolKits": 341,
+    "schoolKitCost": 341,
+    "backpacks": 339,
+    "backpackCost": 339,
     "vbsCamps": 34,
     "monthly": [
       2,
@@ -106,7 +106,7 @@
       0,
       0,
       628,
-      2,
+      50,
       0,
       0,
       0
@@ -282,7 +282,7 @@
       227,
       230,
       227,
-      20,
+      30,
       0,
       0,
       0
@@ -314,7 +314,7 @@
     "vbsUnique": 432,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 1966,
+    "personasAlcanzadas": 1969,
     "biblesMonthly": [
       12,
       41,
@@ -374,12 +374,12 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 743,
-      "beneficiaries": 2744,
-      "girls": 407,
+      "accounts": 744,
+      "beneficiaries": 2747,
+      "girls": 408,
       "boys": 422,
-      "newFamilies": 118,
-      "newUB": 392
+      "newFamilies": 119,
+      "newUB": 395
     },
     "quito": {
       "accounts": 411,
@@ -390,12 +390,12 @@
       "newUB": 235
     },
     "imbabura": {
-      "accounts": 312,
-      "beneficiaries": 1322,
-      "girls": 157,
+      "accounts": 313,
+      "beneficiaries": 1325,
+      "girls": 158,
       "boys": 163,
-      "newFamilies": 44,
-      "newUB": 157
+      "newFamilies": 45,
+      "newUB": 160
     }
   },
   "christmas": {
@@ -439,13 +439,13 @@
     "totalCost": 12936.41
   },
   "level2": {
-    "individualsServed": 631,
-    "totalCost": 207052.87
+    "individualsServed": 646,
+    "totalCost": 238940.02000000002
   },
   "level3": {
     "individualsServed": 312,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-08T15:10:03.370Z",
+  "lastUpdated": "2026-09-09T15:08:59.497Z",
   "syncWarnings": []
 }
