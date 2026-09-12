@@ -1,8 +1,8 @@
 {
   "overview": {
-    "totalBeneficiaries": 2747,
-    "totalAccounts": 744,
-    "newFamilies": 119,
+    "totalBeneficiaries": 2753,
+    "totalAccounts": 745,
+    "newFamilies": 120,
     "totalDeliveries": 7349,
     "totalReached": 2016
   },
@@ -282,7 +282,7 @@
       227,
       230,
       227,
-      34,
+      51,
       0,
       0,
       0
@@ -374,20 +374,20 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 744,
-      "beneficiaries": 2747,
-      "girls": 408,
+      "accounts": 745,
+      "beneficiaries": 2753,
+      "girls": 410,
       "boys": 421,
-      "newFamilies": 119,
-      "newUB": 395
+      "newFamilies": 120,
+      "newUB": 401
     },
     "quito": {
-      "accounts": 411,
-      "beneficiaries": 1364,
-      "girls": 245,
+      "accounts": 412,
+      "beneficiaries": 1370,
+      "girls": 247,
       "boys": 256,
-      "newFamilies": 74,
-      "newUB": 235
+      "newFamilies": 75,
+      "newUB": 241
     },
     "imbabura": {
       "accounts": 313,
@@ -446,6 +446,6 @@
     "individualsServed": 312,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-11T15:03:37.855Z",
+  "lastUpdated": "2026-09-12T14:11:36.761Z",
   "syncWarnings": []
 }
