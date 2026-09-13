@@ -376,15 +376,15 @@
     "combined": {
       "accounts": 745,
       "beneficiaries": 2753,
-      "girls": 410,
-      "boys": 421,
+      "girls": 409,
+      "boys": 420,
       "newFamilies": 120,
       "newUB": 401
     },
     "quito": {
       "accounts": 412,
       "beneficiaries": 1370,
-      "girls": 247,
+      "girls": 246,
       "boys": 256,
       "newFamilies": 75,
       "newUB": 241
@@ -393,7 +393,7 @@
       "accounts": 313,
       "beneficiaries": 1325,
       "girls": 158,
-      "boys": 162,
+      "boys": 161,
       "newFamilies": 45,
       "newUB": 160
     }
@@ -446,6 +446,6 @@
     "individualsServed": 312,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-12T14:11:36.761Z",
+  "lastUpdated": "2026-09-13T14:55:51.308Z",
   "syncWarnings": []
 }
