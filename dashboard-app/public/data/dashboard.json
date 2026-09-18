@@ -1,9 +1,23 @@
 {
   "overview": {
-    "totalBeneficiaries": 2782,
-    "totalAccounts": 753,
-    "newFamilies": 128,
+    "totalBeneficiaries": 2786,
+    "totalAccounts": 754,
+    "newFamilies": 129,
     "totalDeliveries": 7356,
+    "deliveriesMonthly": [
+      284,
+      519,
+      1078,
+      688,
+      831,
+      915,
+      667,
+      2074,
+      300,
+      0,
+      0,
+      0
+    ],
     "totalReached": 2025
   },
   "hotMeals": {
@@ -19,6 +33,20 @@
       537,
       646,
       142,
+      0,
+      0,
+      0
+    ],
+    "familiesMonthly": [
+      25,
+      56,
+      90,
+      66,
+      76,
+      86,
+      86,
+      118,
+      47,
       0,
       0,
       0
@@ -42,6 +70,34 @@
       0,
       0,
       0
+    ],
+    "ubMonthly": [
+      27,
+      44,
+      50,
+      58,
+      21,
+      71,
+      16,
+      365,
+      6,
+      0,
+      0,
+      0
+    ],
+    "costMonthly": [
+      465.98,
+      828.77,
+      1277.25,
+      1036.96,
+      1066.54,
+      1623.6,
+      265.74,
+      6337.25,
+      100.2,
+      0,
+      0,
+      0
     ]
   },
   "clothing": {
@@ -60,6 +116,20 @@
       0,
       0,
       0
+    ],
+    "ubMonthly": [
+      0,
+      28,
+      33,
+      40,
+      32,
+      39,
+      53,
+      31,
+      20,
+      0,
+      0,
+      0
     ]
   },
   "health": {
@@ -68,14 +138,126 @@
     "clinic": {
       "consultations": 650,
       "ub": 246,
-      "paidVozManos": 3323.5,
-      "paidPDV": 574
+      "paidVozManos": 15263.3,
+      "paidPDV": 574,
+      "consultationsMonthly": [
+        84,
+        91,
+        135,
+        125,
+        98,
+        111,
+        0,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ubMonthly": [
+        45,
+        58,
+        82,
+        81,
+        59,
+        65,
+        0,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paidVozManosMonthly": [
+        1630,
+        1941.5,
+        3323.5,
+        3103.3,
+        2233,
+        2911,
+        0,
+        121,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paidPDVMonthly": [
+        22,
+        40,
+        76,
+        191,
+        142,
+        99,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     "other": {
       "aids": 582,
-      "ub": 566,
-      "invested": 3904.27
+      "ub": 485,
+      "invested": 3904.27,
+      "aidsMonthly": [
+        86,
+        4,
+        31,
+        6,
+        14,
+        44,
+        10,
+        344,
+        43,
+        0,
+        0,
+        0
+      ],
+      "ubMonthly": [
+        70,
+        4,
+        30,
+        5,
+        12,
+        40,
+        7,
+        331,
+        42,
+        0,
+        0,
+        0
+      ],
+      "investedMonthly": [
+        106.34,
+        235.48,
+        232.92,
+        356,
+        386.06,
+        759.65,
+        166.21,
+        1461.29,
+        200.32,
+        0,
+        0,
+        0
+      ]
     },
+    "ubMonthly": [
+      108,
+      58,
+      106,
+      83,
+      63,
+      91,
+      7,
+      337,
+      42,
+      0,
+      0,
+      0
+    ],
     "monthly": [
       170,
       95,
@@ -93,10 +275,38 @@
   },
   "education": {
     "schoolKits": 356,
-    "schoolKitCost": 356,
+    "schoolKitCost": 11.16,
     "backpacks": 356,
-    "backpackCost": 356,
+    "backpackCost": 8.81,
     "vbsCamps": 34,
+    "kitsMonthly": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      314,
+      41,
+      0,
+      0,
+      0
+    ],
+    "backpacksMonthly": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      314,
+      41,
+      0,
+      0,
+      0
+    ],
     "monthly": [
       2,
       0,
@@ -117,25 +327,151 @@
     "ub": 40,
     "furniture": {
       "services": 4,
-      "ub": 2
+      "ub": 2,
+      "monthly": [
+        0,
+        3,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ubMonthly": [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     "appliances": {
       "services": 2,
-      "ub": 2
+      "ub": 2,
+      "monthly": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ubMonthly": [
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     "household": {
       "services": 2,
-      "ub": 2
+      "ub": 2,
+      "monthly": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ubMonthly": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     "electronics": {
       "services": 42,
-      "ub": 34
+      "ub": 34,
+      "monthly": [
+        0,
+        0,
+        0,
+        42,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ubMonthly": [
+        0,
+        0,
+        0,
+        34,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
     },
     "monthly": [
       0,
       3,
       2,
       44,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "ubMonthly": [
+      0,
+      2,
+      2,
+      35,
       1,
       0,
       0,
@@ -206,6 +542,62 @@
       0,
       0,
       0
+    ],
+    "idealMonthly": [
+      0,
+      0,
+      0,
+      2,
+      0,
+      5,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "fullMonthly": [
+      0,
+      0,
+      0,
+      2,
+      5,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "basicMonthly": [
+      5,
+      5,
+      0,
+      4,
+      0,
+      4,
+      4,
+      4,
+      1,
+      0,
+      0,
+      0
+    ],
+    "multiplicationMonthly": [
+      7,
+      8,
+      4,
+      0,
+      4,
+      5,
+      10,
+      10,
+      0,
+      0,
+      0,
+      0
     ]
   },
   "meps": {
@@ -216,6 +608,20 @@
     "aborted": 79,
     "marketReady": 10,
     "participants": 313,
+    "participantsMonthly": [
+      13,
+      78,
+      63,
+      145,
+      148,
+      147,
+      144,
+      142,
+      74,
+      0,
+      0,
+      0
+    ],
     "fund": {
       "year": 2026,
       "disbursed": 278.99,
@@ -233,6 +639,34 @@
         0,
         0,
         0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "disbursedMonthly": [
+        0,
+        0,
+        0,
+        0,
+        278.99,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "repaidMonthly": [
+        96.89,
+        40,
+        0,
+        55,
+        15,
+        25.75,
+        25,
+        58,
         0,
         0,
         0,
@@ -370,16 +804,72 @@
       0,
       0,
       0
+    ],
+    "vbsCampsMonthly": [
+      0,
+      3,
+      8,
+      3,
+      8,
+      3,
+      3,
+      5,
+      1,
+      0,
+      0,
+      0
+    ],
+    "personasMonthly": [
+      232,
+      609,
+      609,
+      915,
+      974,
+      995,
+      950,
+      1605,
+      516,
+      0,
+      0,
+      0
     ]
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 753,
-      "beneficiaries": 2782,
-      "girls": 413,
-      "boys": 422,
-      "newFamilies": 128,
-      "newUB": 430
+      "accounts": 754,
+      "beneficiaries": 2786,
+      "girls": 414,
+      "boys": 423,
+      "newFamilies": 129,
+      "newUB": 434,
+      "newFamiliesMonthly": [
+        2,
+        9,
+        14,
+        12,
+        23,
+        17,
+        19,
+        19,
+        14,
+        0,
+        0,
+        0
+      ],
+      "newUBMonthly": [
+        3,
+        34,
+        44,
+        48,
+        60,
+        70,
+        61,
+        63,
+        51,
+        0,
+        0,
+        0
+      ]
     },
     "quito": {
       "accounts": 417,
@@ -387,15 +877,71 @@
       "girls": 248,
       "boys": 258,
       "newFamilies": 80,
-      "newUB": 257
+      "newUB": 257,
+      "newFamiliesMonthly": [
+        0,
+        3,
+        10,
+        12,
+        19,
+        9,
+        12,
+        9,
+        6,
+        0,
+        0,
+        0
+      ],
+      "newUBMonthly": [
+        0,
+        7,
+        33,
+        48,
+        44,
+        34,
+        43,
+        26,
+        22,
+        0,
+        0,
+        0
+      ]
     },
     "imbabura": {
-      "accounts": 316,
-      "beneficiaries": 1338,
-      "girls": 160,
-      "boys": 161,
-      "newFamilies": 48,
-      "newUB": 173
+      "accounts": 317,
+      "beneficiaries": 1342,
+      "girls": 161,
+      "boys": 162,
+      "newFamilies": 49,
+      "newUB": 177,
+      "newFamiliesMonthly": [
+        2,
+        6,
+        4,
+        0,
+        4,
+        8,
+        7,
+        10,
+        8,
+        0,
+        0,
+        0
+      ],
+      "newUBMonthly": [
+        3,
+        27,
+        11,
+        0,
+        16,
+        36,
+        18,
+        37,
+        29,
+        0,
+        0,
+        0
+      ]
     }
   },
   "christmas": {
@@ -436,16 +982,58 @@
   },
   "level1": {
     "individualsServed": 705,
+    "servedMonthly": [
+      37,
+      128,
+      157,
+      104,
+      167,
+      157,
+      125,
+      388,
+      77,
+      0,
+      0,
+      0
+    ],
     "totalCost": 13002.29
   },
   "level2": {
     "individualsServed": 658,
-    "totalCost": 261273.77
+    "servedMonthly": [
+      109,
+      93,
+      176,
+      149,
+      122,
+      172,
+      86,
+      352,
+      64,
+      0,
+      0,
+      0
+    ],
+    "totalCost": 26850.89
   },
   "level3": {
     "individualsServed": 313,
+    "servedMonthly": [
+      13,
+      78,
+      63,
+      145,
+      148,
+      147,
+      144,
+      142,
+      74,
+      0,
+      0,
+      0
+    ],
     "totalCost": null
   },
-  "lastUpdated": "2026-09-18T15:00:27.152Z",
+  "lastUpdated": "2026-09-18T17:12:24.345Z",
   "syncWarnings": []
 }

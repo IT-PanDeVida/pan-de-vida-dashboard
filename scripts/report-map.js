@@ -198,15 +198,18 @@ function extractOverview(r) {
   return null; // filled in by transformAll
 }
 
-function extractHotMeals(r) {
+function extractHotMeals(r, m = {}) {
+  const ms = m.monthlySeries ?? {};
   return {
     plates: total(r.hot_meals),
     families: total(r.hot_meals_families, 1), // aggregate[1] = Record Count = unique families served
     monthly: monthlyByDate(r.hot_meals),
+    familiesMonthly: ms.hotMeals?.ub ?? null, // distinct contacts served each month (months overlap)
   };
 }
 
-function extractGroceries(r) {
+function extractGroceries(r, m = {}) {
+  const ms = m.monthlySeries ?? {};
   // VIVERES AVG COST report (groceries_avg_cost) contains all grocery metrics:
   //   aggregate[0] = Sum of Quantity  (bags delivered)
   //   aggregate[1] = Sum of Total Cost ($)
@@ -224,10 +227,13 @@ function extractGroceries(r) {
     avgCost,
     totalCost,
     monthly: monthlyByDate(r.groceries),
+    ubMonthly: ms.groceries?.ub ?? null,     // distinct contacts per month (months overlap)
+    costMonthly: ms.groceries?.cost ?? null, // $ Total_Cost__c per month
   };
 }
 
-function extractClothing(r) {
+function extractClothing(r, m = {}) {
+  const ms = m.monthlySeries ?? {};
   // Note: monthly[0] (January) = 0 is genuine — verified Aug 2026 via SOQL that
   // Salesforce has no clothing service deliveries dated January this year. If
   // January distributions happened, they were never recorded (data-entry gap).
@@ -235,17 +241,29 @@ function extractClothing(r) {
     donations: total(r.clothing),
     ub: total(r.clothing_bu, 1), // aggregate[1] = Record Count = unique beneficiaries (50)
     monthly: monthlyByDate(r.clothing),
+    ubMonthly: ms.clothing?.ub ?? null, // distinct contacts per month (months overlap)
   };
 }
 
 function extractHealth(r, m = {}) {
   const clinicConsultations = total(r.health_clinic_atenciones);
   const clinicUB = total(r.health_clinic_bu, 1); // aggregate[1] = Record Count = unique beneficiaries (86)
-  const clinicVozManos = total(r.health_clinic_monto, 1);  // aggregate[1] = formula "unico" = $3,571.50 (Voz y Manos)
+  // Voz y Manos = Sum of Cost per Unit over the clinic services. The report
+  // ("Monto pagado por Clinica la Y", aggregate[1]) carries a CUSTOM March-only date
+  // filter (verified Sep 2026: it showed $3,323.50 = March alone, vs $15,263.30 for
+  // the year), so the live SOQL monthly series is the source and the report only
+  // the fallback.
+  const ms = m.monthlySeries ?? {};
+  const sumSeries = (arr) => Math.round(arr.reduce((a, b) => a + (b ?? 0), 0) * 100) / 100;
+  const clinicVozManos = ms.clinic?.vozManos
+    ? sumSeries(ms.clinic.vozManos)
+    : total(r.health_clinic_monto, 1);
   const clinicPDV = total(r.health_clinic_pdv_cost);  // aggregate[0] = Sum of Cost PDV = $62
 
   const otherAids = total(r.health_other);
-  const otherUB = total(r.health_other, 2); // aggregate[2] = Record Count = unique beneficiaries (77)
+  // aggregate[2] of the report is its Record Count (delivery ROWS, not people), so
+  // the distinct-contact count comes from live SOQL; the report is the fallback.
+  const otherUB = m.monthlySeries?.healthOtherUBYear ?? total(r.health_other, 2);
   const otherInvested = total(r.health_other, 1); // aggregate[1] = total cost
 
   // Program-wide totals come from live SOQL (fetchSectionMetrics): total services =
@@ -265,12 +283,20 @@ function extractHealth(r, m = {}) {
       ub: clinicUB,
       paidVozManos: clinicVozManos,
       paidPDV: clinicPDV,
+      consultationsMonthly: ms.clinic?.qty ?? null,
+      ubMonthly: ms.clinic?.ub ?? null,
+      paidVozManosMonthly: ms.clinic?.vozManos ?? null,
+      paidPDVMonthly: ms.clinic?.pdv ?? null,
     },
     other: {
       aids: otherAids,
       ub: otherUB,
       invested: otherInvested,
+      aidsMonthly: ms.healthOther?.qty ?? null,
+      ubMonthly: ms.healthOther?.ub ?? null,
+      investedMonthly: ms.healthOther?.cost ?? null,
     },
+    ubMonthly: ms.healthUB ?? null, // distinct people per month, program-wide (months overlap)
     monthly: m.healthMonthly ?? sumMonthly(
       monthlyByDate(r.health_clinic_atenciones),
       monthlyByDate(r.health_other),
@@ -279,11 +305,22 @@ function extractHealth(r, m = {}) {
 }
 
 function extractEducation(r) {
+  // The "AVG Cost" reports aggregate as [0] Sum of Quantity, [1] Sum of Total Cost,
+  // [2] Average Total Cost per record, [3] RowCount. Unit cost = total cost ÷ units
+  // (same construction as groceries.avgCost), so unitCost × units = total cost on
+  // the cards. aggregate[0] was being read here before, which published the unit
+  // COUNT as the unit cost.
+  const unitCost = (report) => {
+    const qty = total(report, 0);
+    return qty > 0 ? Math.round((total(report, 1) / qty) * 100) / 100 : 0;
+  };
   const kits = total(r.education_kits);
-  const kitCost = total(r.education_kits_cost);
+  const kitCost = unitCost(r.education_kits_cost);
   const backpacks = total(r.education_backpacks);
-  const backpackCost = total(r.education_backpacks_cost);
+  const backpackCost = unitCost(r.education_backpacks_cost);
   const vbsCamps = total(r.education_vbs, 3); // aggregate[3] = Record Count = unique delivery dates = camps held
+  const kitsMonthly = monthlyByDate(r.education_kits);
+  const backpacksMonthly = monthlyByDate(r.education_backpacks);
 
   return {
     schoolKits: kits,
@@ -291,10 +328,9 @@ function extractEducation(r) {
     backpacks,
     backpackCost,
     vbsCamps,
-    monthly: sumMonthly(
-      monthlyByDate(r.education_kits),
-      monthlyByDate(r.education_backpacks),
-    ),
+    kitsMonthly,
+    backpacksMonthly,
+    monthly: sumMonthly(kitsMonthly, backpacksMonthly),
   };
 }
 
@@ -305,10 +341,12 @@ function extractShelter(r, m = {}) {
   // remain as fallbacks:
   //   aggregate[0] = Sum of Quantity (total items/services)
   //   aggregate[1] = Unique Count (unique beneficiaries / families served)
-  const cat = (key, report) => m.shelterCategories?.[key] ?? {
-    services: total(report),
-    ub: total(report, 1),
-  };
+  const sm = m.monthlySeries?.shelter;
+  const cat = (key, report) => ({
+    ...(m.shelterCategories?.[key] ?? { services: total(report), ub: total(report, 1) }),
+    monthly: sm?.[key]?.qty ?? null,
+    ubMonthly: sm?.[key]?.ub ?? null, // distinct contacts per month (months overlap)
+  });
   const furniture = cat("furniture", r.shelter_furniture);
   const appliances = cat("appliances", r.shelter_appliances);
   const household = cat("household", r.shelter_household);
@@ -333,6 +371,10 @@ function extractShelter(r, m = {}) {
       monthlyByDate(r.shelter_household),
       monthlyByDate(r.shelter_electronics),
     ),
+    // Sum of the category series — same construction as the `ub` headline above
+    ubMonthly: sm
+      ? sumMonthly(sm.furniture?.ub, sm.appliances?.ub, sm.household?.ub, sm.electronics?.ub)
+      : null,
   };
 }
 
@@ -377,6 +419,11 @@ function extractLifeFarms(r, m = {}) {
       monthlyByDate(r.life_farms_urban)
     ),
     urbanMonthly: fm.urban ?? monthlyByDate(r.life_farms_urban),
+    // Per-type series for the goal cards (new farms set up per month this year)
+    idealMonthly: fm.ideal ?? null,
+    fullMonthly: fm.full ?? null,
+    basicMonthly: fm.basic ?? null,
+    multiplicationMonthly: fm.multiplication ?? null,
   };
 }
 
@@ -398,6 +445,7 @@ function buildMeps(m) {
     aborted: s["abortado"] ?? 0,
     marketReady: m.mepMarketReady ?? 0,
     participants: m.level3Served ?? null, // distinct people served by the program this year
+    participantsMonthly: m.monthlySeries?.level3Served ?? null, // distinct people per month (months overlap)
     fund: {
       year: fund.year ?? null, // disbursed/repaid are YTD flows; total* are all-time program totals
       disbursed,
@@ -412,6 +460,8 @@ function buildMeps(m) {
         ? Math.round(((totalDisbursed - (fund.outstanding ?? 0)) / totalDisbursed) * 100)
         : null,
       loansMonthly: fund.loansMonthly ?? new Array(12).fill(0), // loans made per month this year
+      disbursedMonthly: m.monthlySeries?.fund?.disbursed ?? null, // $ per month this year
+      repaidMonthly: m.monthlySeries?.fund?.repaid ?? null,
     },
     locations: m.mepLocations ?? [], // [{ name, count }] — null = no location recorded, "__OTHERS__" = smaller communities
     monthly: m.mepMonthly ?? new Array(12).fill(0),
@@ -459,6 +509,10 @@ function extractEvangelism(r, m = {}) {
     vbsMonthly: ev.vbsMonthly ?? new Array(12).fill(0),        // attendances per month
     pofMonthly: ev.pofMonthly ?? new Array(12).fill(0),
     monthly: ev.biblesMonthly ?? new Array(12).fill(0),        // kept for backward compatibility
+    vbsCampsMonthly: m.monthlySeries?.vbsCamps ?? null,        // camps held (distinct dates) per month
+    // People in households served THAT month — months overlap, so the bars do
+    // not add up to personasAlcanzadas (the UI carries a note saying so).
+    personasMonthly: m.monthlySeries?.personas ?? null,
   };
 }
 
@@ -484,6 +538,7 @@ function extractBeneficiaries(r, m = {}) {
   // ~94 people — and the report-based girls/boys only covered two provinces.
   // The reports remain as fallbacks if the SOQL metrics fail.
   const sb = m.beneficiaries;
+  const nb = m.monthlySeries?.newBene; // per-month new families / individuals by region
 
   // Girls and boys aged 0–13, extracted from per-contact detail rows
   // (Contact.Gender__c + Contact.Current_Age__c columns in the report)
@@ -501,6 +556,8 @@ function extractBeneficiaries(r, m = {}) {
       boys: sb?.combined?.boys ?? (childrenQ.boys + childrenIMB.boys),
       newFamilies: newFamiliesUIO + newFamiliesIMB2,
       newUB: newUBUIO + newUBIMB2,
+      newFamiliesMonthly: nb?.combined?.families ?? null,
+      newUBMonthly: nb?.combined?.ub ?? null,
     },
     quito: {
       accounts: sb?.quito?.fam ?? total(r.beneficiaries_quito, 2),
@@ -509,6 +566,8 @@ function extractBeneficiaries(r, m = {}) {
       boys: sb?.quito?.boys ?? childrenQ.boys,
       newFamilies: newFamiliesUIO,
       newUB: newUBUIO,
+      newFamiliesMonthly: nb?.quito?.families ?? null,
+      newUBMonthly: nb?.quito?.ub ?? null,
     },
     imbabura: {
       accounts: sb?.imbabura?.fam ?? total(r.beneficiaries_imbabura, 2),
@@ -517,6 +576,8 @@ function extractBeneficiaries(r, m = {}) {
       boys: sb?.imbabura?.boys ?? childrenIMB.boys,
       newFamilies: newFamiliesIMB2,
       newUB: newUBIMB2,
+      newFamiliesMonthly: nb?.imbabura?.families ?? null,
+      newUBMonthly: nb?.imbabura?.ub ?? null,
     },
   };
 }
@@ -548,11 +609,12 @@ function extractEmergency(r) {
 //   { level1Served, level2Served, level3Served, totalReached,            (fetchLevelMetrics)
 //     mepStatus, mepMarketReady, mepFund, mepLocations, mepMonthly,      (fetchMepMetrics)
 //     healthServices, healthUB, healthMonthly, shelterMonthly,           (fetchSectionMetrics)
-//     evangelism, farmsMonthly, beneficiaries }
+//     evangelism, farmsMonthly, beneficiaries,
+//     monthlySeries }   per-card 12-month arrays (fetchMonthlySeries); null = failed
 export function transformAll(r, metrics = {}) {
-  const hotMeals = extractHotMeals(r);
-  const groceries = extractGroceries(r);
-  const clothing = extractClothing(r);
+  const hotMeals = extractHotMeals(r, metrics);
+  const groceries = extractGroceries(r, metrics);
+  const clothing = extractClothing(r, metrics);
   const health = extractHealth(r, metrics);
   const education = extractEducation(r);
   const shelter = extractShelter(r, metrics);
@@ -583,6 +645,11 @@ export function transformAll(r, metrics = {}) {
     totalAccounts: bene?.combined?.accounts ?? 0,
     newFamilies: newFamiliesUIO + newFamiliesIMB2,
     totalDeliveries,
+    // Same components as totalDeliveries, month by month
+    deliveriesMonthly: sumMonthly(
+      hotMeals?.monthly, groceries?.monthly, clothing?.monthly,
+      health?.monthly, education?.monthly, shelter?.monthly,
+    ),
     // Grand total = distinct people in households served this year (family reach,
     // deduplicated). Computed live via SOQL; the active-life-farms count is shown
     // beside it on the overview but NOT added in (different unit: farms, not people).
@@ -606,14 +673,17 @@ export function transformAll(r, metrics = {}) {
 
   const level1 = {
     individualsServed: metrics.level1Served ?? null, // Hunger + Emergency (deduped)
+    servedMonthly: metrics.monthlySeries?.level1Served ?? null, // distinct people per month (months overlap)
     totalCost: level1Cost > 0 ? level1Cost : null,
   };
   const level2 = {
     individualsServed: metrics.level2Served ?? null, // Health + Education + Shelter (deduped)
+    servedMonthly: metrics.monthlySeries?.level2Served ?? null,
     totalCost: level2Cost > 0 ? level2Cost : null,
   };
   const level3 = {
     individualsServed: metrics.level3Served ?? null, // Microbusiness/MEP (deduped)
+    servedMonthly: metrics.monthlySeries?.level3Served ?? null,
     totalCost: null, // TODO: add cost components when life farms / MEPs report cost
   };
 

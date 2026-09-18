@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext, useRef, createContext } from "react";
 
 // ─────────────────────────────────────────────────────────────
 // PAN DE VIDA FOUNDATION — DASHBOARD 2026
@@ -158,6 +158,19 @@ const i18n = {
     goalTracked: "tracked live",
     sharkTankPlaceholder: "Data coming soon — this program's metrics are being integrated.",
     viewDetail: "View detail",
+    monthlyShort: "Monthly",
+    monthlyBreakdown: "Monthly breakdown",
+    yearTotal: "Year total",
+    close: "Close",
+    noMonthlyData: "No records for this year yet.",
+    uniqueMonthlyNote: "Each bar counts the unique people served that month. The same person can be served in several months, so the bars do not add up to the annual total.",
+    personasMonthlyNote: "People living in households that received at least one delivery that month. Months overlap, so the bars do not add up to the annual total.",
+    newFamiliesMonthlyNote: "By the month the family's account was created in Salesforce.",
+    fundFlowNote: "Bars show this year's flows; the card shows the all-time program total.",
+    capitalDisbursedThisYear: "Capital disbursed — this year",
+    repaidThisYear: "Repayments — this year",
+    farmsMonthlyNote: "New farms set up per month this year (the card shows the running total).",
+    deliveriesMonthlyNote: "Hot meals + food kits + clothing + health + education + shelter.",
     byLocation: "By Location",
     quito: "Quito", otavalo: "Otavalo", mantaRiobamba: "Manta & Riobamba",
     biblesDelivered: "Bibles distributed",
@@ -289,6 +302,19 @@ const i18n = {
     goalTracked: "con seguimiento en vivo",
     sharkTankPlaceholder: "Datos próximamente — las métricas de este programa están siendo integradas.",
     viewDetail: "Ver detalle",
+    monthlyShort: "Mensual",
+    monthlyBreakdown: "Desglose mensual",
+    yearTotal: "Total del año",
+    close: "Cerrar",
+    noMonthlyData: "Aún no hay registros este año.",
+    uniqueMonthlyNote: "Cada barra cuenta las personas únicas atendidas ese mes. Una misma persona puede ser atendida en varios meses, por lo que las barras no suman el total anual.",
+    personasMonthlyNote: "Personas en hogares que recibieron al menos una entrega ese mes. Los meses se superponen, por lo que las barras no suman el total anual.",
+    newFamiliesMonthlyNote: "Según el mes en que se creó la cuenta de la familia en Salesforce.",
+    fundFlowNote: "Las barras muestran los flujos de este año; la tarjeta muestra el total histórico del programa.",
+    capitalDisbursedThisYear: "Capital desembolsado — este año",
+    repaidThisYear: "Pagos recibidos — este año",
+    farmsMonthlyNote: "Huertos nuevos por mes este año (la tarjeta muestra el total acumulado).",
+    deliveriesMonthlyNote: "Comidas + víveres + ropa + salud + educación + vivienda.",
     byLocation: "Por Ubicación",
     quito: "Quito", otavalo: "Otavalo", mantaRiobamba: "Manta y Riobamba",
     biblesDelivered: "Biblias distribuidas",
@@ -383,6 +409,7 @@ const Icon = {
   tent:          () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><path d="M1 17L10 3l9 14H1z"/><path d="M8 17v-5h4v5"/></svg>,
   child:         () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><circle cx="10" cy="6" r="3"/><path d="M5 17c0-2.8 2.2-5 5-5s5 2.2 5 5"/></svg>,
   chart:         () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><polyline points="3,13 7,8 11,11 17,5"/></svg>,
+  bars:          () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="14" height="14"><path d="M4 16v-5M10 16V4M16 16V8"/></svg>,
   check:         () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><polyline points="4,10 8,14 16,6"/></svg>,
   star:          () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><polygon points="10,2 12.5,8 19,8.5 14,13 15.9,19.5 10,16 4.1,19.5 6,13 1,8.5 7.5,8"/></svg>,
   money:         () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16"><circle cx="10" cy="10" r="8"/><path d="M10 6v8M8 8.5c0-1.1.9-2 2-2s2 .9 2 2-1 1.5-2 2-2 .9-2 2 .9 2 2 2 2-.9 2-2"/></svg>,
@@ -399,15 +426,49 @@ const Icon = {
 
 // ─── PRIMITIVES ───────────────────────────────────────────────
 
-function Card({ children, style, className = "" }) {
+function Card({ children, style, className = "", ...rest }) {
   return (
-    <div className={`pdv-card ${className}`} style={style}>
+    <div className={`pdv-card ${className}`} style={style} {...rest}>
       {children}
     </div>
   );
 }
 
-function StatCard({ label, value, prefix = "", color = C.blue, iconEl, delay = 0, highlight }) {
+// ─── CLICK-TO-CHART ───────────────────────────────────────────
+// Any card whose metric has a 12-month series opens the monthly popup
+// (MetricModal, rendered once at the Dashboard root). The context carries the
+// opener so pages don't have to thread a callback through every card.
+const MetricModalCtx = createContext(null);
+
+// Returns the props that turn an element into the popup's trigger, or null when
+// the metric has no monthly series (snapshot cards, fallback data, or a series
+// that failed in the sync) — the card then simply isn't clickable.
+//   metric = { title, monthly, color, total, note, format: "count" | "money" }
+function useMetricTrigger(metric) {
+  const open = useContext(MetricModalCtx);
+  if (!open || !Array.isArray(metric.monthly) || metric.monthly.length === 0) return null;
+  const fire = () => open(metric);
+  return {
+    role: "button",
+    tabIndex: 0,
+    "aria-haspopup": "dialog",
+    onClick: fire,
+    onKeyDown: (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fire(); }
+    },
+  };
+}
+
+function MetricHint() {
+  return <span className="pdv-metric-hint" aria-hidden="true"><Icon.bars /></span>;
+}
+
+function StatCard({ label, value, prefix = "", color = C.blue, iconEl, delay = 0, highlight, monthly, format, note, modalTitle, modalTotal }) {
+  const display = `${prefix}${typeof value === "number" ? value.toLocaleString() : value}`;
+  const trigger = useMetricTrigger({
+    title: modalTitle ?? label, monthly, color, note, format,
+    total: modalTotal ?? display,
+  });
   const [v, setV] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setV(true), delay);
@@ -415,17 +476,15 @@ function StatCard({ label, value, prefix = "", color = C.blue, iconEl, delay = 0
   }, [delay]);
 
   return (
-    <Card className={highlight ? "pdv-highlight" : ""} style={{
+    <Card className={`${highlight ? "pdv-highlight" : ""} ${trigger ? "pdv-card--metric" : ""}`} style={{
       opacity: v ? 1 : 0,
       transform: v ? "translateY(0)" : "translateY(10px)",
-      transition: "opacity 0.3s cubic-bezier(0.2,0,0,1), transform 0.3s cubic-bezier(0.2,0,0,1)",
-    }}>
+      transition: "opacity 0.3s cubic-bezier(0.2,0,0,1), transform 0.3s cubic-bezier(0.2,0,0,1), box-shadow 120ms ease, outline-color 120ms ease",
+    }} {...trigger}>
       <div className="pdv-stat-card">
         <div>
           <div className="pdv-stat-label">{label}</div>
-          <div className="pdv-stat-value" style={{ color }}>
-            {prefix}{typeof value === "number" ? value.toLocaleString() : value}
-          </div>
+          <div className="pdv-stat-value" style={{ color }}>{display}</div>
         </div>
         {iconEl && (
           <div className="pdv-stat-icon" style={{ background: bgOf(color), color }}>
@@ -433,11 +492,13 @@ function StatCard({ label, value, prefix = "", color = C.blue, iconEl, delay = 0
           </div>
         )}
       </div>
+      {trigger && <MetricHint />}
     </Card>
   );
 }
 
-function ProgressBar({ label, goal, done, color = C.blue, description, highlight }) {
+function ProgressBar({ label, goal, done, color = C.blue, description, highlight, monthly, note, modalTotal }) {
+  const trigger = useMetricTrigger({ title: label, monthly, color, note, total: modalTotal });
   const [a, setA] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setA(true), 200);
@@ -447,7 +508,7 @@ function ProgressBar({ label, goal, done, color = C.blue, description, highlight
   const over = done >= goal;
 
   return (
-    <Card className={highlight ? "pdv-highlight" : ""} style={{ padding: "20px 24px" }}>
+    <Card className={`${highlight ? "pdv-highlight" : ""} ${trigger ? "pdv-card--metric" : ""}`} style={{ padding: "20px 24px" }} {...trigger}>
       <div className="pdv-progress-header">
         <div>
           <div className="pdv-progress-label">{label}</div>
@@ -468,11 +529,25 @@ function ProgressBar({ label, goal, done, color = C.blue, description, highlight
         />
       </div>
       <div className="pdv-progress-pct" style={{ color: over ? C.green : C.text4 }}>{pct}%</div>
+      {trigger && <MetricHint />}
     </Card>
   );
 }
 
-function BarChart({ data, color = C.blue }) {
+// Bar labels stay compact so 12 columns fit on a phone; the full value is in the
+// column's tooltip / aria-label.
+function formatBarValue(v, format) {
+  if (format !== "money") return v.toLocaleString();
+  if (v >= 1000) return `$${(v / 1000).toFixed(1)}k`;
+  return `$${Math.round(v)}`;
+}
+function formatFullValue(v, format) {
+  return format === "money"
+    ? `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    : v.toLocaleString();
+}
+
+function BarChart({ data, color = C.blue, format }) {
   const [a, setA] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setA(true), 300);
@@ -483,8 +558,8 @@ function BarChart({ data, color = C.blue }) {
   return (
     <div className="pdv-barchart">
       {data.map((d, i) => (
-        <div key={i} className="pdv-bar-col">
-          {d.value > 0 && <span className="pdv-bar-val">{d.value}</span>}
+        <div key={i} className="pdv-bar-col" title={`${d.label}: ${formatFullValue(d.value, format)}`}>
+          {d.value > 0 && <span className="pdv-bar-val">{formatBarValue(d.value, format)}</span>}
           <div
             className="pdv-bar"
             style={{
@@ -500,11 +575,13 @@ function BarChart({ data, color = C.blue }) {
   );
 }
 
+const monthLabels = (t) => [t.jan, t.feb, t.mar, t.apr, t.may, t.jun, t.jul, t.aug, t.sep, t.oct, t.nov, t.dec];
+
 function MonthlyDistribution({ t, monthly, color = C.blue, title, note }) {
   const m = Array.isArray(monthly) ? monthly : [];
   // All 12 months are rendered — the chart previously stopped at June, which hid
   // July+ data and made the bars disagree with the year-to-date headline totals.
-  const labels = [t.jan, t.feb, t.mar, t.apr, t.may, t.jun, t.jul, t.aug, t.sep, t.oct, t.nov, t.dec];
+  const labels = monthLabels(t);
   return (
     <Card>
       <SectionTitle>{title ?? t.monthlyDistribution}</SectionTitle>
@@ -514,6 +591,64 @@ function MonthlyDistribution({ t, monthly, color = C.blue, title, note }) {
         data={labels.map((label, i) => ({ label, value: m[i] ?? 0 }))}
       />
     </Card>
+  );
+}
+
+// The monthly popup. Rendered once at the Dashboard root (outside .pdv-main, so
+// no card transform / z-index can trap it). Closes with X, Esc or a backdrop
+// click; focus goes to the close button and returns to the card on close.
+function MetricModal({ metric, t, year, onClose }) {
+  const closeRef = useRef(null);
+  useEffect(() => {
+    const opener = document.activeElement;
+    closeRef.current?.focus();
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+      // The close button is the only focusable element — keep focus on it.
+      if (e.key === "Tab") { e.preventDefault(); closeRef.current?.focus(); }
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      if (opener instanceof HTMLElement) opener.focus();
+    };
+  }, [onClose]);
+
+  const m = metric.monthly;
+  const labels = monthLabels(t);
+  const empty = m.every((v) => !v);
+  return (
+    <div className="pdv-modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="pdv-modal" role="dialog" aria-modal="true" aria-labelledby="pdv-modal-title">
+        <div className="pdv-modal-hdr">
+          <div>
+            <h2 id="pdv-modal-title" className="pdv-modal-title">{metric.title}</h2>
+            <div className="pdv-modal-sub">{t.monthlyBreakdown}{year ? ` · ${year}` : ""}</div>
+          </div>
+          <button ref={closeRef} className="pdv-modal-close" onClick={onClose} aria-label={t.close}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" width="14" height="14">
+              <path d="M3 3l10 10M13 3L3 13"/>
+            </svg>
+          </button>
+        </div>
+        {metric.total != null && (
+          <div className="pdv-modal-total">
+            <span className="pdv-modal-total-lbl">{t.yearTotal}</span>
+            <span className="pdv-modal-total-val" style={{ color: metric.color }}>{metric.total}</span>
+          </div>
+        )}
+        <BarChart
+          color={metric.color}
+          format={metric.format}
+          data={labels.map((label, i) => ({ label, value: m[i] ?? 0 }))}
+        />
+        {empty && <p className="pdv-modal-note">{t.noMonthlyData}</p>}
+        {metric.note && <p className="pdv-modal-note">{metric.note}</p>}
+      </div>
+    </div>
   );
 }
 
@@ -649,6 +784,18 @@ function NavItem({ iconEl, label, sublabel, active, onClick }) {
   );
 }
 
+// One figure inside a blue summary card (health / shelter headers); opens the
+// monthly popup when its series exists.
+function SummaryStat({ label, value, monthly, note }) {
+  const trigger = useMetricTrigger({ title: label, monthly, color: C.blue, note, total: (value ?? 0).toLocaleString() });
+  return (
+    <div className={trigger ? "pdv-summary-metric" : undefined} {...trigger}>
+      <div className="pdv-summary-lbl">{label}{trigger && <> <Icon.bars /></>}</div>
+      <div className="pdv-summary-val">{value}</div>
+    </div>
+  );
+}
+
 // ─── PAGES ────────────────────────────────────────────────────
 
 // Map: label key → { page, tab? }
@@ -673,8 +820,11 @@ const LEVEL_NAV = {
   "3": { page: "level3" },
 };
 
-function ClickableCard({ children, onClick, style, color, label = "Ver detalle" }) {
+// `metric` (optional) adds a chart button to the footer that opens the monthly
+// popup; the card body keeps navigating.
+function ClickableCard({ children, onClick, style, color, label = "Ver detalle", metric, chartLabel }) {
   const [hov, setHov] = useState(false);
+  const chart = useMetricTrigger(metric ?? {});
   return (
     <div
       className="pdv-card pdv-card--clickable"
@@ -700,7 +850,7 @@ function ClickableCard({ children, onClick, style, color, label = "Ver detalle" 
         borderTop: `1px solid ${hov ? (color ? color + "33" : "rgba(0,0,0,0.08)") : "rgba(0,0,0,0.06)"}`,
         padding: "10px 20px",
         display: "flex",
-        justifyContent: "flex-end",
+        justifyContent: chart ? "space-between" : "flex-end",
         alignItems: "center",
         gap: 5,
         fontSize: 13,
@@ -711,10 +861,72 @@ function ClickableCard({ children, onClick, style, color, label = "Ver detalle" 
         borderBottomRightRadius: "var(--radius-xl)",
         background: hov ? (color ? color + "08" : "rgba(0,0,0,0.02)") : "transparent",
       }}>
-        {label}
-        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" width="11" height="11">
-          <path d="M2.5 6h7M6.5 3l3 3-3 3"/>
-        </svg>
+        {chart && (
+          <button
+            type="button"
+            className="pdv-chart-btn"
+            style={{ color: color || C.text3 }}
+            aria-label={`${chartLabel}: ${metric.title}`}
+            title={chartLabel}
+            aria-haspopup="dialog"
+            onClick={(e) => { e.stopPropagation(); chart.onClick(); }}
+          >
+            <Icon.bars />
+            {chartLabel}
+          </button>
+        )}
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          {label}
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8" width="11" height="11">
+            <path d="M2.5 6h7M6.5 3l3 3-3 3"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// One figure inside an Overview level card. Tiles with an ITEM_NAV entry jump to
+// their tab; tiles without one ("individuals served") open the monthly popup
+// when their series exists; anything else lets the click reach the level card.
+function LevelTile({ item, color, t, onNavigate }) {
+  const nav = ITEM_NAV[item.navKey];
+  const display = typeof item.val === "number" ? item.val.toLocaleString() : item.val;
+  const trigger = useMetricTrigger({
+    title: item.label, monthly: nav ? null : item.monthly, color,
+    total: display, note: t.uniqueMonthlyNote,
+  });
+  return (
+    <div
+      {...trigger}
+      onClick={(e) => {
+        if (nav) {
+          e.stopPropagation();
+          onNavigate(nav.page, nav.tab, item.navKey);
+        } else if (trigger) {
+          e.stopPropagation();
+          trigger.onClick();
+        }
+      }}
+      onKeyDown={trigger ? (e) => { e.stopPropagation(); trigger.onKeyDown(e); } : undefined}
+      style={{
+        cursor: "pointer",
+        padding: "10px 12px",
+        borderRadius: 10,
+        transition: "background 120ms ease",
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.04)"}
+      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+    >
+      <div style={{
+        fontSize: 12, fontWeight: 600, color: C.text4,
+        marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em",
+        lineHeight: 1.3, minHeight: 32,
+      }}>{item.label}{trigger && <> <Icon.bars /></>}</div>
+      <div style={{
+        fontSize: 30, fontWeight: 500, color: C.text1, letterSpacing: "-0.03em",
+      }}>
+        {display}
       </div>
     </div>
   );
@@ -740,14 +952,14 @@ function OverviewPage({ t, onNavigate, data }) {
       { label: t.hotMeals,                val: D.hotMeals?.plates      ?? 0, navKey: "hotMeals"          },
       { label: t.groceries,               val: D.groceries?.bags       ?? 0, navKey: "groceries"         },
       { label: t.clothingDonationsCount,  val: D.clothing?.donations   ?? 0, navKey: "clothing"          },
-      { label: t.individualsServed,       val: fmtCount(D.level1?.individualsServed), navKey: "individualsServedL1" },
+      { label: t.individualsServed,       val: fmtCount(D.level1?.individualsServed), navKey: "individualsServedL1", monthly: D.level1?.servedMonthly },
       { label: t.totalCost,               val: fmtMoney(D.level1?.totalCost),          navKey: "totalCost" },
     ]},
     { lvl: "2", name: t.level2Name, color: C.blue, items: [
       { label: t.health,             val: D.health?.totalServices ?? 0, navKey: "health"       },
       { label: t.education,          val: eduTotal,                     navKey: "education"    },
       { label: t.shelter,            val: D.shelter?.services     ?? 0, navKey: "shelter"      },
-      { label: t.individualsServed,  val: fmtCount(D.level2?.individualsServed), navKey: "individualsServedL2" },
+      { label: t.individualsServed,  val: fmtCount(D.level2?.individualsServed), navKey: "individualsServedL2", monthly: D.level2?.servedMonthly },
       { label: t.totalCost,          val: fmtMoney(D.level2?.totalCost),          navKey: "totalCostL2" },
     ]},
     { lvl: "3", name: t.level3Name, color: C.green, items: [
@@ -755,7 +967,7 @@ function OverviewPage({ t, onNavigate, data }) {
       { label: t.revolvingFund,      val: D.meps?.total           ?? 0, navKey: "revolvingFund"},
       { label: t.marketReady,        val: D.meps?.marketReady     ?? 0, navKey: "marketReady" },
       { label: t.sharkTank,          val: D.sharkTank?.winners    ?? 0, navKey: "sharkTank"    },
-      { label: t.individualsServed,  val: fmtCount(D.level3?.individualsServed), navKey: "individualsServedL3" },
+      { label: t.individualsServed,  val: fmtCount(D.level3?.individualsServed), navKey: "individualsServedL3", monthly: D.level3?.servedMonthly },
       { label: t.totalCost,          val: fmtMoney(D.level3?.totalCost),          navKey: "totalCostL3" },
     ]},
   ];
@@ -785,10 +997,14 @@ function OverviewPage({ t, onNavigate, data }) {
         {[
           { label: t.totalBeneficiaries, value: D.overview?.totalBeneficiaries ?? 0, color: C.blue,   icon: <Icon.people />,  nav: { page: "beneficiaries" }, navKey: "totalBeneficiaries" },
           { label: t.totalAccounts,      value: D.overview?.totalAccounts      ?? 0, color: C.teal,   icon: <Icon.folder />,  nav: { page: "beneficiaries" }, navKey: "totalAccounts" },
-          { label: t.newFamilies,        value: D.overview?.newFamilies         ?? 0, color: C.green,  icon: <Icon.home />,    nav: { page: "beneficiaries" }, navKey: "newFamilies" },
-          { label: t.totalDeliveries,    value: D.overview?.totalDeliveries     ?? 0, color: C.orange, icon: <Icon.box />,     nav: { page: "level1", tab: "hotmeals" }, navKey: "hotMeals" },
+          { label: t.newFamilies,        value: D.overview?.newFamilies         ?? 0, color: C.green,  icon: <Icon.home />,    nav: { page: "beneficiaries" }, navKey: "newFamilies",
+            monthly: D.beneficiaries?.combined?.newFamiliesMonthly, note: t.newFamiliesMonthlyNote },
+          { label: t.totalDeliveries,    value: D.overview?.totalDeliveries     ?? 0, color: C.orange, icon: <Icon.box />,     nav: { page: "level1", tab: "hotmeals" }, navKey: "hotMeals",
+            monthly: D.overview?.deliveriesMonthly, note: t.deliveriesMonthlyNote },
         ].map((s, i) => (
-          <ClickableCard key={i} color={s.color} label={t.viewDetail} onClick={() => onNavigate(s.nav.page, s.nav.tab, s.navKey)}>
+          <ClickableCard key={i} color={s.color} label={t.viewDetail} onClick={() => onNavigate(s.nav.page, s.nav.tab, s.navKey)}
+            chartLabel={t.monthlyShort}
+            metric={{ title: s.label, monthly: s.monthly, color: s.color, note: s.note, total: s.value.toLocaleString() }}>
             <div className="pdv-stat-card">
               <div>
                 <div className="pdv-stat-label">{s.label}</div>
@@ -820,35 +1036,7 @@ function OverviewPage({ t, onNavigate, data }) {
                 <LevelBadge level={sec.lvl} name={sec.name} color={sec.color} />
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: 22, rowGap: 22, marginTop: 14 }}>
                   {sec.items.map((item, j) => (
-                    <div
-                      key={j}
-                      onClick={(e) => {
-                        const nav = ITEM_NAV[item.navKey];
-                        if (nav) {
-                          e.stopPropagation();
-                          onNavigate(nav.page, nav.tab, item.navKey);
-                        }
-                      }}
-                      style={{
-                        cursor: "pointer",
-                        padding: "10px 12px",
-                        borderRadius: 10,
-                        transition: "background 120ms ease",
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.background = "rgba(0,0,0,0.04)"}
-                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                    >
-                      <div style={{
-                        fontSize: 12, fontWeight: 600, color: C.text4,
-                        marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em",
-                        lineHeight: 1.3, minHeight: 32,
-                      }}>{item.label}</div>
-                      <div style={{
-                        fontSize: 30, fontWeight: 500, color: C.text1, letterSpacing: "-0.03em",
-                      }}>
-                        {typeof item.val === "number" ? item.val.toLocaleString() : item.val}
-                      </div>
-                    </div>
+                    <LevelTile key={j} item={item} color={sec.color} t={t} onNavigate={onNavigate} />
                   ))}
                 </div>
               </ClickableCard>
@@ -862,12 +1050,14 @@ function OverviewPage({ t, onNavigate, data }) {
         <SectionTitle>{t.evangelism}</SectionTitle>
         <Grid cols={4}>
           {[
-            { label: t.biblesDelivered,    value: D.evangelism?.bibles             ?? 0, icon: <Icon.book />,   navKey: "bibles" },
-            { label: t.vbsCampsHeld,       value: D.evangelism?.vbsCamps           ?? 0, icon: <Icon.tent />,   navKey: "vbsCamps" },
-            { label: t.childrenVBS,        value: D.evangelism?.childrenVBS        ?? 0, icon: <Icon.child />,  navKey: "childrenVBS" },
-            { label: t.personasAlcanzadas, value: D.evangelism?.personasAlcanzadas ?? 0, icon: <Icon.people />, navKey: "personasAlcanzadas" },
+            { label: t.biblesDelivered,    value: D.evangelism?.bibles             ?? 0, icon: <Icon.book />,   navKey: "bibles",             monthly: D.evangelism?.biblesMonthly },
+            { label: t.vbsCampsHeld,       value: D.evangelism?.vbsCamps           ?? 0, icon: <Icon.tent />,   navKey: "vbsCamps",           monthly: D.evangelism?.vbsCampsMonthly },
+            { label: t.childrenVBS,        value: D.evangelism?.childrenVBS        ?? 0, icon: <Icon.child />,  navKey: "childrenVBS",        monthly: D.evangelism?.vbsMonthly },
+            { label: t.personasAlcanzadas, value: D.evangelism?.personasAlcanzadas ?? 0, icon: <Icon.people />, navKey: "personasAlcanzadas", monthly: D.evangelism?.personasMonthly, note: t.personasMonthlyNote },
           ].map((s, i) => (
-            <ClickableCard key={i} color={C.purple} label={t.viewDetail} onClick={() => onNavigate("evangelism", null, s.navKey)}>
+            <ClickableCard key={i} color={C.purple} label={t.viewDetail} onClick={() => onNavigate("evangelism", null, s.navKey)}
+              chartLabel={t.monthlyShort}
+              metric={{ title: s.label, monthly: s.monthly, color: C.purple, note: s.note, total: s.value.toLocaleString() }}>
               <div className="pdv-stat-card">
                 <div>
                   <div className="pdv-stat-label">{s.label}</div>
@@ -905,8 +1095,8 @@ function Level1Page({ t, initialTab = "hotmeals", data, highlightKey }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <TabDescription>{t.hotMealsTabDesc}</TabDescription>
           <Grid cols={2}>
-            <StatCard label={t.hotMealsDelivered} value={D.hotMeals?.plates   ?? 0} color={C.red}    iconEl={<Icon.bag />}    highlight={highlightKey === 'hotMeals'} delay={0}  />
-            <StatCard label={t.familiesHotMeals}  value={D.hotMeals?.families ?? 0} color={C.orange} iconEl={<Icon.people />} delay={60} />
+            <StatCard label={t.hotMealsDelivered} value={D.hotMeals?.plates   ?? 0} color={C.red}    iconEl={<Icon.bag />}    highlight={highlightKey === 'hotMeals'} delay={0} monthly={D.hotMeals?.monthly} />
+            <StatCard label={t.familiesHotMeals}  value={D.hotMeals?.families ?? 0} color={C.orange} iconEl={<Icon.people />} delay={60} monthly={D.hotMeals?.familiesMonthly} note={t.uniqueMonthlyNote} />
           </Grid>
           <div style={{ fontSize: 12, color: C.text4, marginTop: -10 }}>{t.hotMealsFamiliesNote}</div>
           <MonthlyDistribution t={t} monthly={D.hotMeals?.monthly} color={C.red} />
@@ -917,10 +1107,10 @@ function Level1Page({ t, initialTab = "hotmeals", data, highlightKey }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <TabDescription>{t.groceriesTabDesc}</TabDescription>
           <Grid cols={4}>
-            <StatCard label={t.groceryBags} value={D.groceries?.bags ?? 0}      color={C.yellow} iconEl={<Icon.cart />}   highlight={highlightKey === 'groceries'} delay={0}   />
-            <StatCard label={t.ubGrocery}   value={D.groceries?.ub   ?? 0}       color={C.orange} iconEl={<Icon.people />} delay={60}  />
+            <StatCard label={t.groceryBags} value={D.groceries?.bags ?? 0}      color={C.yellow} iconEl={<Icon.cart />}   highlight={highlightKey === 'groceries'} delay={0} monthly={D.groceries?.monthly} />
+            <StatCard label={t.ubGrocery}   value={D.groceries?.ub   ?? 0}       color={C.orange} iconEl={<Icon.people />} delay={60} monthly={D.groceries?.ubMonthly} note={t.uniqueMonthlyNote} />
             <StatCard label={t.avgCost}     value={(D.groceries?.avgCost   ?? 0).toFixed(2)} prefix="$" color={C.teal}  iconEl={<Icon.dollar />} delay={120} />
-            <StatCard label={t.totalCost}   value={(D.groceries?.totalCost ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} prefix="$" color={C.green} iconEl={<Icon.money />} highlight={highlightKey === 'totalCost'} delay={180} />
+            <StatCard label={t.totalCost}   value={(D.groceries?.totalCost ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} prefix="$" color={C.green} iconEl={<Icon.money />} highlight={highlightKey === 'totalCost'} delay={180} monthly={D.groceries?.costMonthly} format="money" />
           </Grid>
           <MonthlyDistribution t={t} monthly={D.groceries?.monthly} color={C.yellow} />
         </div>
@@ -930,8 +1120,8 @@ function Level1Page({ t, initialTab = "hotmeals", data, highlightKey }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <TabDescription>{t.clothingTabDesc}</TabDescription>
           <Grid cols={2}>
-            <StatCard label={t.clothingDonations} value={D.clothing?.donations ?? 0} color={C.purple} iconEl={<Icon.shirt />} highlight={highlightKey === 'clothing'} delay={0}  />
-            <StatCard label={t.ubClothing}        value={D.clothing?.ub        ?? 0} color={C.teal}   iconEl={<Icon.people />} delay={60} />
+            <StatCard label={t.clothingDonations} value={D.clothing?.donations ?? 0} color={C.purple} iconEl={<Icon.shirt />} highlight={highlightKey === 'clothing'} delay={0} monthly={D.clothing?.monthly} />
+            <StatCard label={t.ubClothing}        value={D.clothing?.ub        ?? 0} color={C.teal}   iconEl={<Icon.people />} delay={60} monthly={D.clothing?.ubMonthly} note={t.uniqueMonthlyNote} />
           </Grid>
           <MonthlyDistribution t={t} monthly={D.clothing?.monthly} color={C.purple} />
         </div>
@@ -970,30 +1160,24 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
           <TabDescription>{t.healthTabDesc}</TabDescription>
           <div className={`pdv-card pdv-summary-card ${highlightKey === 'health' || highlightKey === 'totalHealthUB' ? 'pdv-highlight' : ''}`}>
             <div className="pdv-summary-inner">
-              <div>
-                <div className="pdv-summary-lbl">{t.totalHealthServices}</div>
-                <div className="pdv-summary-val">{D.health?.totalServices ?? 0}</div>
-              </div>
-              <div>
-                <div className="pdv-summary-lbl">{t.totalHealthUB}</div>
-                <div className="pdv-summary-val">{D.health?.totalUB ?? 0}</div>
-              </div>
+              <SummaryStat label={t.totalHealthServices} value={D.health?.totalServices ?? 0} monthly={D.health?.monthly} />
+              <SummaryStat label={t.totalHealthUB} value={D.health?.totalUB ?? 0} monthly={D.health?.ubMonthly} note={t.uniqueMonthlyNote} />
             </div>
           </div>
 
           <SectionTitle>{t.clinicTitle}</SectionTitle>
           <Grid cols={4}>
-            <StatCard label={t.medicalAttention} value={D.health?.clinic?.consultations ?? 0}  color={C.blue}  iconEl={<Icon.doctor />} delay={0}   />
-            <StatCard label={t.ubMedical}        value={D.health?.clinic?.ub             ?? 0}  color={C.teal}  iconEl={<Icon.people />} delay={60}  />
-            <StatCard label={t.paidByVozManos}   value={(D.health?.clinic?.paidVozManos ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} prefix="$" color={C.green} iconEl={<Icon.dollar />} delay={120} />
-            <StatCard label={t.paidByPDV}        value={(D.health?.clinic?.paidPDV       ?? 0).toFixed(2)} prefix="$" color={C.blue}  iconEl={<Icon.money />}  delay={180} />
+            <StatCard label={t.medicalAttention} value={D.health?.clinic?.consultations ?? 0}  color={C.blue}  iconEl={<Icon.doctor />} delay={0} monthly={D.health?.clinic?.consultationsMonthly} />
+            <StatCard label={t.ubMedical}        value={D.health?.clinic?.ub             ?? 0}  color={C.teal}  iconEl={<Icon.people />} delay={60} monthly={D.health?.clinic?.ubMonthly} note={t.uniqueMonthlyNote} />
+            <StatCard label={t.paidByVozManos}   value={(D.health?.clinic?.paidVozManos ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} prefix="$" color={C.green} iconEl={<Icon.dollar />} delay={120} monthly={D.health?.clinic?.paidVozManosMonthly} format="money" />
+            <StatCard label={t.paidByPDV}        value={(D.health?.clinic?.paidPDV       ?? 0).toFixed(2)} prefix="$" color={C.blue}  iconEl={<Icon.money />}  delay={180} monthly={D.health?.clinic?.paidPDVMonthly} format="money" />
           </Grid>
 
           <SectionTitle style={{ marginTop: 4 }}>{t.otherMedicalAidsTitle}</SectionTitle>
           <Grid cols={3}>
-            <StatCard label={t.otherMedicalAids} value={D.health?.other?.aids     ?? 0}  color={C.orange} iconEl={<Icon.doctor />} delay={0}   />
-            <StatCard label={t.ubOtherMedical}   value={D.health?.other?.ub       ?? 0}  color={C.teal}   iconEl={<Icon.people />} delay={60}  />
-            <StatCard label={t.investedOther}     value={(D.health?.other?.invested ?? 0).toFixed(2)} prefix="$" color={C.green} iconEl={<Icon.dollar />} delay={120} />
+            <StatCard label={t.otherMedicalAids} value={D.health?.other?.aids     ?? 0}  color={C.orange} iconEl={<Icon.doctor />} delay={0} monthly={D.health?.other?.aidsMonthly} />
+            <StatCard label={t.ubOtherMedical}   value={D.health?.other?.ub       ?? 0}  color={C.teal}   iconEl={<Icon.people />} delay={60} monthly={D.health?.other?.ubMonthly} note={t.uniqueMonthlyNote} />
+            <StatCard label={t.investedOther}     value={(D.health?.other?.invested ?? 0).toFixed(2)} prefix="$" color={C.green} iconEl={<Icon.dollar />} delay={120} monthly={D.health?.other?.investedMonthly} format="money" />
           </Grid>
 
           <MonthlyDistribution t={t} monthly={D.health?.monthly} color={C.blue} />
@@ -1004,12 +1188,12 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
         <div className={highlightKey === 'education' ? 'pdv-highlight' : ''} style={{ display: "flex", flexDirection: "column", gap: 20, padding: highlightKey === 'education' ? 8 : 0, borderRadius: 24 }}>
           <TabDescription>{t.educationTabDesc}</TabDescription>
           <Grid cols={3}>
-            <StatCard label={t.schoolKits}                 value={D.education?.schoolKits   ?? 0}   color={C.red}    iconEl={<Icon.backpack />} delay={0}   />
+            <StatCard label={t.schoolKits}                 value={D.education?.schoolKits   ?? 0}   color={C.red}    iconEl={<Icon.backpack />} delay={0} monthly={D.education?.kitsMonthly} />
             <StatCard label={`${t.unitCost} (kit)`}        value={(D.education?.schoolKitCost ?? 0).toFixed(2)} prefix="$" color={C.yellow} iconEl={<Icon.dollar />} delay={60}  />
             <StatCard label={`${t.totalCostLabel} (kits)`} value={((D.education?.schoolKits ?? 0) * (D.education?.schoolKitCost ?? 0)).toFixed(2)} prefix="$" color={C.green}  iconEl={<Icon.money />}  delay={120} />
           </Grid>
           <Grid cols={3}>
-            <StatCard label={t.backpacks}                                          value={D.education?.backpacks    ?? 0}   color={C.blue}   iconEl={<Icon.backpack />} delay={180} />
+            <StatCard label={t.backpacks}                                          value={D.education?.backpacks    ?? 0}   color={C.blue}   iconEl={<Icon.backpack />} delay={180} monthly={D.education?.backpacksMonthly} />
             <StatCard label={`${t.unitCost} (${t.backpacks.toLowerCase()})`}       value={(D.education?.backpackCost ?? 0).toFixed(2)} prefix="$" color={C.yellow} iconEl={<Icon.dollar />} delay={240} />
             <StatCard label={`${t.totalCostLabel} (${t.backpacks.toLowerCase()})`} value={((D.education?.backpacks ?? 0) * (D.education?.backpackCost ?? 0)).toFixed(2)} prefix="$" color={C.green}  iconEl={<Icon.money />}  delay={300} />
           </Grid>
@@ -1022,32 +1206,26 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
           <TabDescription>{t.shelterTabDesc}</TabDescription>
           <div className={`pdv-card pdv-summary-card ${highlightKey === 'shelter' ? 'pdv-highlight' : ''}`}>
             <div className="pdv-summary-inner">
-              <div>
-                <div className="pdv-summary-lbl">{t.shelterServices}</div>
-                <div className="pdv-summary-val">{D.shelter?.services ?? 0}</div>
-              </div>
-              <div>
-                <div className="pdv-summary-lbl">{t.shelterUB}</div>
-                <div className="pdv-summary-val">{D.shelter?.ub ?? 0}</div>
-              </div>
+              <SummaryStat label={t.shelterServices} value={D.shelter?.services ?? 0} monthly={D.shelter?.monthly} />
+              <SummaryStat label={t.shelterUB} value={D.shelter?.ub ?? 0} monthly={D.shelter?.ubMonthly} note={t.uniqueMonthlyNote} />
             </div>
           </div>
 
           <Grid cols={2}>
-            <StatCard label={t.shelterFurniture}   value={D.shelter?.furniture?.services   ?? 0} color={C.blue}   iconEl={<Icon.home />}   delay={0}   />
-            <StatCard label={`${t.shelterFamiliesServed}`} value={D.shelter?.furniture?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={60}  />
+            <StatCard label={t.shelterFurniture}   value={D.shelter?.furniture?.services   ?? 0} color={C.blue}   iconEl={<Icon.home />}   delay={0} monthly={D.shelter?.furniture?.monthly} />
+            <StatCard label={`${t.shelterFamiliesServed}`} value={D.shelter?.furniture?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={60} monthly={D.shelter?.furniture?.ubMonthly} modalTitle={`${t.shelterFurniture} — ${t.shelterFamiliesServed}`} note={t.uniqueMonthlyNote} />
           </Grid>
           <Grid cols={2}>
-            <StatCard label={t.shelterAppliances}  value={D.shelter?.appliances?.services  ?? 0} color={C.orange} iconEl={<Icon.home />}   delay={120} />
-            <StatCard label={`${t.shelterFamiliesServed}`} value={D.shelter?.appliances?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={180} />
+            <StatCard label={t.shelterAppliances}  value={D.shelter?.appliances?.services  ?? 0} color={C.orange} iconEl={<Icon.home />}   delay={120} monthly={D.shelter?.appliances?.monthly} />
+            <StatCard label={`${t.shelterFamiliesServed}`} value={D.shelter?.appliances?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={180} monthly={D.shelter?.appliances?.ubMonthly} modalTitle={`${t.shelterAppliances} — ${t.shelterFamiliesServed}`} note={t.uniqueMonthlyNote} />
           </Grid>
           <Grid cols={2}>
-            <StatCard label={t.shelterHousehold}   value={D.shelter?.household?.services   ?? 0} color={C.green}  iconEl={<Icon.home />}   delay={240} />
-            <StatCard label={`${t.shelterFamiliesServed}`} value={D.shelter?.household?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={300} />
+            <StatCard label={t.shelterHousehold}   value={D.shelter?.household?.services   ?? 0} color={C.green}  iconEl={<Icon.home />}   delay={240} monthly={D.shelter?.household?.monthly} />
+            <StatCard label={`${t.shelterFamiliesServed}`} value={D.shelter?.household?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={300} monthly={D.shelter?.household?.ubMonthly} modalTitle={`${t.shelterHousehold} — ${t.shelterFamiliesServed}`} note={t.uniqueMonthlyNote} />
           </Grid>
           <Grid cols={2}>
-            <StatCard label={t.shelterElectronics} value={D.shelter?.electronics?.services ?? 0} color={C.purple} iconEl={<Icon.home />}   delay={360} />
-            <StatCard label={`${t.shelterFamiliesServed}`} value={D.shelter?.electronics?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={420} />
+            <StatCard label={t.shelterElectronics} value={D.shelter?.electronics?.services ?? 0} color={C.purple} iconEl={<Icon.home />}   delay={360} monthly={D.shelter?.electronics?.monthly} />
+            <StatCard label={`${t.shelterFamiliesServed}`} value={D.shelter?.electronics?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={420} monthly={D.shelter?.electronics?.ubMonthly} modalTitle={`${t.shelterElectronics} — ${t.shelterFamiliesServed}`} note={t.uniqueMonthlyNote} />
           </Grid>
 
           <Card>
@@ -1077,6 +1255,9 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
   const urbanNewTotal = Array.isArray(lf.urbanMonthly)
     ? lf.urbanMonthly.reduce((a, b) => a + (b ?? 0), 0)
     : 0;
+  const championsMonthly = Array.isArray(lf.idealMonthly) && Array.isArray(lf.fullMonthly)
+    ? lf.idealMonthly.map((v, i) => (v ?? 0) + (lf.fullMonthly[i] ?? 0))
+    : null;
   const withNew = (desc, n) => `${desc ? desc + " · " : ""}${t.newThisYear}: ${n ?? 0}`;
   return (
     <div>
@@ -1093,18 +1274,18 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
           <TabDescription>{t.lifeFarmsTabDesc}</TabDescription>
           <Grid cols={2}>
             <StatCard label={t.totalLifeFarms} value={lfTotal} color={C.green} iconEl={<Icon.leaf />} delay={0} />
-            <StatCard label={`${t.lifeFarms} — ${t.newThisYear}`} value={lfNewTotal} color={C.teal} iconEl={<Icon.chart />} delay={60} />
+            <StatCard label={`${t.lifeFarms} — ${t.newThisYear}`} value={lfNewTotal} color={C.teal} iconEl={<Icon.chart />} delay={60} monthly={lf.monthly} />
           </Grid>
           <SectionTitle>{t.championsLabel}</SectionTitle>
           <Grid cols={3}>
-            <ProgressBar label={t.idealFarm}     description={withNew(t.idealFarmDesc, lfNew.ideal)}    goal={D.lifeFarms?.idealFarm?.goal      ?? 30}  done={D.lifeFarms?.idealFarm?.done      ?? 0}  color={C.yellow} />
-            <ProgressBar label={t.fullSizeFarm}  description={withNew(t.fullSizeFarmDesc, lfNew.full)} goal={D.lifeFarms?.fullSizeFarm?.goal   ?? 10}  done={D.lifeFarms?.fullSizeFarm?.done   ?? 0}  color={C.blue}   />
-            <ProgressBar label={t.totalChampions} description={withNew("", (lfNew.ideal ?? 0) + (lfNew.full ?? 0))} goal={D.lifeFarms?.totalChampions?.goal ?? 40}  done={D.lifeFarms?.totalChampions?.done ?? 0}  color={C.green}  />
+            <ProgressBar label={t.idealFarm}     description={withNew(t.idealFarmDesc, lfNew.ideal)}    goal={D.lifeFarms?.idealFarm?.goal      ?? 30}  done={D.lifeFarms?.idealFarm?.done      ?? 0}  color={C.yellow} monthly={lf.idealMonthly} modalTotal={lfNew.ideal ?? 0} note={t.farmsMonthlyNote} />
+            <ProgressBar label={t.fullSizeFarm}  description={withNew(t.fullSizeFarmDesc, lfNew.full)} goal={D.lifeFarms?.fullSizeFarm?.goal   ?? 10}  done={D.lifeFarms?.fullSizeFarm?.done   ?? 0}  color={C.blue} monthly={lf.fullMonthly} modalTotal={lfNew.full ?? 0} note={t.farmsMonthlyNote} />
+            <ProgressBar label={t.totalChampions} description={withNew("", (lfNew.ideal ?? 0) + (lfNew.full ?? 0))} goal={D.lifeFarms?.totalChampions?.goal ?? 40}  done={D.lifeFarms?.totalChampions?.done ?? 0}  color={C.green} monthly={championsMonthly} modalTotal={(lfNew.ideal ?? 0) + (lfNew.full ?? 0)} note={t.farmsMonthlyNote} />
           </Grid>
           <SectionTitle style={{ marginTop: 8 }}>{t.growthLabel}</SectionTitle>
           <Grid cols={2}>
-            <ProgressBar label={t.basicFarm}          description={withNew(t.basicFarmDesc, lfNew.basic)}          goal={D.lifeFarms?.basicFarm?.goal      ?? 118} done={D.lifeFarms?.basicFarm?.done      ?? 0} color={C.orange} />
-            <ProgressBar label={t.multiplicationFarm} description={withNew(t.multiplicationDesc, lfNew.multiplication)} goal={D.lifeFarms?.multiplication?.goal ?? 108} done={D.lifeFarms?.multiplication?.done ?? 0} color={C.purple} />
+            <ProgressBar label={t.basicFarm}          description={withNew(t.basicFarmDesc, lfNew.basic)}          goal={D.lifeFarms?.basicFarm?.goal      ?? 118} done={D.lifeFarms?.basicFarm?.done      ?? 0} color={C.orange} monthly={lf.basicMonthly} modalTotal={lfNew.basic ?? 0} note={t.farmsMonthlyNote} />
+            <ProgressBar label={t.multiplicationFarm} description={withNew(t.multiplicationDesc, lfNew.multiplication)} goal={D.lifeFarms?.multiplication?.goal ?? 108} done={D.lifeFarms?.multiplication?.done ?? 0} color={C.purple} monthly={lf.multiplicationMonthly} modalTotal={lfNew.multiplication ?? 0} note={t.farmsMonthlyNote} />
           </Grid>
           <MonthlyDistribution t={t} monthly={lf.monthly} color={C.green} title={t.newFarmsMonthly} />
         </div>
@@ -1115,7 +1296,7 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
           <TabDescription>{t.urbanFarmsTabDesc}</TabDescription>
           <Grid cols={4}>
             <StatCard label={t.urbanFarmsCount} value={D.lifeFarms?.urbanFarm?.done ?? 0} color={C.green} iconEl={<Icon.leaf />} delay={0} />
-            <StatCard label={t.newThisYear} value={urbanNewTotal} color={C.teal} iconEl={<Icon.chart />} delay={60} />
+            <StatCard label={t.newThisYear} value={urbanNewTotal} color={C.teal} iconEl={<Icon.chart />} delay={60} monthly={lf.urbanMonthly} modalTitle={`${t.urbanFarms} — ${t.newThisYear}`} />
           </Grid>
           <MonthlyDistribution t={t} monthly={lf.urbanMonthly} color={C.green} title={t.newFarmsMonthly} />
         </div>
@@ -1128,7 +1309,7 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
             <StatCard label={t.totalMEPs}        value={D.meps?.total        ?? 0} color={C.text1} iconEl={<Icon.chart />}  highlight={highlightKey === 'revolvingFund'} delay={0}   />
             <StatCard label={t.active}           value={D.meps?.active       ?? 0} color={C.green} iconEl={<Icon.check />}  delay={60}  />
             <StatCard label={t.marketReady}      value={D.meps?.marketReady  ?? 0} color={C.yellow} iconEl={<Icon.star />}  highlight={highlightKey === 'marketReady'} delay={120} />
-            <StatCard label={t.mepParticipants}  value={D.meps?.participants ?? "—"} color={C.teal}  iconEl={<Icon.people />} delay={180} />
+            <StatCard label={t.mepParticipants}  value={D.meps?.participants ?? "—"} color={C.teal}  iconEl={<Icon.people />} delay={180} monthly={D.meps?.participantsMonthly} note={t.uniqueMonthlyNote} />
           </Grid>
           <div style={{ fontSize: 12, color: C.text4, marginTop: -10 }}>
             {t.marketReady}: {t.mepMarketReadyDesc}
@@ -1141,8 +1322,8 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
           <div>
             <SectionTitle>{t.fundCapital}</SectionTitle>
             <Grid cols={4}>
-              <StatCard label={t.totalCapitalDisbursed}  prefix="$" value={money(D.meps?.fund?.totalDisbursed)} color={C.purple} iconEl={<Icon.money />}  delay={0}   />
-              <StatCard label={t.totalRepaidLabel}       prefix="$" value={money(D.meps?.fund?.totalRepaid)}    color={C.green}  iconEl={<Icon.dollar />} delay={60}  />
+              <StatCard label={t.totalCapitalDisbursed}  prefix="$" value={money(D.meps?.fund?.totalDisbursed)} color={C.purple} iconEl={<Icon.money />}  delay={0} monthly={D.meps?.fund?.disbursedMonthly} format="money" modalTitle={t.capitalDisbursedThisYear} modalTotal={`$${money(D.meps?.fund?.disbursed)}`} note={t.fundFlowNote} />
+              <StatCard label={t.totalRepaidLabel}       prefix="$" value={money(D.meps?.fund?.totalRepaid)}    color={C.green}  iconEl={<Icon.dollar />} delay={60} monthly={D.meps?.fund?.repaidMonthly} format="money" modalTitle={t.repaidThisYear} modalTotal={`$${money(D.meps?.fund?.repaid)}`} note={t.fundFlowNote} />
               <StatCard label={t.outstandingBalance}     prefix="$" value={money(D.meps?.fund?.outstanding)}    color={C.orange} iconEl={<Icon.warn />}   delay={120} />
               <StatCard label={t.programRepaymentRate}   value={D.meps?.fund?.repaymentRate != null ? `${D.meps.fund.repaymentRate}%` : "—"} color={C.blue} iconEl={<Icon.chart />} delay={180} />
             </Grid>
@@ -1206,7 +1387,7 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
           <TabDescription>{t.sharkTankTabDesc}</TabDescription>
           <Grid cols={4}>
             <StatCard label={t.sharkTankWinners} value={D.sharkTank?.winners ?? 0} color={C.teal} iconEl={<Icon.star />} delay={0} />
-            <StatCard label={t.sharkNewThisYear} value={D.sharkTank?.winnersThisYear ?? 0} color={C.blue} iconEl={<Icon.chart />} delay={60} />
+            <StatCard label={t.sharkNewThisYear} value={D.sharkTank?.winnersThisYear ?? 0} color={C.blue} iconEl={<Icon.chart />} delay={60} monthly={D.sharkTank?.monthly} />
             <StatCard label={t.sharkTankPdvCost} value={(D.sharkTank?.pdvCost ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} prefix="$" color={C.green} iconEl={<Icon.money />} delay={120} />
           </Grid>
           <MonthlyDistribution t={t} monthly={D.sharkTank?.monthly} color={C.teal} title={t.sharkMonthlyTitle} />
@@ -1237,14 +1418,14 @@ function EvangelismPage({ t, data, highlightKey }) {
         <span className="pdv-level-badge-text" style={{ color: C.purple }}>{t.evangelismDesc}</span>
       </div>
       <Grid cols={4}>
-        <StatCard label={t.biblesDelivered}     value={D.evangelism?.bibles              ?? 0} color={C.purple} iconEl={<Icon.book />}   highlight={highlightKey === 'bibles'} delay={0}   />
-        <StatCard label={t.vbsCampsHeld}        value={D.evangelism?.vbsCamps            ?? 0} color={C.blue}   iconEl={<Icon.tent />}   highlight={highlightKey === 'vbsCamps'} delay={80}  />
-        <StatCard label={t.childrenVBS}         value={D.evangelism?.childrenVBS         ?? 0} color={C.red}    iconEl={<Icon.child />}  highlight={highlightKey === 'childrenVBS'} delay={160} />
+        <StatCard label={t.biblesDelivered}     value={D.evangelism?.bibles              ?? 0} color={C.purple} iconEl={<Icon.book />}   highlight={highlightKey === 'bibles'} delay={0} monthly={D.evangelism?.biblesMonthly ?? D.evangelism?.monthly} />
+        <StatCard label={t.vbsCampsHeld}        value={D.evangelism?.vbsCamps            ?? 0} color={C.blue}   iconEl={<Icon.tent />}   highlight={highlightKey === 'vbsCamps'} delay={80} monthly={D.evangelism?.vbsCampsMonthly} />
+        <StatCard label={t.childrenVBS}         value={D.evangelism?.childrenVBS         ?? 0} color={C.red}    iconEl={<Icon.child />}  highlight={highlightKey === 'childrenVBS'} delay={160} monthly={D.evangelism?.vbsMonthly} />
         <StatCard label={t.vbsUnique}           value={D.evangelism?.vbsUnique           ?? "—"} color={C.orange} iconEl={<Icon.people />} delay={240} />
       </Grid>
       <Grid cols={3}>
-        <StatCard label={t.personasAlcanzadas}  value={D.evangelism?.personasAlcanzadas  ?? 0} color={C.green}  iconEl={<Icon.people />} highlight={highlightKey === 'personasAlcanzadas'} delay={0} />
-        <StatCard label={`${t.professionsOfFaith} (${t.thisYear.toLowerCase()})`} value={D.evangelism?.professionsOfFaith ?? "—"} color={C.yellow} iconEl={<Icon.star />} delay={60} />
+        <StatCard label={t.personasAlcanzadas}  value={D.evangelism?.personasAlcanzadas  ?? 0} color={C.green}  iconEl={<Icon.people />} highlight={highlightKey === 'personasAlcanzadas'} delay={0} monthly={D.evangelism?.personasMonthly} note={t.personasMonthlyNote} />
+        <StatCard label={`${t.professionsOfFaith} (${t.thisYear.toLowerCase()})`} value={D.evangelism?.professionsOfFaith ?? "—"} color={C.yellow} iconEl={<Icon.star />} delay={60} monthly={D.evangelism?.pofMonthly} />
         <StatCard label={`${t.professionsOfFaith} (${t.professionsOfFaithAllTime})`} value={D.evangelism?.professionsOfFaithAllTime ?? "—"} color={C.teal} iconEl={<Icon.check />} delay={120} />
       </Grid>
       <MonthlyDistribution t={t} monthly={D.evangelism?.biblesMonthly ?? D.evangelism?.monthly} color={C.purple} title={t.biblesMonthlyTitle} />
@@ -1259,9 +1440,9 @@ function BeneficiariesPage({ t, data, highlightKey }) {
   const D = data ?? FALLBACK_DATA;
   const bene = D.beneficiaries ?? FALLBACK_DATA.beneficiaries;
   const tableData = {
-    combined: { accounts: bene.combined?.accounts ?? 0, bene: bene.combined?.beneficiaries ?? 0, girls: bene.combined?.girls ?? 0, boys: bene.combined?.boys ?? 0, families: bene.combined?.newFamilies ?? 0, ub: bene.combined?.newUB ?? 0 },
-    quito:    { accounts: bene.quito?.accounts    ?? 0, bene: bene.quito?.beneficiaries    ?? 0, girls: bene.quito?.girls    ?? 0, boys: bene.quito?.boys    ?? 0, families: bene.quito?.newFamilies    ?? 0, ub: bene.quito?.newUB    ?? 0 },
-    imbabura: { accounts: bene.imbabura?.accounts ?? 0, bene: bene.imbabura?.beneficiaries ?? 0, girls: bene.imbabura?.girls ?? 0, boys: bene.imbabura?.boys ?? 0, families: bene.imbabura?.newFamilies ?? 0, ub: bene.imbabura?.newUB ?? 0 },
+    combined: { accounts: bene.combined?.accounts ?? 0, bene: bene.combined?.beneficiaries ?? 0, girls: bene.combined?.girls ?? 0, boys: bene.combined?.boys ?? 0, families: bene.combined?.newFamilies ?? 0, ub: bene.combined?.newUB ?? 0, familiesMonthly: bene.combined?.newFamiliesMonthly, ubMonthly: bene.combined?.newUBMonthly },
+    quito:    { accounts: bene.quito?.accounts    ?? 0, bene: bene.quito?.beneficiaries    ?? 0, girls: bene.quito?.girls    ?? 0, boys: bene.quito?.boys    ?? 0, families: bene.quito?.newFamilies    ?? 0, ub: bene.quito?.newUB    ?? 0, familiesMonthly: bene.quito?.newFamiliesMonthly, ubMonthly: bene.quito?.newUBMonthly },
+    imbabura: { accounts: bene.imbabura?.accounts ?? 0, bene: bene.imbabura?.beneficiaries ?? 0, girls: bene.imbabura?.girls ?? 0, boys: bene.imbabura?.boys ?? 0, families: bene.imbabura?.newFamilies ?? 0, ub: bene.imbabura?.newUB ?? 0, familiesMonthly: bene.imbabura?.newFamiliesMonthly, ubMonthly: bene.imbabura?.newUBMonthly },
   };
   const d = tableData[tab];
 
@@ -1304,8 +1485,8 @@ function BeneficiariesPage({ t, data, highlightKey }) {
 
         {/* Nivel 3: Families Accepted y New UB */}
         <Grid cols={2}>
-          <StatCard label={t.acceptedFamilies}    value={d.families} color={C.green}  iconEl={<Icon.home />} highlight={highlightKey === 'newFamilies'} delay={240} />
-          <StatCard label={t.acceptedUB}          value={d.ub}       color={C.orange} iconEl={<Icon.star />} delay={300} />
+          <StatCard label={t.acceptedFamilies}    value={d.families} color={C.green}  iconEl={<Icon.home />} highlight={highlightKey === 'newFamilies'} delay={240} monthly={d.familiesMonthly} note={t.newFamiliesMonthlyNote} />
+          <StatCard label={t.acceptedUB}          value={d.ub}       color={C.orange} iconEl={<Icon.star />} delay={300} monthly={d.ubMonthly} note={t.newFamiliesMonthlyNote} />
         </Grid>
       </div>
     </div>
@@ -1662,8 +1843,12 @@ export default function Dashboard() {
 
   const go = useCallback((p) => { navigate(p); }, [navigate]);
 
+  // Monthly popup (click-to-chart) — opened by any card through MetricModalCtx
+  const [metric, setMetric] = useState(null);
+  const closeMetric = useCallback(() => setMetric(null), []);
+
   return (
-    <>
+    <MetricModalCtx.Provider value={setMetric}>
       {/* Mobile header */}
       <div className="pdv-mobile-hdr">
         <button
@@ -1795,6 +1980,10 @@ export default function Dashboard() {
           {page === "goals"         && <GoalsPage         t={t} lang={lang} data={dashData} />}
         </main>
       </div>
-    </>
+
+      {metric && (
+        <MetricModal metric={metric} t={t} year={lastUpdated?.getFullYear()} onClose={closeMetric} />
+      )}
+    </MetricModalCtx.Provider>
   );
 }

@@ -158,7 +158,20 @@ async function runSoql(instanceUrl, accessToken, soql) {
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
   });
   if (!res.ok) throw new Error(`SOQL failed (${res.status}): ${await res.text()}`);
-  return res.json();
+  const json = await res.json();
+  // Row queries page at 2000 records — follow nextRecordsUrl so a growing result
+  // can never be silently truncated.
+  let next = json.nextRecordsUrl;
+  while (next) {
+    const page = await fetch(`${instanceUrl}${next}`, {
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    });
+    if (!page.ok) throw new Error(`SOQL paging failed (${page.status}): ${await page.text()}`);
+    const pj = await page.json();
+    json.records.push(...(pj.records ?? []));
+    next = pj.nextRecordsUrl;
+  }
+  return json;
 }
 
 // Read a single aggregate value (aliased "e") from a SOQL aggregate query.
@@ -513,6 +526,235 @@ async function fetchMepMetrics(instanceUrl, accessToken) {
   };
 }
 
+// ─── Per-card monthly series (live SOQL) ────────────────────────────────────────
+// The dashboard opens a 12-month chart when a KPI card is clicked, so every
+// flow-type card needs its own series. The reports can't provide them (most have
+// no date column, and detail rows cap at 2000), so each series is computed here
+// with the same filters the card's headline uses (verified against the report
+// definitions in Sep 2026).
+//
+// Every series runs in isolation through trySeries: a failure leaves THAT series
+// null (the card simply isn't clickable) and is recorded in SOQL_WARNINGS →
+// syncWarnings. Nothing in here can affect the headline metrics above.
+const SOQL_WARNINGS = [];
+async function fetchMonthlySeries(instanceUrl, accessToken) {
+  const now = new Date();
+  const Y = now.getFullYear();
+  const SD = "pmdm__ServiceDelivery__c";
+  const MONTH = "CALENDAR_MONTH(pmdm__DeliveryDate__c)";
+  const win = `pmdm__DeliveryDate__c >= ${Y}-01-01 AND pmdm__DeliveryDate__c <= ${Y}-12-31 ` +
+    `AND pmdm__Quantity__c >= 1`;
+  const soql = (q) => runSoql(instanceUrl, accessToken, q);
+  const zeros = () => new Array(12).fill(0);
+  const cents = (arr) => arr.map((v) => Math.round(v * 100) / 100);
+
+  const trySeries = async (name, fn) => {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        return await fn();
+      } catch (err) {
+        if (attempt === 2) {
+          console.warn(`  ✗ monthly ${name}: ${err.message}`);
+          SOQL_WARNINGS.push(`monthly series failed: ${name}`);
+          return null;
+        }
+        await new Promise((res) => setTimeout(res, 1500));
+      }
+    }
+  };
+
+  // One grouped query → { qty, ub, ...extras }, each a 12-month array.
+  //   qty = SUM(Quantity), ub = COUNT_DISTINCT(Contact) — the same "unico"
+  //   definition the BU reports use (registered contacts only).
+  //   extras = { key: "Currency_Field__c" } → SUM per month, rounded to cents.
+  const monthlyStats = async (filter, extras = {}) => {
+    const cols = Object.entries(extras).map(([k, f]) => `, SUM(${f}) ${k}`).join("");
+    const j = await soql(
+      `SELECT ${MONTH} m, SUM(pmdm__Quantity__c) qty, COUNT_DISTINCT(pmdm__Contact__c) ub${cols} ` +
+      `FROM ${SD} WHERE ${win} AND (${filter}) GROUP BY ${MONTH}`);
+    const out = { qty: zeros(), ub: zeros() };
+    for (const k of Object.keys(extras)) out[k] = zeros();
+    for (const rec of j.records ?? []) {
+      const idx = (Number(rec.m) || 0) - 1;
+      if (idx < 0 || idx > 11) continue;
+      for (const k of Object.keys(out)) out[k][idx] = Number(rec[k]) || 0;
+    }
+    for (const k of Object.keys(extras)) out[k] = cents(out[k]);
+    return out;
+  };
+
+  // Distinct people per month = contacts + not-registered persons (by N.r. id),
+  // the same definition as the annual "individuals served" counts.
+  const monthlyPeople = async (filter) => {
+    const out = zeros();
+    const legs = [
+      `SELECT ${MONTH} m, COUNT_DISTINCT(pmdm__Contact__c) e FROM ${SD} WHERE ${win} AND (${filter}) GROUP BY ${MONTH}`,
+      `SELECT ${MONTH} m, COUNT_DISTINCT(N_r_Identification__c) e FROM ${SD} ` +
+        `WHERE ${win} AND pmdm__Contact__c = null AND (${filter}) GROUP BY ${MONTH}`,
+    ];
+    for (const q of legs) {
+      for (const rec of (await soql(q)).records ?? []) {
+        const idx = (Number(rec.m) || 0) - 1;
+        if (idx >= 0 && idx < 12) out[idx] += Number(rec.e) || 0;
+      }
+    }
+    return out;
+  };
+
+  const svc = (...parts) => `(${parts.map((p) => `pmdm__Service__r.Name LIKE '%${p}%'`).join(" OR ")})`;
+  const prog = "pmdm__Service__r.pmdm__Program__r.Name";
+  // Clinic services, as the "Clínica la Y" reports define them
+  const CLINIC = svc("Atencion", "fisio", "odon");
+
+  const ms = {};
+
+  // ── Level 1 ─────────────────────────────────────────────────────────────────
+  ms.hotMeals = await trySeries("hotMeals", () => monthlyStats(svc("Comida caliente")));
+  ms.groceries = await trySeries("groceries", () => monthlyStats(svc("víveres"), { cost: "Total_Cost__c" }));
+  ms.clothing = await trySeries("clothing", () => monthlyStats(svc("ropa")));
+
+  // ── Level 2 ─────────────────────────────────────────────────────────────────
+  // vozManos = Cost_per_Unit__c (what Voz y Manos pays the clinic), pdv = Cost_PDV__c.
+  ms.clinic = await trySeries("clinic", () =>
+    monthlyStats(CLINIC, { vozManos: "Cost_per_Unit__c", pdv: "Cost_PDV__c" }));
+  ms.healthOther = await trySeries("healthOther", () =>
+    monthlyStats(`${svc("salud")} AND (NOT ${CLINIC})`, { cost: "Total_Cost__c" }));
+  // Distinct people for the year: the "Otras ayudas médicas" report has no unique
+  // formula — its Record Count (delivery rows) was being shown as unique people.
+  ms.healthOtherUBYear = await trySeries("healthOtherUBYear", () =>
+    aggValue(instanceUrl, accessToken,
+      `SELECT COUNT_DISTINCT(pmdm__Contact__c) e FROM ${SD} WHERE ${win} AND ${svc("salud")} AND (NOT ${CLINIC})`));
+  ms.healthUB = await trySeries("healthUB", () =>
+    monthlyPeople(`${prog} = 'Programa de Salud (Health)'`));
+  ms.shelter = await trySeries("shelter", async () => {
+    const KEYS = {
+      "Mobiliario (Condiciones de Vida)": "furniture",
+      "Electrodomésticos (Condiciones de Vida)": "appliances",
+      "Enseres del hogar (Condiciones de Vida)": "household",
+      "Electrónicos y suministros (Condiciones de Vida)": "electronics",
+    };
+    const out = Object.fromEntries(Object.values(KEYS).map((k) => [k, { qty: zeros(), ub: zeros() }]));
+    const j = await soql(
+      `SELECT pmdm__Service__r.Name s, ${MONTH} m, SUM(pmdm__Quantity__c) qty, COUNT_DISTINCT(pmdm__Contact__c) ub ` +
+      `FROM ${SD} WHERE ${win} AND pmdm__Service__r.Name IN ('${Object.keys(KEYS).join("','")}') ` +
+      `GROUP BY pmdm__Service__r.Name, ${MONTH}`);
+    for (const rec of j.records ?? []) {
+      const key = KEYS[rec.s];
+      const idx = (Number(rec.m) || 0) - 1;
+      if (!key || idx < 0 || idx > 11) continue;
+      out[key].qty[idx] = Number(rec.qty) || 0;
+      out[key].ub[idx] = Number(rec.ub) || 0;
+    }
+    return out;
+  });
+
+  // ── Cross-level individuals served (same program→level mapping as fetchLevelMetrics)
+  ms.level1Served = await trySeries("level1Served", () => monthlyPeople(
+    `${prog} IN ('Programa de Mitigación del hambre (Hunger relief)','Programa de Ayuda de Emergencia (Emergency relief)')`));
+  ms.level2Served = await trySeries("level2Served", () => monthlyPeople(
+    `${prog} IN ('Programa de Salud (Health)','Programa de Educación (Education)','Programa Mejoramiento de condiciones de vida (Shelter)')`));
+  ms.level3Served = await trySeries("level3Served", () => monthlyPeople(
+    `${prog} = 'Programa de Microemprendimiento (Microbusiness)'`));
+
+  // ── Evangelism ──────────────────────────────────────────────────────────────
+  // VBS camps held = distinct delivery dates (the report's "DeliveryDateÚnica").
+  ms.vbsCamps = await trySeries("vbsCamps", async () => {
+    const out = zeros();
+    const j = await soql(
+      `SELECT pmdm__DeliveryDate__c d, COUNT(Id) e FROM ${SD} WHERE ${win} AND ${svc("vbs")} ` +
+      `GROUP BY pmdm__DeliveryDate__c`);
+    for (const rec of j.records ?? []) {
+      const month = Number(String(rec.d ?? "").slice(5, 7)) - 1;
+      if (month >= 0 && month < 12) out[month] += 1;
+    }
+    return out;
+  });
+
+  // "Personas alcanzadas por el evangelio" mirrors the Salesforce report: household
+  // members of primary contacts with any delivery (Qty >= 1) in the window. Per
+  // month = households served THAT month, so months overlap and the bars do not
+  // add up to the annual figure (the UI says so). One query per elapsed month.
+  const personasSoql = (from, to) =>
+    `SELECT SUM(Account.npsp__Number_of_Household_Members__c) e FROM Contact ` +
+    `WHERE npsp__Primary_Contact__c = true AND Id IN (SELECT pmdm__Contact__c FROM ${SD} ` +
+    `WHERE pmdm__DeliveryDate__c >= ${from} AND pmdm__DeliveryDate__c <= ${to} AND pmdm__Quantity__c >= 1)`;
+  ms.personas = await trySeries("personas", async () => {
+    const out = zeros();
+    const pad = (n) => String(n).padStart(2, "0");
+    await Promise.all(out.map(async (_, i) => {
+      if (i > now.getMonth()) return; // future months stay 0
+      const last = new Date(Date.UTC(Y, i + 1, 0)).getUTCDate();
+      out[i] = await aggValue(instanceUrl, accessToken,
+        personasSoql(`${Y}-${pad(i + 1)}-01`, `${Y}-${pad(i + 1)}-${pad(last)}`));
+    }));
+    return out;
+  });
+  // Annual value by the same query — logged next to the report's figure. The
+  // report hard-codes "DeliveryDate >= 2026-01-01", so it needs a manual edit
+  // every January; this is the number it should show.
+  ms.personasYear = await trySeries("personasYear", () =>
+    aggValue(instanceUrl, accessToken, personasSoql(`${Y}-01-01`, `${Y}-12-31`)));
+
+  // ── New families / new individuals per month ────────────────────────────────
+  // Same definition as the "NUEVOS APAs" reports: active Beneficiary contacts whose
+  // household ACCOUNT was created this year; families = distinct APA numbers,
+  // individuals = distinct contact numbers, split by MailingState. Row query +
+  // JS binning because Account.CreatedDate is a datetime: CALENDAR_MONTH() would
+  // bin in UTC, pushing evening entries on a month's last day into the next
+  // month. Ecuador is UTC-5 year-round (no DST).
+  ms.newBene = await trySeries("newBene", async () => {
+    const TZ = "T05:00:00Z";
+    const j = await soql(
+      `SELECT Account.CreatedDate, Account.APA_Number__c, Contact_Number__c, MailingState FROM Contact ` +
+      `WHERE RecordType.Name = 'Beneficiary' AND Status__c = 'active' ` +
+      `AND Account.CreatedDate >= ${Y}-01-01${TZ} AND Account.CreatedDate < ${Y + 1}-01-01${TZ}`);
+    const sets = {};
+    for (const region of ["quito", "imbabura"]) {
+      sets[region] = { families: zeros().map(() => new Set()), ub: zeros().map(() => new Set()) };
+    }
+    for (const rec of j.records ?? []) {
+      const st = String(rec.MailingState ?? "").toLowerCase();
+      const region = st === "pichincha" ? "quito" : st === "imbabura" ? "imbabura" : null;
+      const created = Date.parse(rec.Account?.CreatedDate);
+      if (!region || Number.isNaN(created)) continue;
+      const idx = new Date(created - 5 * 3600e3).getUTCMonth();
+      if (rec.Account?.APA_Number__c != null) sets[region].families[idx].add(rec.Account.APA_Number__c);
+      if (rec.Contact_Number__c != null) sets[region].ub[idx].add(rec.Contact_Number__c);
+    }
+    const out = {};
+    for (const region of ["quito", "imbabura"]) {
+      out[region] = {
+        families: sets[region].families.map((s) => s.size),
+        ub: sets[region].ub.map((s) => s.size),
+      };
+    }
+    // Combined = Quito + Imbabura, like the headline (report-map extractBeneficiaries)
+    out.combined = {
+      families: out.quito.families.map((v, i) => v + out.imbabura.families[i]),
+      ub: out.quito.ub.map((v, i) => v + out.imbabura.ub[i]),
+    };
+    return out;
+  });
+
+  // ── Revolving fund: $ disbursed / repaid per month this year ────────────────
+  ms.fund = await trySeries("fund", async () => {
+    const out = { disbursed: zeros(), repaid: zeros() };
+    const j = await soql(
+      `SELECT CALENDAR_MONTH(Registration_Date__c) m, Amount_Flow__c f, SUM(Amount__c) e ` +
+      `FROM MEP_Finance_Transaction__c WHERE Transaction_Type__c = 'Revolving Fund Loan' ` +
+      `AND Registration_Date__c >= ${Y}-01-01 AND Registration_Date__c <= ${Y}-12-31 ` +
+      `GROUP BY CALENDAR_MONTH(Registration_Date__c), Amount_Flow__c`);
+    for (const rec of j.records ?? []) {
+      const idx = (Number(rec.m) || 0) - 1;
+      const key = rec.f === "outgoing" ? "disbursed" : rec.f === "incoming" ? "repaid" : null;
+      if (key && idx >= 0 && idx < 12) out[key][idx] = Math.abs(Number(rec.e) || 0);
+    }
+    return { disbursed: cents(out.disbursed), repaid: cents(out.repaid) };
+  });
+
+  return ms;
+}
+
 // ─── Import report map ────────────────────────────────────────────────────────
 const { REPORT_IDS, transformAll } = await import("./report-map.js");
 
@@ -578,15 +820,34 @@ async function main() {
     console.warn(`  ✗ MEP metrics: ${err.message} (meps will stay null)`);
   }
 
+  // Per-card monthly series for the click-to-chart popups (see fetchMonthlySeries)
+  console.log("\nComputing per-card monthly series (SOQL)...");
+  let monthlySeries = {};
+  try {
+    monthlySeries = await fetchMonthlySeries(instanceUrl, accessToken);
+    const ok = Object.values(monthlySeries).filter((v) => v != null).length;
+    const sum = (arr) => (arr ?? []).reduce((a, b) => a + b, 0);
+    console.log(
+      `  ✓ ${ok}/${Object.keys(monthlySeries).length} series | ` +
+      `new families=${sum(monthlySeries.newBene?.combined?.families)} | ` +
+      `personas alcanzadas (SOQL, year)=${monthlySeries.personasYear}`,
+    );
+  } catch (err) {
+    console.warn(`  ✗ Monthly series: ${err.message} (cards will not be clickable)`);
+    SOQL_WARNINGS.push("monthly series failed: all");
+  }
+
   // Transform raw Salesforce responses into our dashboard schema
   console.log("\nTransforming data...");
-  const dashboardData = transformAll(rawReports, { ...levelMetrics, ...mepMetrics, ...sectionMetrics });
+  const dashboardData = transformAll(rawReports,
+    { ...levelMetrics, ...mepMetrics, ...sectionMetrics, monthlySeries });
   dashboardData.lastUpdated = new Date().toISOString();
-  // Reports that failed even after retries — visible in the JSON so a partly
-  // broken sync can't masquerade as a clean one.
-  dashboardData.syncWarnings = FAILED_REPORTS.length
-    ? FAILED_REPORTS.map((name) => `report fetch failed: ${name}`)
-    : [];
+  // Reports that failed even after retries (and monthly series that failed) —
+  // visible in the JSON so a partly broken sync can't masquerade as a clean one.
+  dashboardData.syncWarnings = [
+    ...FAILED_REPORTS.map((name) => `report fetch failed: ${name}`),
+    ...SOQL_WARNINGS,
+  ];
 
   // Write output
   writeFileSync(OUTPUT_FILE, JSON.stringify(dashboardData, null, 2), "utf8");
