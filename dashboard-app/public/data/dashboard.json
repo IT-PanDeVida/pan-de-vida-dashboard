@@ -282,7 +282,7 @@
       227,
       230,
       227,
-      81,
+      90,
       0,
       0,
       0
@@ -308,7 +308,7 @@
     ]
   },
   "evangelism": {
-    "bibles": 337,
+    "bibles": 338,
     "vbsCamps": 34,
     "childrenVBS": 1366,
     "vbsUnique": 432,
@@ -324,7 +324,7 @@
       27,
       31,
       133,
-      10,
+      11,
       0,
       0,
       0
@@ -366,7 +366,7 @@
       27,
       31,
       133,
-      10,
+      11,
       0,
       0,
       0
@@ -377,7 +377,7 @@
       "accounts": 753,
       "beneficiaries": 2782,
       "girls": 413,
-      "boys": 423,
+      "boys": 422,
       "newFamilies": 128,
       "newUB": 430
     },
@@ -385,7 +385,7 @@
       "accounts": 417,
       "beneficiaries": 1386,
       "girls": 248,
-      "boys": 259,
+      "boys": 258,
       "newFamilies": 80,
       "newUB": 257
     },
@@ -435,7 +435,7 @@
     ]
   },
   "level1": {
-    "individualsServed": 704,
+    "individualsServed": 705,
     "totalCost": 13002.29
   },
   "level2": {
@@ -446,6 +446,6 @@
     "individualsServed": 313,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-17T15:33:58.308Z",
+  "lastUpdated": "2026-09-18T15:01:18.827Z",
   "syncWarnings": []
 }
