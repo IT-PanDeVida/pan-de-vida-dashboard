@@ -3,7 +3,7 @@
     "totalBeneficiaries": 2786,
     "totalAccounts": 754,
     "newFamilies": 129,
-    "totalDeliveries": 7356,
+    "totalDeliveries": 7357,
     "deliveriesMonthly": [
       284,
       519,
@@ -12,7 +12,7 @@
       831,
       915,
       667,
-      2074,
+      2075,
       300,
       0,
       0,
@@ -53,10 +53,10 @@
     ]
   },
   "groceries": {
-    "bags": 835,
+    "bags": 836,
     "ub": 419,
-    "avgCost": 15.571604790419162,
-    "totalCost": 13002.29,
+    "avgCost": 15.573504784688996,
+    "totalCost": 13019.45,
     "monthly": [
       29,
       48,
@@ -65,7 +65,7 @@
       62,
       134,
       18,
-      396,
+      397,
       6,
       0,
       0,
@@ -93,7 +93,7 @@
       1066.54,
       1623.6,
       265.74,
-      6337.25,
+      6354.41,
       100.2,
       0,
       0,
@@ -745,7 +745,7 @@
     "bibles": 338,
     "vbsCamps": 34,
     "childrenVBS": 1366,
-    "vbsUnique": 432,
+    "vbsUnique": 440,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
     "personasAlcanzadas": 1978,
@@ -839,7 +839,7 @@
       "accounts": 754,
       "beneficiaries": 2786,
       "girls": 414,
-      "boys": 423,
+      "boys": 422,
       "newFamilies": 129,
       "newUB": 434,
       "newFamiliesMonthly": [
@@ -875,7 +875,7 @@
       "accounts": 417,
       "beneficiaries": 1386,
       "girls": 248,
-      "boys": 258,
+      "boys": 257,
       "newFamilies": 80,
       "newUB": 257,
       "newFamiliesMonthly": [
@@ -996,7 +996,7 @@
       0,
       0
     ],
-    "totalCost": 13002.29
+    "totalCost": 13019.45
   },
   "level2": {
     "individualsServed": 658,
@@ -1034,6 +1034,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-09-18T17:12:24.345Z",
+  "lastUpdated": "2026-09-19T14:26:41.380Z",
   "syncWarnings": []
 }
