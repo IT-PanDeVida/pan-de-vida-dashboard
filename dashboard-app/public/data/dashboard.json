@@ -1,9 +1,9 @@
 {
   "overview": {
-    "totalBeneficiaries": 2782,
-    "totalAccounts": 753,
-    "newFamilies": 128,
-    "totalDeliveries": 7356,
+    "totalBeneficiaries": 2786,
+    "totalAccounts": 754,
+    "newFamilies": 129,
+    "totalDeliveries": 7357,
     "totalReached": 2025
   },
   "hotMeals": {
@@ -25,10 +25,10 @@
     ]
   },
   "groceries": {
-    "bags": 835,
+    "bags": 836,
     "ub": 419,
-    "avgCost": 15.571604790419162,
-    "totalCost": 13002.29,
+    "avgCost": 15.573504784688996,
+    "totalCost": 13019.45,
     "monthly": [
       29,
       48,
@@ -37,7 +37,7 @@
       62,
       134,
       18,
-      396,
+      397,
       6,
       0,
       0,
@@ -311,7 +311,7 @@
     "bibles": 338,
     "vbsCamps": 34,
     "childrenVBS": 1366,
-    "vbsUnique": 432,
+    "vbsUnique": 440,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
     "personasAlcanzadas": 1978,
@@ -374,28 +374,28 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 753,
-      "beneficiaries": 2782,
-      "girls": 413,
+      "accounts": 754,
+      "beneficiaries": 2786,
+      "girls": 414,
       "boys": 422,
-      "newFamilies": 128,
-      "newUB": 430
+      "newFamilies": 129,
+      "newUB": 434
     },
     "quito": {
       "accounts": 417,
       "beneficiaries": 1386,
       "girls": 248,
-      "boys": 258,
+      "boys": 257,
       "newFamilies": 80,
       "newUB": 257
     },
     "imbabura": {
-      "accounts": 316,
-      "beneficiaries": 1338,
-      "girls": 160,
-      "boys": 161,
-      "newFamilies": 48,
-      "newUB": 173
+      "accounts": 317,
+      "beneficiaries": 1342,
+      "girls": 161,
+      "boys": 162,
+      "newFamilies": 49,
+      "newUB": 177
     }
   },
   "christmas": {
@@ -436,7 +436,7 @@
   },
   "level1": {
     "individualsServed": 705,
-    "totalCost": 13002.29
+    "totalCost": 13019.45
   },
   "level2": {
     "individualsServed": 658,
@@ -446,6 +446,6 @@
     "individualsServed": 313,
     "totalCost": null
   },
-  "lastUpdated": "2026-09-18T15:01:18.827Z",
+  "lastUpdated": "2026-09-19T14:28:29.744Z",
   "syncWarnings": []
 }
