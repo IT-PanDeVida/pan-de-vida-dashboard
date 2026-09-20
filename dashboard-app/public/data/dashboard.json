@@ -497,11 +497,11 @@
     },
     "basicFarm": {
       "goal": 118,
-      "done": 160
+      "done": 161
     },
     "multiplication": {
       "goal": 108,
-      "done": 127
+      "done": 126
     },
     "urbanFarm": {
       "goal": null,
@@ -511,7 +511,7 @@
     "newThisYear": {
       "ideal": 12,
       "full": 12,
-      "basic": 27,
+      "basic": 28,
       "multiplication": 48,
       "urban": 36
     },
@@ -524,7 +524,7 @@
       23,
       23,
       17,
-      1,
+      2,
       0,
       0,
       0
@@ -580,7 +580,7 @@
       4,
       4,
       4,
-      1,
+      2,
       0,
       0,
       0
@@ -716,7 +716,7 @@
       227,
       230,
       227,
-      90,
+      92,
       0,
       0,
       0
@@ -1034,6 +1034,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-09-19T14:26:41.380Z",
+  "lastUpdated": "2026-09-20T14:42:25.779Z",
   "syncWarnings": []
 }
