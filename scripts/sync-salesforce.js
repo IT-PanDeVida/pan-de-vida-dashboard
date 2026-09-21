@@ -181,6 +181,28 @@ async function aggValue(instanceUrl, accessToken, soql) {
   return Number(rec.e ?? rec.expr0 ?? 0) || 0;
 }
 
+// ─── Distinct people behind a set of service deliveries ────────────────────────
+// = registered contacts + not-registered persons (identified by their N.r.
+// document). This is the dashboard's definition of a unique beneficiary
+// everywhere, and the reason every "BU …" report is now only a fallback: those
+// reports group by Contact, so ALL deliveries without a contact lookup collapse
+// into a single "-" group. Verified on hot meals (Sep 2026): 192 contacts + 125
+// not-registered people = 317, while "BU Comida Caliente (familia)" said 193.
+async function peopleCount(instanceUrl, accessToken, where) {
+  const SD = "pmdm__ServiceDelivery__c";
+  const contacts = await aggValue(instanceUrl, accessToken,
+    `SELECT COUNT_DISTINCT(pmdm__Contact__c) e FROM ${SD} WHERE ${where}`);
+  const notReg = await aggValue(instanceUrl, accessToken,
+    `SELECT COUNT_DISTINCT(N_r_Identification__c) e FROM ${SD} WHERE ${where} AND pmdm__Contact__c = null`);
+  return contacts + notReg;
+}
+
+// Service-name "contains" filter — mirrors the reports' CUST_NAME contains filters.
+const svcLike = (...parts) =>
+  `(${parts.map((p) => `pmdm__Service__r.Name LIKE '%${p}%'`).join(" OR ")})`;
+// Clinic services, as the "Clínica la Y" reports define them.
+const CLINIC_FILTER = svcLike("Atencion", "fisio", "odon");
+
 // ─── Cross-level "individuals served" + grand-total reached (live SOQL) ─────────
 // No single Salesforce report provides these deduplicated distinct-people counts,
 // so we compute them directly from pmdm__ServiceDelivery__c:
@@ -205,11 +227,7 @@ async function fetchLevelMetrics(instanceUrl, accessToken) {
 
   const metrics = {};
   for (const [key, filter] of Object.entries(levelFilters)) {
-    const contacts = await aggValue(instanceUrl, accessToken,
-      `SELECT COUNT_DISTINCT(pmdm__Contact__c) e FROM ${SD} WHERE ${win} AND (${filter})`);
-    const notReg = await aggValue(instanceUrl, accessToken,
-      `SELECT COUNT_DISTINCT(N_r_Identification__c) e FROM ${SD} WHERE ${win} AND pmdm__Contact__c = null AND (${filter})`);
-    metrics[key] = contacts + notReg;
+    metrics[key] = await peopleCount(instanceUrl, accessToken, `${win} AND (${filter})`);
   }
 
   // Grand total = distinct people living in any household that received a service
@@ -270,13 +288,26 @@ async function fetchSectionMetrics(instanceUrl, accessToken) {
     const HEALTH = `pmdm__Service__r.pmdm__Program__r.Name = 'Programa de Salud (Health)'`;
     out.healthServices = await agg(
       `SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${win} AND ${HEALTH}`);
-    const healthContacts = await agg(
-      `SELECT COUNT_DISTINCT(pmdm__Contact__c) e FROM ${SD} WHERE ${win} AND ${HEALTH}`);
-    const healthNotReg = await agg(
-      `SELECT COUNT_DISTINCT(N_r_Identification__c) e FROM ${SD} WHERE ${win} AND pmdm__Contact__c = null AND ${HEALTH}`);
-    out.healthUB = healthContacts + healthNotReg;
+    out.healthUB = await peopleCount(instanceUrl, accessToken, `${win} AND ${HEALTH}`);
     out.healthMonthly = await monthlySoql(HEALTH);
   } catch (err) { console.warn(`  ✗ health metrics: ${err.message}`); }
+
+  // ── Unique beneficiaries per card (contacts + not-registered people) ────────
+  // Replaces the "BU …" reports as the source of every per-card unique count.
+  // Those reports group by Contact only, so the whole unregistered population
+  // counted as one: hot meals published 188 "familias" where 317 people were
+  // served (192 contacts + 125 not-registered). The service filters are the same
+  // LIKE filters the monthly series use, so each card matches its own chart.
+  try {
+    out.cardUB = {
+      hotMeals:    await peopleCount(instanceUrl, accessToken, `${win} AND ${svcLike("Comida caliente")}`),
+      groceries:   await peopleCount(instanceUrl, accessToken, `${win} AND ${svcLike("víveres")}`),
+      clothing:    await peopleCount(instanceUrl, accessToken, `${win} AND ${svcLike("ropa")}`),
+      clinic:      await peopleCount(instanceUrl, accessToken, `${win} AND ${CLINIC_FILTER}`),
+      healthOther: await peopleCount(instanceUrl, accessToken,
+        `${win} AND ${svcLike("salud")} AND (NOT ${CLINIC_FILTER})`),
+    };
+  } catch (err) { console.warn(`  ✗ per-card unique beneficiaries: ${err.message}`); }
 
   // ── Shelter: the four categories the dashboard tracks ───────────────────────
   // The Salesforce reports filter on the delivery NAME ("CUST_NAME contains ..."),
@@ -302,6 +333,14 @@ async function fetchSectionMetrics(instanceUrl, accessToken) {
     for (const rec of sc.records ?? []) {
       const key = SHELTER_KEYS[rec.s];
       if (key) shelterCategories[key] = { services: Number(rec.q) || 0, ub: Number(rec.u) || 0 };
+    }
+    // Not-registered beneficiaries, same definition as peopleCount / the other cards.
+    const snr = await runSoql(instanceUrl, accessToken,
+      `SELECT pmdm__Service__r.Name s, COUNT_DISTINCT(N_r_Identification__c) u ` +
+      `FROM ${SD} WHERE ${win} AND ${SHELTER4} AND pmdm__Contact__c = null GROUP BY pmdm__Service__r.Name`);
+    for (const rec of snr.records ?? []) {
+      const key = SHELTER_KEYS[rec.s];
+      if (key) shelterCategories[key].ub += Number(rec.u) || 0;
     }
     out.shelterMonthly = shelterMonthly;
     out.shelterCategories = shelterCategories;
@@ -564,8 +603,10 @@ async function fetchMonthlySeries(instanceUrl, accessToken) {
   };
 
   // One grouped query → { qty, ub, ...extras }, each a 12-month array.
-  //   qty = SUM(Quantity), ub = COUNT_DISTINCT(Contact) — the same "unico"
-  //   definition the BU reports use (registered contacts only).
+  //   qty = SUM(Quantity), ub = distinct people = COUNT_DISTINCT(Contact) +
+  //   COUNT_DISTINCT(N.r. id) among rows with no contact — the same definition as
+  //   the annual card figures (peopleCount), so a card and its chart agree. The
+  //   BU reports' "unico" counts registered contacts only; it is not used here.
   //   extras = { key: "Currency_Field__c" } → SUM per month, rounded to cents.
   const monthlyStats = async (filter, extras = {}) => {
     const cols = Object.entries(extras).map(([k, f]) => `, SUM(${f}) ${k}`).join("");
@@ -578,6 +619,13 @@ async function fetchMonthlySeries(instanceUrl, accessToken) {
       const idx = (Number(rec.m) || 0) - 1;
       if (idx < 0 || idx > 11) continue;
       for (const k of Object.keys(out)) out[k][idx] = Number(rec[k]) || 0;
+    }
+    const nr = await soql(
+      `SELECT ${MONTH} m, COUNT_DISTINCT(N_r_Identification__c) e FROM ${SD} ` +
+      `WHERE ${win} AND pmdm__Contact__c = null AND (${filter}) GROUP BY ${MONTH}`);
+    for (const rec of nr.records ?? []) {
+      const idx = (Number(rec.m) || 0) - 1;
+      if (idx >= 0 && idx < 12) out.ub[idx] += Number(rec.e) || 0;
     }
     for (const k of Object.keys(extras)) out[k] = cents(out[k]);
     return out;
@@ -601,10 +649,9 @@ async function fetchMonthlySeries(instanceUrl, accessToken) {
     return out;
   };
 
-  const svc = (...parts) => `(${parts.map((p) => `pmdm__Service__r.Name LIKE '%${p}%'`).join(" OR ")})`;
+  const svc = svcLike;                 // same service-name filters as fetchSectionMetrics
   const prog = "pmdm__Service__r.pmdm__Program__r.Name";
-  // Clinic services, as the "Clínica la Y" reports define them
-  const CLINIC = svc("Atencion", "fisio", "odon");
+  const CLINIC = CLINIC_FILTER;
 
   const ms = {};
 
@@ -621,9 +668,9 @@ async function fetchMonthlySeries(instanceUrl, accessToken) {
     monthlyStats(`${svc("salud")} AND (NOT ${CLINIC})`, { cost: "Total_Cost__c" }));
   // Distinct people for the year: the "Otras ayudas médicas" report has no unique
   // formula — its Record Count (delivery rows) was being shown as unique people.
+  // Kept as the fallback for metrics.cardUB.healthOther, hence the same definition.
   ms.healthOtherUBYear = await trySeries("healthOtherUBYear", () =>
-    aggValue(instanceUrl, accessToken,
-      `SELECT COUNT_DISTINCT(pmdm__Contact__c) e FROM ${SD} WHERE ${win} AND ${svc("salud")} AND (NOT ${CLINIC})`));
+    peopleCount(instanceUrl, accessToken, `${win} AND ${svc("salud")} AND (NOT ${CLINIC})`));
   ms.healthUB = await trySeries("healthUB", () =>
     monthlyPeople(`${prog} = 'Programa de Salud (Health)'`));
   ms.shelter = await trySeries("shelter", async () => {
@@ -634,16 +681,27 @@ async function fetchMonthlySeries(instanceUrl, accessToken) {
       "Electrónicos y suministros (Condiciones de Vida)": "electronics",
     };
     const out = Object.fromEntries(Object.values(KEYS).map((k) => [k, { qty: zeros(), ub: zeros() }]));
+    const IN4 = `pmdm__Service__r.Name IN ('${Object.keys(KEYS).join("','")}')`;
     const j = await soql(
       `SELECT pmdm__Service__r.Name s, ${MONTH} m, SUM(pmdm__Quantity__c) qty, COUNT_DISTINCT(pmdm__Contact__c) ub ` +
-      `FROM ${SD} WHERE ${win} AND pmdm__Service__r.Name IN ('${Object.keys(KEYS).join("','")}') ` +
-      `GROUP BY pmdm__Service__r.Name, ${MONTH}`);
+      `FROM ${SD} WHERE ${win} AND ${IN4} GROUP BY pmdm__Service__r.Name, ${MONTH}`);
     for (const rec of j.records ?? []) {
       const key = KEYS[rec.s];
       const idx = (Number(rec.m) || 0) - 1;
       if (!key || idx < 0 || idx > 11) continue;
       out[key].qty[idx] = Number(rec.qty) || 0;
       out[key].ub[idx] = Number(rec.ub) || 0;
+    }
+    // Not-registered people per month, same definition as every other ub series.
+    const nr = await soql(
+      `SELECT pmdm__Service__r.Name s, ${MONTH} m, COUNT_DISTINCT(N_r_Identification__c) e ` +
+      `FROM ${SD} WHERE ${win} AND ${IN4} AND pmdm__Contact__c = null ` +
+      `GROUP BY pmdm__Service__r.Name, ${MONTH}`);
+    for (const rec of nr.records ?? []) {
+      const key = KEYS[rec.s];
+      const idx = (Number(rec.m) || 0) - 1;
+      if (!key || idx < 0 || idx > 11) continue;
+      out[key].ub[idx] += Number(rec.e) || 0;
     }
     return out;
   });
@@ -793,6 +851,11 @@ async function main() {
   let sectionMetrics = {};
   try {
     sectionMetrics = await fetchSectionMetrics(instanceUrl, accessToken);
+    const cu = sectionMetrics.cardUB ?? {};
+    console.log(
+      `  ✓ unique people: hotMeals=${cu.hotMeals} groceries=${cu.groceries} clothing=${cu.clothing} ` +
+      `clinic=${cu.clinic} healthOther=${cu.healthOther}`,
+    );
     console.log(
       `  ✓ health: services=${sectionMetrics.healthServices} people=${sectionMetrics.healthUB} | ` +
       `bibles=${sectionMetrics.evangelism?.bibles} vbs=${sectionMetrics.evangelism?.vbsAttendees}` +

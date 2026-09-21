@@ -202,9 +202,14 @@ function extractHotMeals(r, m = {}) {
   const ms = m.monthlySeries ?? {};
   return {
     plates: total(r.hot_meals),
-    families: total(r.hot_meals_families, 1), // aggregate[1] = Record Count = unique families served
+    // Distinct people served (contacts + not-registered), via live SOQL. The
+    // "BU Comida Caliente (familia)" report groups by Contact, so every delivery
+    // without a contact lookup collapsed into one group: it said 193 where 317
+    // people were served (192 contacts + 125 not-registered). Report = fallback,
+    // and its aggregate[1] is the "unico" formula, not the Record Count.
+    families: m.cardUB?.hotMeals ?? total(r.hot_meals_families, 1),
     monthly: monthlyByDate(r.hot_meals),
-    familiesMonthly: ms.hotMeals?.ub ?? null, // distinct contacts served each month (months overlap)
+    familiesMonthly: ms.hotMeals?.ub ?? null, // distinct people per month (months overlap)
   };
 }
 
@@ -220,14 +225,16 @@ function extractGroceries(r, m = {}) {
   const totalCost = total(r.groceries_avg_cost, 1);
   // Average unit cost per kit, so that avgCost × bags = totalCost holds on the card.
   const avgCost = bags > 0 ? totalCost / bags : 0;
-  const ubBU = total(r.groceries_bu, 1); // aggregate[1] = Record Count = unique beneficiaries (97)
+  // Unique beneficiaries = contacts + not-registered people (live SOQL); the BU
+  // report counts registered contacts only (419 vs 519 in Sep 2026).
+  const ubBU = m.cardUB?.groceries ?? total(r.groceries_bu, 1);
   return {
     bags,
     ub: ubBU,
     avgCost,
     totalCost,
     monthly: monthlyByDate(r.groceries),
-    ubMonthly: ms.groceries?.ub ?? null,     // distinct contacts per month (months overlap)
+    ubMonthly: ms.groceries?.ub ?? null,     // distinct people per month (months overlap)
     costMonthly: ms.groceries?.cost ?? null, // $ Total_Cost__c per month
   };
 }
@@ -239,15 +246,18 @@ function extractClothing(r, m = {}) {
   // January distributions happened, they were never recorded (data-entry gap).
   return {
     donations: total(r.clothing),
-    ub: total(r.clothing_bu, 1), // aggregate[1] = Record Count = unique beneficiaries (50)
+    // Contacts + not-registered people (live SOQL); the BU report counted
+    // registered contacts only (125 vs 212 in Sep 2026).
+    ub: m.cardUB?.clothing ?? total(r.clothing_bu, 1),
     monthly: monthlyByDate(r.clothing),
-    ubMonthly: ms.clothing?.ub ?? null, // distinct contacts per month (months overlap)
+    ubMonthly: ms.clothing?.ub ?? null, // distinct people per month (months overlap)
   };
 }
 
 function extractHealth(r, m = {}) {
   const clinicConsultations = total(r.health_clinic_atenciones);
-  const clinicUB = total(r.health_clinic_bu, 1); // aggregate[1] = Record Count = unique beneficiaries (86)
+  // Contacts + not-registered people (live SOQL); the BU report groups by Contact.
+  const clinicUB = m.cardUB?.clinic ?? total(r.health_clinic_bu, 1);
   // Voz y Manos = Sum of Cost per Unit over the clinic services. The report
   // ("Monto pagado por Clinica la Y", aggregate[1]) carries a CUSTOM March-only date
   // filter (verified Sep 2026: it showed $3,323.50 = March alone, vs $15,263.30 for
@@ -262,8 +272,9 @@ function extractHealth(r, m = {}) {
 
   const otherAids = total(r.health_other);
   // aggregate[2] of the report is its Record Count (delivery ROWS, not people), so
-  // the distinct-contact count comes from live SOQL; the report is the fallback.
-  const otherUB = m.monthlySeries?.healthOtherUBYear ?? total(r.health_other, 2);
+  // the distinct-people count (contacts + not-registered) comes from live SOQL;
+  // the report is the last fallback.
+  const otherUB = m.cardUB?.healthOther ?? m.monthlySeries?.healthOtherUBYear ?? total(r.health_other, 2);
   const otherInvested = total(r.health_other, 1); // aggregate[1] = total cost
 
   // Program-wide totals come from live SOQL (fetchSectionMetrics): total services =
@@ -337,10 +348,11 @@ function extractEducation(r) {
 function extractShelter(r, m = {}) {
   // Category totals come from live SOQL over the service lookup (fetchSectionMetrics):
   // the Salesforce reports filter on the delivery NAME, which drops records whose
-  // auto-name was edited, and they carry no date column for monthlies. The reports
-  // remain as fallbacks:
+  // auto-name was edited, and they carry no date column for monthlies. The SOQL ub
+  // is contacts + not-registered people, like every other card. The reports remain
+  // as fallbacks:
   //   aggregate[0] = Sum of Quantity (total items/services)
-  //   aggregate[1] = Unique Count (unique beneficiaries / families served)
+  //   aggregate[1] = Unique Count (registered contacts only)
   const sm = m.monthlySeries?.shelter;
   const cat = (key, report) => ({
     ...(m.shelterCategories?.[key] ?? { services: total(report), ub: total(report, 1) }),
@@ -609,6 +621,8 @@ function extractEmergency(r) {
 //   { level1Served, level2Served, level3Served, totalReached,            (fetchLevelMetrics)
 //     mepStatus, mepMarketReady, mepFund, mepLocations, mepMonthly,      (fetchMepMetrics)
 //     healthServices, healthUB, healthMonthly, shelterMonthly,           (fetchSectionMetrics)
+//     cardUB { hotMeals, groceries, clothing, clinic, healthOther }      ← unique
+//       people per card (contacts + not-registered); replaces the "BU …" reports,
 //     evangelism, farmsMonthly, beneficiaries,
 //     monthlySeries }   per-card 12-month arrays (fetchMonthlySeries); null = failed
 export function transformAll(r, metrics = {}) {
