@@ -1,6 +1,6 @@
 {
   "overview": {
-    "totalBeneficiaries": 2792,
+    "totalBeneficiaries": 2793,
     "totalAccounts": 757,
     "newFamilies": 132,
     "totalDeliveries": 7490,
@@ -18,7 +18,7 @@
       0,
       0
     ],
-    "totalReached": 2042
+    "totalReached": 2043
   },
   "hotMeals": {
     "plates": 4120,
@@ -617,7 +617,7 @@
       147,
       144,
       142,
-      83,
+      99,
       0,
       0,
       0
@@ -716,7 +716,7 @@
       227,
       230,
       227,
-      108,
+      134,
       0,
       0,
       0
@@ -748,7 +748,7 @@
     "vbsUnique": 440,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 2000,
+    "personasAlcanzadas": 2001,
     "biblesMonthly": [
       12,
       41,
@@ -820,15 +820,15 @@
       0
     ],
     "personasMonthly": [
-      232,
-      609,
-      609,
-      915,
-      974,
-      995,
-      950,
-      1605,
-      592,
+      233,
+      610,
+      610,
+      916,
+      975,
+      996,
+      951,
+      1606,
+      671,
       0,
       0,
       0
@@ -837,7 +837,7 @@
   "beneficiaries": {
     "combined": {
       "accounts": 757,
-      "beneficiaries": 2792,
+      "beneficiaries": 2793,
       "girls": 415,
       "boys": 423,
       "newFamilies": 132,
@@ -873,7 +873,7 @@
     },
     "quito": {
       "accounts": 418,
-      "beneficiaries": 1388,
+      "beneficiaries": 1389,
       "girls": 248,
       "boys": 258,
       "newFamilies": 81,
@@ -1027,13 +1027,13 @@
       147,
       144,
       142,
-      83,
+      99,
       0,
       0,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-09-23T15:28:04.663Z",
+  "lastUpdated": "2026-09-24T15:50:16.493Z",
   "syncWarnings": []
 }
