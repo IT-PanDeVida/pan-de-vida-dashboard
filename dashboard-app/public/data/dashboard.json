@@ -1,8 +1,8 @@
 {
   "overview": {
-    "totalBeneficiaries": 2793,
-    "totalAccounts": 757,
-    "newFamilies": 132,
+    "totalBeneficiaries": 2810,
+    "totalAccounts": 761,
+    "newFamilies": 136,
     "totalDeliveries": 7491,
     "deliveriesMonthly": [
       284,
@@ -18,7 +18,7 @@
       0,
       0
     ],
-    "totalReached": 2060
+    "totalReached": 2076
   },
   "hotMeals": {
     "plates": 4120,
@@ -501,18 +501,18 @@
     },
     "multiplication": {
       "goal": 108,
-      "done": 132
+      "done": 135
     },
     "urbanFarm": {
       "goal": null,
       "done": 37
     },
-    "total": 395,
+    "total": 398,
     "newThisYear": {
       "ideal": 12,
       "full": 12,
       "basic": 29,
-      "multiplication": 55,
+      "multiplication": 58,
       "urban": 36
     },
     "monthly": [
@@ -524,7 +524,7 @@
       23,
       23,
       17,
-      10,
+      13,
       0,
       0,
       0
@@ -594,7 +594,7 @@
       5,
       10,
       10,
-      7,
+      10,
       0,
       0,
       0
@@ -607,7 +607,7 @@
     "finished": 102,
     "aborted": 79,
     "marketReady": 10,
-    "participants": 323,
+    "participants": 326,
     "participantsMonthly": [
       13,
       78,
@@ -617,7 +617,7 @@
       147,
       144,
       142,
-      109,
+      112,
       0,
       0,
       0
@@ -716,7 +716,7 @@
       227,
       230,
       227,
-      144,
+      147,
       0,
       0,
       0
@@ -745,10 +745,10 @@
     "bibles": 342,
     "vbsCamps": 35,
     "childrenVBS": 1402,
-    "vbsUnique": 440,
+    "vbsUnique": 447,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 2018,
+    "personasAlcanzadas": 2034,
     "biblesMonthly": [
       12,
       41,
@@ -822,13 +822,13 @@
     "personasMonthly": [
       233,
       610,
-      610,
-      916,
-      975,
-      996,
+      611,
+      917,
+      976,
+      997,
       951,
-      1606,
-      705,
+      1607,
+      721,
       0,
       0,
       0
@@ -836,12 +836,12 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 757,
-      "beneficiaries": 2793,
-      "girls": 415,
-      "boys": 423,
-      "newFamilies": 132,
-      "newUB": 440,
+      "accounts": 761,
+      "beneficiaries": 2810,
+      "girls": 416,
+      "boys": 427,
+      "newFamilies": 136,
+      "newUB": 456,
       "newFamiliesMonthly": [
         2,
         9,
@@ -851,7 +851,7 @@
         17,
         19,
         19,
-        17,
+        21,
         0,
         0,
         0
@@ -865,19 +865,19 @@
         70,
         61,
         63,
-        57,
+        73,
         0,
         0,
         0
       ]
     },
     "quito": {
-      "accounts": 418,
-      "beneficiaries": 1389,
+      "accounts": 422,
+      "beneficiaries": 1404,
       "girls": 248,
-      "boys": 258,
-      "newFamilies": 81,
-      "newUB": 259,
+      "boys": 262,
+      "newFamilies": 85,
+      "newUB": 273,
       "newFamiliesMonthly": [
         0,
         3,
@@ -887,7 +887,7 @@
         9,
         12,
         9,
-        7,
+        11,
         0,
         0,
         0
@@ -901,7 +901,7 @@
         34,
         43,
         26,
-        24,
+        38,
         0,
         0,
         0
@@ -909,11 +909,11 @@
     },
     "imbabura": {
       "accounts": 319,
-      "beneficiaries": 1346,
-      "girls": 162,
+      "beneficiaries": 1348,
+      "girls": 163,
       "boys": 162,
       "newFamilies": 51,
-      "newUB": 181,
+      "newUB": 183,
       "newFamiliesMonthly": [
         2,
         6,
@@ -937,7 +937,7 @@
         36,
         18,
         37,
-        33,
+        35,
         0,
         0,
         0
@@ -1017,7 +1017,7 @@
     "totalCost": 26874.61
   },
   "level3": {
-    "individualsServed": 323,
+    "individualsServed": 326,
     "servedMonthly": [
       13,
       78,
@@ -1027,13 +1027,13 @@
       147,
       144,
       142,
-      109,
+      112,
       0,
       0,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-09-25T15:50:40.369Z",
+  "lastUpdated": "2026-09-26T14:59:11.476Z",
   "syncWarnings": []
 }
