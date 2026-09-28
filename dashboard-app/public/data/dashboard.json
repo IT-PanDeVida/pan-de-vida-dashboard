@@ -3,7 +3,7 @@
     "totalBeneficiaries": 2810,
     "totalAccounts": 761,
     "newFamilies": 136,
-    "totalDeliveries": 7491,
+    "totalDeliveries": 7614,
     "deliveriesMonthly": [
       284,
       519,
@@ -13,16 +13,16 @@
       915,
       667,
       2075,
-      434,
+      557,
       0,
       0,
       0
     ],
-    "totalReached": 2076
+    "totalReached": 2083
   },
   "hotMeals": {
-    "plates": 4120,
-    "families": 317,
+    "plates": 4236,
+    "families": 322,
     "monthly": [
       83,
       313,
@@ -32,7 +32,7 @@
       556,
       537,
       646,
-      254,
+      370,
       0,
       0,
       0
@@ -46,17 +46,17 @@
       91,
       91,
       124,
-      79,
+      94,
       0,
       0,
       0
     ]
   },
   "groceries": {
-    "bags": 842,
-    "ub": 524,
-    "avgCost": 17.520486935866984,
-    "totalCost": 14752.25,
+    "bags": 849,
+    "ub": 529,
+    "avgCost": 17.475465253239104,
+    "totalCost": 14836.67,
     "monthly": [
       29,
       48,
@@ -66,7 +66,7 @@
       134,
       18,
       397,
-      12,
+      19,
       0,
       0,
       0
@@ -80,7 +80,7 @@
       114,
       17,
       365,
-      12,
+      19,
       0,
       0,
       0
@@ -94,7 +94,7 @@
       1623.6,
       265.74,
       6354.41,
-      1833,
+      1917.42,
       0,
       0,
       0
@@ -278,7 +278,7 @@
     "schoolKitCost": 11.16,
     "backpacks": 357,
     "backpackCost": 8.81,
-    "vbsCamps": 35,
+    "vbsCamps": 36,
     "kitsMonthly": [
       1,
       0,
@@ -617,7 +617,7 @@
       147,
       144,
       142,
-      112,
+      115,
       0,
       0,
       0
@@ -716,7 +716,7 @@
       227,
       230,
       227,
-      147,
+      152,
       0,
       0,
       0
@@ -743,12 +743,12 @@
   },
   "evangelism": {
     "bibles": 342,
-    "vbsCamps": 35,
-    "childrenVBS": 1402,
+    "vbsCamps": 36,
+    "childrenVBS": 1442,
     "vbsUnique": 447,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 2034,
+    "personasAlcanzadas": 2041,
     "biblesMonthly": [
       12,
       41,
@@ -772,7 +772,7 @@
       123,
       143,
       409,
-      62,
+      102,
       0,
       0,
       0
@@ -814,7 +814,7 @@
       3,
       3,
       5,
-      2,
+      3,
       0,
       0,
       0
@@ -828,7 +828,7 @@
       997,
       951,
       1607,
-      721,
+      776,
       0,
       0,
       0
@@ -981,7 +981,7 @@
     ]
   },
   "level1": {
-    "individualsServed": 710,
+    "individualsServed": 713,
     "servedMonthly": [
       37,
       128,
@@ -991,15 +991,15 @@
       157,
       125,
       388,
-      95,
+      109,
       0,
       0,
       0
     ],
-    "totalCost": 14752.25
+    "totalCost": 14836.67
   },
   "level2": {
-    "individualsServed": 659,
+    "individualsServed": 665,
     "servedMonthly": [
       109,
       93,
@@ -1009,7 +1009,7 @@
       172,
       86,
       352,
-      80,
+      96,
       0,
       0,
       0
@@ -1027,13 +1027,13 @@
       147,
       144,
       142,
-      112,
+      115,
       0,
       0,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-09-27T15:40:45.577Z",
+  "lastUpdated": "2026-09-28T18:37:18.149Z",
   "syncWarnings": []
 }
