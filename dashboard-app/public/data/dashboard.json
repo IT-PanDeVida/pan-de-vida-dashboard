@@ -3,7 +3,7 @@
     "totalBeneficiaries": 2810,
     "totalAccounts": 761,
     "newFamilies": 136,
-    "totalDeliveries": 7614,
+    "totalDeliveries": 9261,
     "deliveriesMonthly": [
       284,
       519,
@@ -13,16 +13,16 @@
       915,
       667,
       2075,
-      557,
+      2204,
       0,
       0,
       0
     ],
-    "totalReached": 2083
+    "totalReached": 2096
   },
   "hotMeals": {
-    "plates": 4236,
-    "families": 322,
+    "plates": 4245,
+    "families": 324,
     "monthly": [
       83,
       313,
@@ -32,7 +32,7 @@
       556,
       537,
       646,
-      370,
+      379,
       0,
       0,
       0
@@ -46,17 +46,17 @@
       91,
       91,
       124,
-      94,
+      97,
       0,
       0,
       0
     ]
   },
   "groceries": {
-    "bags": 849,
-    "ub": 529,
-    "avgCost": 17.475465253239104,
-    "totalCost": 14836.67,
+    "bags": 850,
+    "ub": 530,
+    "avgCost": 17.47509411764706,
+    "totalCost": 14853.83,
     "monthly": [
       29,
       48,
@@ -66,7 +66,7 @@
       134,
       18,
       397,
-      19,
+      20,
       0,
       0,
       0
@@ -80,7 +80,7 @@
       114,
       17,
       365,
-      19,
+      20,
       0,
       0,
       0
@@ -94,15 +94,15 @@
       1623.6,
       265.74,
       6354.41,
-      1917.42,
+      1934.58,
       0,
       0,
       0
     ]
   },
   "clothing": {
-    "donations": 519,
-    "ub": 212,
+    "donations": 2119,
+    "ub": 219,
     "monthly": [
       0,
       60,
@@ -112,7 +112,7 @@
       70,
       102,
       54,
-      27,
+      1627,
       0,
       0,
       0
@@ -126,15 +126,15 @@
       43,
       56,
       34,
-      21,
+      31,
       0,
       0,
       0
     ]
   },
   "health": {
-    "totalServices": 1245,
-    "totalUB": 625,
+    "totalServices": 1282,
+    "totalUB": 634,
     "clinic": {
       "consultations": 650,
       "ub": 246,
@@ -198,8 +198,8 @@
       ]
     },
     "other": {
-      "aids": 595,
-      "ub": 488,
+      "aids": 632,
+      "ub": 499,
       "invested": 3908.02,
       "aidsMonthly": [
         86,
@@ -210,7 +210,7 @@
         44,
         10,
         344,
-        56,
+        93,
         0,
         0,
         0
@@ -224,7 +224,7 @@
         41,
         7,
         331,
-        49,
+        79,
         0,
         0,
         0
@@ -253,7 +253,7 @@
       91,
       7,
       337,
-      49,
+      79,
       0,
       0,
       0
@@ -267,7 +267,7 @@
       155,
       10,
       350,
-      56,
+      93,
       0,
       0,
       0
@@ -742,13 +742,13 @@
     ]
   },
   "evangelism": {
-    "bibles": 342,
+    "bibles": 344,
     "vbsCamps": 36,
-    "childrenVBS": 1442,
-    "vbsUnique": 447,
+    "childrenVBS": 1447,
+    "vbsUnique": 448,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 2041,
+    "personasAlcanzadas": 2054,
     "biblesMonthly": [
       12,
       41,
@@ -757,7 +757,7 @@
       46,
       27,
       31,
-      133,
+      135,
       15,
       0,
       0,
@@ -772,7 +772,7 @@
       123,
       143,
       409,
-      102,
+      107,
       0,
       0,
       0
@@ -799,7 +799,7 @@
       46,
       27,
       31,
-      133,
+      135,
       15,
       0,
       0,
@@ -828,7 +828,7 @@
       997,
       951,
       1607,
-      776,
+      801,
       0,
       0,
       0
@@ -981,7 +981,7 @@
     ]
   },
   "level1": {
-    "individualsServed": 713,
+    "individualsServed": 717,
     "servedMonthly": [
       37,
       128,
@@ -991,15 +991,15 @@
       157,
       125,
       388,
-      109,
+      114,
       0,
       0,
       0
     ],
-    "totalCost": 14836.67
+    "totalCost": 14853.83
   },
   "level2": {
-    "individualsServed": 665,
+    "individualsServed": 674,
     "servedMonthly": [
       109,
       93,
@@ -1009,7 +1009,7 @@
       172,
       86,
       352,
-      96,
+      114,
       0,
       0,
       0
@@ -1034,6 +1034,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-09-28T18:37:18.149Z",
+  "lastUpdated": "2026-09-29T16:54:29.489Z",
   "syncWarnings": []
 }
