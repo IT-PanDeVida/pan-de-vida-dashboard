@@ -3,7 +3,7 @@
     "totalBeneficiaries": 2831,
     "totalAccounts": 765,
     "newFamilies": 139,
-    "totalDeliveries": 7984,
+    "totalDeliveries": 7986,
     "deliveriesMonthly": [
       284,
       519,
@@ -14,7 +14,7 @@
       667,
       2075,
       757,
-      170,
+      172,
       0,
       0
     ],
@@ -133,7 +133,7 @@
     ]
   },
   "health": {
-    "totalServices": 1361,
+    "totalServices": 1363,
     "totalUB": 654,
     "clinic": {
       "consultations": 650,
@@ -198,9 +198,9 @@
       ]
     },
     "other": {
-      "aids": 711,
+      "aids": 713,
       "ub": 523,
-      "invested": 5904.21,
+      "invested": 5958.3,
       "aidsMonthly": [
         86,
         4,
@@ -211,7 +211,7 @@
         10,
         344,
         102,
-        70,
+        72,
         0,
         0
       ],
@@ -239,7 +239,7 @@
         166.21,
         1461.29,
         2200.26,
-        0,
+        54.09,
         0,
         0
       ]
@@ -268,7 +268,7 @@
       10,
       350,
       102,
-      70,
+      72,
       0,
       0
     ]
@@ -742,7 +742,7 @@
     ]
   },
   "evangelism": {
-    "bibles": 378,
+    "bibles": 381,
     "vbsCamps": 36,
     "childrenVBS": 1447,
     "vbsUnique": 449,
@@ -759,7 +759,7 @@
       31,
       155,
       28,
-      1,
+      4,
       0,
       0
     ],
@@ -801,7 +801,7 @@
       31,
       155,
       28,
-      1,
+      4,
       0,
       0
     ],
@@ -981,7 +981,7 @@
     ]
   },
   "level1": {
-    "individualsServed": 742,
+    "individualsServed": 745,
     "servedMonthly": [
       37,
       128,
@@ -992,7 +992,7 @@
       125,
       396,
       141,
-      47,
+      50,
       0,
       0
     ],
@@ -1014,7 +1014,7 @@
       0,
       0
     ],
-    "totalCost": 34874.31
+    "totalCost": 34928.4
   },
   "level3": {
     "individualsServed": 329,
@@ -1034,6 +1034,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-10-08T17:53:42.509Z",
+  "lastUpdated": "2026-10-09T17:27:41.647Z",
   "syncWarnings": []
 }
