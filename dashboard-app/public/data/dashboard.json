@@ -1,39 +1,39 @@
 {
   "overview": {
-    "totalBeneficiaries": 2883,
-    "totalAccounts": 776,
-    "newFamilies": 150,
-    "totalDeliveries": 8267,
+    "totalBeneficiaries": 2885,
+    "totalAccounts": 777,
+    "newFamilies": 151,
+    "totalDeliveries": 8377,
     "deliveriesMonthly": [
       281,
       513,
       1065,
-      676,
+      674,
       789,
-      882,
-      635,
-      2057,
-      740,
-      439,
+      856,
+      616,
+      2024,
+      733,
+      528,
       0,
       0
     ],
     "totalReached": 2122
   },
   "hotMeals": {
-    "plates": 4624,
+    "plates": 4734,
     "families": 335,
     "monthly": [
       80,
       307,
       730,
-      374,
+      372,
       559,
-      523,
-      505,
-      628,
-      448,
-      280,
+      497,
+      486,
+      595,
+      441,
+      369,
       0,
       0
     ],
@@ -47,7 +47,7 @@
       91,
       124,
       113,
-      95,
+      98,
       0,
       0
     ]
@@ -278,7 +278,7 @@
     "schoolKitCost": 20.37,
     "backpacks": 361,
     "backpackCost": 16.07,
-    "vbsCamps": 37,
+    "vbsCamps": 38,
     "kitsMonthly": [
       1,
       0,
@@ -743,8 +743,8 @@
   },
   "evangelism": {
     "bibles": 382,
-    "vbsCamps": 37,
-    "childrenVBS": 1516,
+    "vbsCamps": 38,
+    "childrenVBS": 1559,
     "vbsUnique": 451,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
@@ -773,7 +773,7 @@
       143,
       409,
       107,
-      69,
+      112,
       0,
       0
     ],
@@ -815,7 +815,7 @@
       3,
       5,
       3,
-      1,
+      2,
       0,
       0
     ],
@@ -829,19 +829,19 @@
       951,
       1608,
       931,
-      528,
+      542,
       0,
       0
     ]
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 776,
-      "beneficiaries": 2883,
-      "girls": 435,
+      "accounts": 777,
+      "beneficiaries": 2885,
+      "girls": 436,
       "boys": 436,
-      "newFamilies": 150,
-      "newUB": 521,
+      "newFamilies": 151,
+      "newUB": 523,
       "newFamiliesMonthly": [
         2,
         9,
@@ -852,7 +852,7 @@
         19,
         19,
         22,
-        13,
+        14,
         0,
         0
       ],
@@ -866,18 +866,18 @@
         61,
         63,
         76,
-        60,
+        62,
         0,
         0
       ]
     },
     "quito": {
-      "accounts": 426,
-      "beneficiaries": 1425,
-      "girls": 255,
+      "accounts": 427,
+      "beneficiaries": 1427,
+      "girls": 256,
       "boys": 264,
-      "newFamilies": 89,
-      "newUB": 292,
+      "newFamilies": 90,
+      "newUB": 294,
       "newFamiliesMonthly": [
         0,
         3,
@@ -888,7 +888,7 @@
         12,
         9,
         11,
-        4,
+        5,
         0,
         0
       ],
@@ -902,7 +902,7 @@
         43,
         26,
         38,
-        17,
+        19,
         0,
         0
       ]
@@ -992,7 +992,7 @@
       125,
       396,
       141,
-      110,
+      113,
       0,
       0
     ],
@@ -1010,7 +1010,7 @@
       86,
       352,
       119,
-      113,
+      121,
       0,
       0
     ],
@@ -1034,6 +1034,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-10-18T14:38:30.800Z",
+  "lastUpdated": "2026-10-19T17:31:29.284Z",
   "syncWarnings": []
 }
