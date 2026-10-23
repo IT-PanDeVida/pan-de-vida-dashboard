@@ -1,9 +1,9 @@
 {
   "overview": {
-    "totalBeneficiaries": 2885,
-    "totalAccounts": 777,
-    "newFamilies": 151,
-    "totalDeliveries": 8576,
+    "totalBeneficiaries": 2869,
+    "totalAccounts": 767,
+    "newFamilies": 141,
+    "totalDeliveries": 8577,
     "deliveriesMonthly": [
       281,
       513,
@@ -14,7 +14,7 @@
       606,
       2013,
       725,
-      709,
+      710,
       0,
       0
     ],
@@ -133,7 +133,7 @@
     ]
   },
   "health": {
-    "totalServices": 1417,
+    "totalServices": 1418,
     "totalUB": 664,
     "clinic": {
       "consultations": 650,
@@ -198,9 +198,9 @@
       ]
     },
     "other": {
-      "aids": 767,
+      "aids": 768,
       "ub": 535,
-      "invested": 7288.16,
+      "invested": 7323.16,
       "aidsMonthly": [
         86,
         4,
@@ -211,7 +211,7 @@
         10,
         344,
         102,
-        126,
+        127,
         0,
         0
       ],
@@ -239,7 +239,7 @@
         166.21,
         1461.29,
         1829.01,
-        1755.2,
+        1790.2,
         0,
         0
       ]
@@ -268,7 +268,7 @@
       10,
       350,
       102,
-      126,
+      127,
       0,
       0
     ]
@@ -505,9 +505,9 @@
     },
     "urbanFarm": {
       "goal": null,
-      "done": 37
+      "done": 27
     },
-    "total": 407,
+    "total": 397,
     "newThisYear": {
       "ideal": 12,
       "full": 12,
@@ -618,7 +618,7 @@
       144,
       142,
       144,
-      74,
+      85,
       0,
       0
     ],
@@ -717,7 +717,7 @@
       230,
       227,
       202,
-      81,
+      97,
       0,
       0
     ]
@@ -829,25 +829,25 @@
       951,
       1608,
       931,
-      721,
+      754,
       0,
       0
     ]
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 777,
-      "beneficiaries": 2885,
-      "girls": 436,
-      "boys": 436,
-      "newFamilies": 151,
-      "newUB": 523,
+      "accounts": 767,
+      "beneficiaries": 2869,
+      "girls": 435,
+      "boys": 433,
+      "newFamilies": 141,
+      "newUB": 507,
       "newFamiliesMonthly": [
         2,
         9,
         14,
         12,
-        23,
+        13,
         17,
         19,
         19,
@@ -861,7 +861,7 @@
         34,
         46,
         48,
-        60,
+        44,
         70,
         61,
         63,
@@ -872,18 +872,18 @@
       ]
     },
     "quito": {
-      "accounts": 427,
-      "beneficiaries": 1427,
-      "girls": 256,
-      "boys": 264,
-      "newFamilies": 90,
-      "newUB": 294,
+      "accounts": 417,
+      "beneficiaries": 1411,
+      "girls": 255,
+      "boys": 261,
+      "newFamilies": 80,
+      "newUB": 278,
       "newFamiliesMonthly": [
         0,
         3,
         10,
         12,
-        19,
+        9,
         9,
         12,
         9,
@@ -897,7 +897,7 @@
         7,
         35,
         48,
-        44,
+        28,
         34,
         43,
         26,
@@ -1014,7 +1014,7 @@
       0,
       0
     ],
-    "totalCost": 36313.25
+    "totalCost": 36348.25
   },
   "level3": {
     "individualsServed": 339,
@@ -1028,12 +1028,12 @@
       144,
       142,
       144,
-      74,
+      85,
       0,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-10-22T15:54:18.768Z",
+  "lastUpdated": "2026-10-23T15:46:12.459Z",
   "syncWarnings": []
 }
