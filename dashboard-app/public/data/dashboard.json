@@ -3,37 +3,37 @@
     "totalBeneficiaries": 2869,
     "totalAccounts": 767,
     "newFamilies": 141,
-    "totalDeliveries": 8577,
+    "totalDeliveries": 8586,
     "deliveriesMonthly": [
       281,
       513,
-      1063,
-      664,
+      1061,
+      663,
       776,
-      838,
-      606,
-      2013,
-      725,
-      710,
+      837,
+      601,
+      2012,
+      724,
+      718,
       0,
       0
     ],
     "totalReached": 2185
   },
   "hotMeals": {
-    "plates": 4801,
+    "plates": 4810,
     "families": 339,
     "monthly": [
       80,
       307,
-      728,
-      362,
+      726,
+      361,
       546,
-      479,
-      476,
-      584,
-      429,
-      422,
+      478,
+      471,
+      583,
+      428,
+      430,
       0,
       0
     ],
@@ -745,7 +745,7 @@
     "bibles": 393,
     "vbsCamps": 38,
     "childrenVBS": 1566,
-    "vbsUnique": 451,
+    "vbsUnique": 458,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
     "personasAlcanzadas": 2143,
@@ -838,8 +838,8 @@
     "combined": {
       "accounts": 767,
       "beneficiaries": 2869,
-      "girls": 435,
-      "boys": 433,
+      "girls": 434,
+      "boys": 432,
       "newFamilies": 141,
       "newUB": 507,
       "newFamiliesMonthly": [
@@ -910,8 +910,8 @@
     "imbabura": {
       "accounts": 330,
       "beneficiaries": 1400,
-      "girls": 175,
-      "boys": 169,
+      "girls": 174,
+      "boys": 168,
       "newFamilies": 61,
       "newUB": 229,
       "newFamiliesMonthly": [
@@ -1034,6 +1034,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-10-23T15:46:12.459Z",
+  "lastUpdated": "2026-10-24T14:36:53.852Z",
   "syncWarnings": []
 }
