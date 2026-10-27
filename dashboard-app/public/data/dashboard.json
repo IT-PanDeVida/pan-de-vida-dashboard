@@ -1,24 +1,24 @@
 {
   "overview": {
-    "totalBeneficiaries": 2869,
-    "totalAccounts": 767,
+    "totalBeneficiaries": 2757,
+    "totalAccounts": 743,
     "newFamilies": 141,
-    "totalDeliveries": 8644,
+    "totalDeliveries": 9153,
     "deliveriesMonthly": [
       281,
       508,
       1048,
       657,
       777,
-      832,
-      594,
-      1996,
-      707,
+      836,
+      741,
+      2175,
+      886,
       763,
       0,
       0
     ],
-    "totalReached": 2185
+    "totalReached": 2199
   },
   "hotMeals": {
     "plates": 4865,
@@ -133,23 +133,23 @@
     ]
   },
   "health": {
-    "totalServices": 1418,
-    "totalUB": 664,
+    "totalServices": 1927,
+    "totalUB": 708,
     "clinic": {
-      "consultations": 650,
-      "ub": 246,
-      "paidVozManos": 15263.3,
-      "paidPDV": 574,
+      "consultations": 1132,
+      "ub": 350,
+      "paidVozManos": 29524.8,
+      "paidPDV": 1018,
       "consultationsMonthly": [
         84,
         91,
         135,
         125,
         104,
-        111,
-        0,
-        0,
-        0,
+        114,
+        138,
+        173,
+        168,
         0,
         0,
         0
@@ -161,9 +161,9 @@
         81,
         61,
         65,
-        0,
-        0,
-        0,
+        82,
+        82,
+        81,
         0,
         0,
         0
@@ -174,10 +174,10 @@
         3323.5,
         3103.3,
         2354,
-        2911,
-        0,
-        0,
-        0,
+        2971,
+        3942,
+        5254.5,
+        5005,
         0,
         0,
         0
@@ -188,29 +188,29 @@
         76,
         191,
         146,
-        99,
-        0,
-        0,
-        0,
+        101,
+        125,
+        172,
+        145,
         0,
         0,
         0
       ]
     },
     "other": {
-      "aids": 768,
-      "ub": 535,
-      "invested": 7323.16,
+      "aids": 795,
+      "ub": 546,
+      "invested": 7877.16,
       "aidsMonthly": [
         86,
         4,
         31,
         6,
         14,
-        44,
-        10,
-        344,
-        102,
+        45,
+        19,
+        350,
+        113,
         127,
         0,
         0
@@ -221,10 +221,10 @@
         30,
         5,
         12,
-        41,
-        7,
-        331,
-        87,
+        42,
+        15,
+        336,
+        97,
         87,
         0,
         0
@@ -235,10 +235,10 @@
         232.92,
         356,
         386.06,
-        759.65,
-        166.21,
-        1461.29,
-        1829.01,
+        779.65,
+        350.21,
+        1587.29,
+        2053.01,
         1790.2,
         0,
         0
@@ -251,9 +251,9 @@
       83,
       65,
       91,
-      7,
-      331,
-      87,
+      90,
+      397,
+      158,
       87,
       0,
       0
@@ -264,10 +264,10 @@
       166,
       131,
       118,
-      155,
-      10,
-      344,
-      102,
+      159,
+      157,
+      523,
+      281,
       127,
       0,
       0
@@ -748,7 +748,7 @@
     "vbsUnique": 458,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 2143,
+    "personasAlcanzadas": 2153,
     "biblesMonthly": [
       12,
       41,
@@ -826,9 +826,9 @@
       919,
       976,
       997,
-      951,
-      1594,
-      931,
+      988,
+      1618,
+      985,
       808,
       0,
       0
@@ -836,10 +836,10 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 767,
-      "beneficiaries": 2869,
-      "girls": 433,
-      "boys": 432,
+      "accounts": 743,
+      "beneficiaries": 2757,
+      "girls": 420,
+      "boys": 416,
       "newFamilies": 141,
       "newUB": 507,
       "newFamiliesMonthly": [
@@ -872,10 +872,10 @@
       ]
     },
     "quito": {
-      "accounts": 417,
-      "beneficiaries": 1411,
-      "girls": 255,
-      "boys": 261,
+      "accounts": 412,
+      "beneficiaries": 1382,
+      "girls": 253,
+      "boys": 255,
       "newFamilies": 80,
       "newUB": 278,
       "newFamiliesMonthly": [
@@ -908,10 +908,10 @@
       ]
     },
     "imbabura": {
-      "accounts": 330,
-      "beneficiaries": 1400,
-      "girls": 173,
-      "boys": 168,
+      "accounts": 311,
+      "beneficiaries": 1317,
+      "girls": 162,
+      "boys": 158,
       "newFamilies": 61,
       "newUB": 229,
       "newFamiliesMonthly": [
@@ -999,7 +999,7 @@
     "totalCost": 16388.85
   },
   "level2": {
-    "individualsServed": 704,
+    "individualsServed": 742,
     "servedMonthly": [
       109,
       93,
@@ -1007,14 +1007,14 @@
       149,
       124,
       172,
-      86,
-      346,
-      119,
+      145,
+      410,
+      186,
       145,
       0,
       0
     ],
-    "totalCost": 36348.25
+    "totalCost": 51607.75
   },
   "level3": {
     "individualsServed": 339,
@@ -1034,6 +1034,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-10-26T17:25:21.011Z",
+  "lastUpdated": "2026-10-27T16:42:49.420Z",
   "syncWarnings": []
 }
