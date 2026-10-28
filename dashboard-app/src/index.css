@@ -909,6 +909,49 @@ p { margin: 0; }
   outline: none;
 }
 
+/* ── INFO TOOLTIP (the "i" beside a box's label) ─────── */
+.pdv-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin: -3px 0 -3px 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-4);
+  vertical-align: middle;
+  cursor: help;
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+
+.pdv-info-btn:hover,
+.pdv-info-btn:focus-visible {
+  color: var(--blue);
+  background: rgba(26, 115, 232, 0.1);
+  outline: none;
+}
+
+.pdv-tooltip {
+  position: fixed;
+  z-index: 300; /* above the monthly popup (200) */
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--text-1);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: left;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  pointer-events: none;
+  white-space: pre-line;
+}
+
 /* ── MONTHLY POPUP ───────────────────────────────────── */
 .pdv-modal-overlay {
   position: fixed;

@@ -210,6 +210,9 @@ function extractHotMeals(r, m = {}) {
     families: m.cardUB?.hotMeals ?? total(r.hot_meals_families, 1),
     monthly: monthlyByDate(r.hot_meals),
     familiesMonthly: ms.hotMeals?.ub ?? null, // distinct people per month (months overlap)
+    // Estimated people in those families (registered household sizes + average
+    // size for not-registered people) — see fetchSectionMetrics. No report fallback.
+    people: m.hotMealsPeople ?? null,
   };
 }
 

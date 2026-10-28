@@ -309,6 +309,33 @@ async function fetchSectionMetrics(instanceUrl, accessToken) {
     };
   } catch (err) { console.warn(`  ✗ per-card unique beneficiaries: ${err.message}`); }
 
+  // ── People represented by the hot-meal families (estimate) ──────────────────
+  // Registered: sum of npsp__Number_of_Household_Members__c over the distinct
+  // households served (an NPSP rollup — equals the Contact count of each
+  // household; verified Oct 2026: 207 households = 712 people). Not-registered
+  // people have no household in Salesforce, so each one is assumed to represent
+  // an average-sized family: the mean over ALL active families (households with
+  // an active Beneficiary contact — 783 households / 3.71 in Oct 2026), per Mati.
+  try {
+    const HOT = `${win} AND ${svcLike("Comida caliente")}`;
+    const membersOf = async (where) => (await runSoql(instanceUrl, accessToken,
+      `SELECT SUM(npsp__Number_of_Household_Members__c) e, COUNT(Id) n FROM Account WHERE ${where}`)).records?.[0] ?? {};
+    const hh = await membersOf(`Id IN (SELECT Contact_Assigned_Household__c FROM ${SD} WHERE ${HOT})`);
+    const registered = Number(hh.e) || 0;
+    const households = Number(hh.n) || 0;
+    const notRegistered = await agg(
+      `SELECT COUNT_DISTINCT(N_r_Identification__c) e FROM ${SD} WHERE ${HOT} AND pmdm__Contact__c = null`);
+    const act = await membersOf(
+      `Id IN (SELECT AccountId FROM Contact WHERE RecordType.Name = 'Beneficiary' AND Status__c = 'active')`);
+    const activeHouseholds = Number(act.n) || 0;
+    const avg = activeHouseholds ? (Number(act.e) || 0) / activeHouseholds : 0;
+    out.hotMealsPeople = {
+      estimate: registered + Math.round(notRegistered * avg),
+      registered, households, notRegistered, activeHouseholds,
+      avgHouseholdSize: Math.round(avg * 100) / 100,
+    };
+  } catch (err) { console.warn(`  ✗ hot-meal people estimate: ${err.message}`); }
+
   // ── Shelter: the four categories the dashboard tracks ───────────────────────
   // The Salesforce reports filter on the delivery NAME ("CUST_NAME contains ..."),
   // which silently drops records whose auto-name was edited, and they lack a date
@@ -855,6 +882,11 @@ async function main() {
     console.log(
       `  ✓ unique people: hotMeals=${cu.hotMeals} groceries=${cu.groceries} clothing=${cu.clothing} ` +
       `clinic=${cu.clinic} healthOther=${cu.healthOther}`,
+    );
+    const hp = sectionMetrics.hotMealsPeople;
+    if (hp) console.log(
+      `  ✓ hot-meal people ≈${hp.estimate} (${hp.registered} in ${hp.households} registered households + ` +
+      `${hp.notRegistered} not-registered × ${hp.avgHouseholdSize}, avg of ${hp.activeHouseholds} active households)`,
     );
     console.log(
       `  ✓ health: services=${sectionMetrics.healthServices} people=${sectionMetrics.healthUB} | ` +
