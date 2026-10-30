@@ -3,37 +3,37 @@
     "totalBeneficiaries": 2757,
     "totalAccounts": 743,
     "newFamilies": 141,
-    "totalDeliveries": 9161,
+    "totalDeliveries": 9183,
     "deliveriesMonthly": [
       281,
-      508,
-      1044,
+      496,
+      1036,
       653,
-      773,
-      836,
+      764,
+      834,
       733,
-      2171,
+      2168,
       886,
-      766,
+      783,
       0,
       0
     ],
-    "totalReached": 2199
+    "totalReached": 2205
   },
   "hotMeals": {
-    "plates": 4873,
-    "families": 339,
+    "plates": 4895,
+    "families": 340,
     "monthly": [
       80,
-      302,
-      709,
+      290,
+      701,
       351,
-      537,
-      473,
+      528,
+      471,
       456,
-      569,
+      566,
       411,
-      475,
+      492,
       0,
       0
     ],
@@ -47,14 +47,14 @@
       91,
       124,
       113,
-      106,
+      108,
       0,
       0
     ],
     "people": {
-      "estimate": 1195,
-      "registered": 712,
-      "households": 207,
+      "estimate": 1202,
+      "registered": 719,
+      "households": 208,
       "notRegistered": 130,
       "activeHouseholds": 749,
       "avgHouseholdSize": 3.71
@@ -615,7 +615,7 @@
     "finished": 102,
     "aborted": 79,
     "marketReady": 10,
-    "participants": 340,
+    "participants": 344,
     "participantsMonthly": [
       13,
       78,
@@ -626,7 +626,7 @@
       145,
       143,
       144,
-      114,
+      136,
       0,
       0
     ],
@@ -722,18 +722,18 @@
       281,
       224,
       227,
-      231,
+      232,
       228,
-      202,
-      138,
+      206,
+      180,
       0,
       0
     ]
   },
   "sharkTank": {
-    "winners": 11,
-    "pdvCost": 3111.12,
-    "winnersThisYear": 2,
+    "winners": 12,
+    "pdvCost": 3329.73,
+    "winnersThisYear": 3,
     "monthly": [
       0,
       0,
@@ -741,7 +741,7 @@
       0,
       0,
       0,
-      1,
+      2,
       1,
       0,
       0,
@@ -756,7 +756,7 @@
     "vbsUnique": 458,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 2153,
+    "personasAlcanzadas": 2159,
     "biblesMonthly": [
       12,
       41,
@@ -837,7 +837,7 @@
       993,
       1618,
       985,
-      902,
+      972,
       0,
       0
     ]
@@ -847,7 +847,7 @@
       "accounts": 743,
       "beneficiaries": 2757,
       "girls": 420,
-      "boys": 416,
+      "boys": 415,
       "newFamilies": 141,
       "newUB": 507,
       "newFamiliesMonthly": [
@@ -919,7 +919,7 @@
       "accounts": 311,
       "beneficiaries": 1317,
       "girls": 162,
-      "boys": 158,
+      "boys": 157,
       "newFamilies": 61,
       "newUB": 229,
       "newFamiliesMonthly": [
@@ -1000,7 +1000,7 @@
       125,
       396,
       142,
-      136,
+      138,
       0,
       0
     ],
@@ -1025,7 +1025,7 @@
     "totalCost": 51607.75
   },
   "level3": {
-    "individualsServed": 340,
+    "individualsServed": 344,
     "servedMonthly": [
       13,
       78,
@@ -1036,12 +1036,12 @@
       145,
       143,
       144,
-      114,
+      136,
       0,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-10-29T17:27:03.963Z",
+  "lastUpdated": "2026-10-30T17:01:58.660Z",
   "syncWarnings": []
 }
