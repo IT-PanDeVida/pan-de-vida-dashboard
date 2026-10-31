@@ -626,7 +626,7 @@
       145,
       143,
       144,
-      136,
+      154,
       0,
       0
     ],
@@ -725,7 +725,7 @@
       232,
       228,
       206,
-      180,
+      204,
       0,
       0
     ]
@@ -837,7 +837,7 @@
       993,
       1618,
       985,
-      972,
+      1034,
       0,
       0
     ]
@@ -846,8 +846,8 @@
     "combined": {
       "accounts": 743,
       "beneficiaries": 2757,
-      "girls": 420,
-      "boys": 415,
+      "girls": 419,
+      "boys": 414,
       "newFamilies": 141,
       "newUB": 507,
       "newFamiliesMonthly": [
@@ -882,8 +882,8 @@
     "quito": {
       "accounts": 412,
       "beneficiaries": 1382,
-      "girls": 253,
-      "boys": 255,
+      "girls": 252,
+      "boys": 254,
       "newFamilies": 80,
       "newUB": 278,
       "newFamiliesMonthly": [
@@ -1036,12 +1036,12 @@
       145,
       143,
       144,
-      136,
+      154,
       0,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-10-30T17:01:58.660Z",
+  "lastUpdated": "2026-10-31T16:08:43.347Z",
   "syncWarnings": []
 }
