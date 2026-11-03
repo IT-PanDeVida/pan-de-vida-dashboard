@@ -846,7 +846,7 @@
     "combined": {
       "accounts": 743,
       "beneficiaries": 2757,
-      "girls": 419,
+      "girls": 418,
       "boys": 414,
       "newFamilies": 141,
       "newUB": 507,
@@ -918,7 +918,7 @@
     "imbabura": {
       "accounts": 311,
       "beneficiaries": 1317,
-      "girls": 162,
+      "girls": 161,
       "boys": 157,
       "newFamilies": 61,
       "newUB": 229,
@@ -1042,6 +1042,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-02T20:48:53.035Z",
+  "lastUpdated": "2026-11-03T18:28:18.354Z",
   "syncWarnings": []
 }
