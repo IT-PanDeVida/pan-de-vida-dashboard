@@ -3,38 +3,38 @@
     "totalBeneficiaries": 2772,
     "totalAccounts": 747,
     "newFamilies": 145,
-    "totalDeliveries": 9400,
+    "totalDeliveries": 9547,
     "deliveriesMonthly": [
       273,
-      485,
-      1012,
-      635,
-      749,
-      813,
-      705,
-      2120,
-      866,
-      821,
-      129,
+      478,
+      998,
+      625,
+      720,
+      798,
+      693,
+      2106,
+      863,
+      820,
+      250,
       0
     ],
     "totalReached": 2208
   },
   "hotMeals": {
-    "plates": 5056,
-    "families": 344,
+    "plates": 5202,
+    "families": 346,
     "monthly": [
       72,
-      279,
-      677,
-      333,
-      513,
-      450,
-      428,
-      518,
-      391,
-      502,
-      101,
+      272,
+      663,
+      323,
+      484,
+      435,
+      416,
+      504,
+      388,
+      500,
+      222,
       0
     ],
     "familiesMonthly": [
@@ -48,14 +48,14 @@
       124,
       113,
       114,
-      41,
+      78,
       0
     ],
     "people": {
-      "estimate": 1217,
-      "registered": 727,
-      "households": 210,
-      "notRegistered": 132,
+      "estimate": 1223,
+      "registered": 729,
+      "households": 211,
+      "notRegistered": 133,
       "activeHouseholds": 753,
       "avgHouseholdSize": 3.71
     }
@@ -141,7 +141,7 @@
     ]
   },
   "health": {
-    "totalServices": 1929,
+    "totalServices": 1930,
     "totalUB": 709,
     "clinic": {
       "consultations": 1131,
@@ -206,9 +206,9 @@
       ]
     },
     "other": {
-      "aids": 798,
-      "ub": 548,
-      "invested": 6646.37,
+      "aids": 799,
+      "ub": 549,
+      "invested": 6677.87,
       "aidsMonthly": [
         86,
         4,
@@ -219,7 +219,7 @@
         19,
         350,
         113,
-        128,
+        129,
         1,
         0
       ],
@@ -233,7 +233,7 @@
         15,
         336,
         97,
-        88,
+        89,
         1,
         0
       ],
@@ -247,7 +247,7 @@
         350.21,
         1587.29,
         568.01,
-        1979.95,
+        2011.45,
         19.64,
         0
       ]
@@ -262,7 +262,7 @@
       90,
       397,
       158,
-      88,
+      89,
       1,
       0
     ],
@@ -276,7 +276,7 @@
       157,
       523,
       281,
-      128,
+      129,
       1,
       0
     ]
@@ -286,7 +286,7 @@
     "schoolKitCost": 20.32,
     "backpacks": 363,
     "backpackCost": 16.01,
-    "vbsCamps": 41,
+    "vbsCamps": 42,
     "kitsMonthly": [
       1,
       0,
@@ -627,7 +627,7 @@
       143,
       144,
       155,
-      16,
+      19,
       0
     ],
     "fund": {
@@ -726,7 +726,7 @@
       228,
       204,
       207,
-      16,
+      19,
       0
     ]
   },
@@ -751,8 +751,8 @@
   },
   "evangelism": {
     "bibles": 404,
-    "vbsCamps": 41,
-    "childrenVBS": 1643,
+    "vbsCamps": 42,
+    "childrenVBS": 1695,
     "vbsUnique": 463,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
@@ -782,7 +782,7 @@
       409,
       107,
       139,
-      57,
+      109,
       0
     ],
     "pofMonthly": [
@@ -824,7 +824,7 @@
       5,
       3,
       3,
-      2,
+      3,
       0
     ],
     "personasMonthly": [
@@ -838,7 +838,7 @@
       1619,
       986,
       1065,
-      250,
+      385,
       0
     ]
   },
@@ -989,7 +989,7 @@
     ]
   },
   "level1": {
-    "individualsServed": 771,
+    "individualsServed": 772,
     "servedMonthly": [
       37,
       128,
@@ -1001,13 +1001,13 @@
       396,
       142,
       155,
-      45,
+      82,
       0
     ],
     "totalCost": 16526.44
   },
   "level2": {
-    "individualsServed": 744,
+    "individualsServed": 747,
     "servedMonthly": [
       109,
       93,
@@ -1018,11 +1018,11 @@
       145,
       410,
       186,
-      146,
-      43,
+      147,
+      78,
       0
     ],
-    "totalCost": 50341.96000000001
+    "totalCost": 50373.46000000001
   },
   "level3": {
     "individualsServed": 345,
@@ -1037,11 +1037,11 @@
       143,
       144,
       155,
-      16,
+      19,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-11T18:43:43.147Z",
+  "lastUpdated": "2026-11-12T18:58:14.476Z",
   "syncWarnings": []
 }
