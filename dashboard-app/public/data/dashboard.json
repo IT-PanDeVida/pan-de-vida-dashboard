@@ -3,7 +3,7 @@
     "totalBeneficiaries": 2772,
     "totalAccounts": 747,
     "newFamilies": 145,
-    "totalDeliveries": 9547,
+    "totalDeliveries": 9551,
     "deliveriesMonthly": [
       273,
       478,
@@ -15,10 +15,10 @@
       2106,
       863,
       820,
-      250,
+      254,
       0
     ],
-    "totalReached": 2208
+    "totalReached": 2210
   },
   "hotMeals": {
     "plates": 5202,
@@ -61,10 +61,10 @@
     }
   },
   "groceries": {
-    "bags": 952,
-    "ub": 555,
-    "avgCost": 17.35970588235294,
-    "totalCost": 16526.44,
+    "bags": 956,
+    "ub": 556,
+    "avgCost": 17.338117154811716,
+    "totalCost": 16575.24,
     "monthly": [
       29,
       48,
@@ -76,7 +76,7 @@
       397,
       22,
       95,
-      4,
+      8,
       0
     ],
     "ubMonthly": [
@@ -90,7 +90,7 @@
       365,
       22,
       92,
-      4,
+      8,
       0
     ],
     "costMonthly": [
@@ -104,7 +104,7 @@
       6354.41,
       1967.52,
       1553.01,
-      68.64,
+      117.44,
       0
     ]
   },
@@ -627,7 +627,7 @@
       143,
       144,
       155,
-      19,
+      22,
       0
     ],
     "fund": {
@@ -726,7 +726,7 @@
       228,
       204,
       207,
-      19,
+      22,
       0
     ]
   },
@@ -756,7 +756,7 @@
     "vbsUnique": 463,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
-    "personasAlcanzadas": 2162,
+    "personasAlcanzadas": 2164,
     "biblesMonthly": [
       12,
       41,
@@ -838,7 +838,7 @@
       1619,
       986,
       1065,
-      385,
+      408,
       0
     ]
   },
@@ -989,7 +989,7 @@
     ]
   },
   "level1": {
-    "individualsServed": 772,
+    "individualsServed": 773,
     "servedMonthly": [
       37,
       128,
@@ -1001,10 +1001,10 @@
       396,
       142,
       155,
-      82,
+      86,
       0
     ],
-    "totalCost": 16526.44
+    "totalCost": 16575.24
   },
   "level2": {
     "individualsServed": 747,
@@ -1037,11 +1037,11 @@
       143,
       144,
       155,
-      19,
+      22,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-12T18:58:14.476Z",
+  "lastUpdated": "2026-11-13T18:33:43.606Z",
   "syncWarnings": []
 }
