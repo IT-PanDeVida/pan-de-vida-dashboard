@@ -1,8 +1,8 @@
 {
   "overview": {
-    "totalBeneficiaries": 2772,
-    "totalAccounts": 747,
-    "newFamilies": 145,
+    "totalBeneficiaries": 2781,
+    "totalAccounts": 749,
+    "newFamilies": 147,
     "totalDeliveries": 9551,
     "deliveriesMonthly": [
       273,
@@ -56,8 +56,8 @@
       "registered": 729,
       "households": 211,
       "notRegistered": 133,
-      "activeHouseholds": 753,
-      "avgHouseholdSize": 3.71
+      "activeHouseholds": 755,
+      "avgHouseholdSize": 3.72
     }
   },
   "groceries": {
@@ -505,11 +505,11 @@
     },
     "basicFarm": {
       "goal": 118,
-      "done": 165
+      "done": 166
     },
     "multiplication": {
       "goal": 108,
-      "done": 141
+      "done": 140
     },
     "urbanFarm": {
       "goal": null,
@@ -519,7 +519,7 @@
     "newThisYear": {
       "ideal": 12,
       "full": 12,
-      "basic": 32,
+      "basic": 33,
       "multiplication": 67,
       "urban": 36
     },
@@ -534,7 +534,7 @@
       17,
       13,
       12,
-      0,
+      1,
       0
     ],
     "urbanMonthly": [
@@ -590,7 +590,7 @@
       4,
       3,
       3,
-      0,
+      1,
       0
     ],
     "multiplicationMonthly": [
@@ -627,7 +627,7 @@
       143,
       144,
       155,
-      22,
+      36,
       0
     ],
     "fund": {
@@ -726,7 +726,7 @@
       228,
       204,
       207,
-      22,
+      36,
       0
     ]
   },
@@ -838,18 +838,18 @@
       1619,
       986,
       1065,
-      408,
+      458,
       0
     ]
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 747,
-      "beneficiaries": 2772,
-      "girls": 421,
+      "accounts": 749,
+      "beneficiaries": 2781,
+      "girls": 423,
       "boys": 414,
-      "newFamilies": 145,
-      "newUB": 521,
+      "newFamilies": 147,
+      "newUB": 530,
       "newFamiliesMonthly": [
         2,
         9,
@@ -861,7 +861,7 @@
         19,
         22,
         14,
-        4,
+        6,
         0
       ],
       "newUBMonthly": [
@@ -875,7 +875,7 @@
         63,
         76,
         62,
-        14,
+        23,
         0
       ]
     },
@@ -916,12 +916,12 @@
       ]
     },
     "imbabura": {
-      "accounts": 315,
-      "beneficiaries": 1331,
-      "girls": 164,
+      "accounts": 317,
+      "beneficiaries": 1340,
+      "girls": 166,
       "boys": 159,
-      "newFamilies": 65,
-      "newUB": 243,
+      "newFamilies": 67,
+      "newUB": 252,
       "newFamiliesMonthly": [
         2,
         6,
@@ -933,7 +933,7 @@
         10,
         11,
         9,
-        4,
+        6,
         0
       ],
       "newUBMonthly": [
@@ -947,7 +947,7 @@
         37,
         38,
         43,
-        14,
+        23,
         0
       ]
     }
@@ -1037,11 +1037,11 @@
       143,
       144,
       155,
-      22,
+      36,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-13T18:33:43.606Z",
+  "lastUpdated": "2026-11-14T17:11:01.419Z",
   "syncWarnings": []
 }
