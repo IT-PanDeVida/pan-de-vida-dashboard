@@ -3,38 +3,38 @@
     "totalBeneficiaries": 2781,
     "totalAccounts": 749,
     "newFamilies": 147,
-    "totalDeliveries": 9551,
+    "totalDeliveries": 9672,
     "deliveriesMonthly": [
       273,
-      478,
-      998,
-      625,
-      720,
-      798,
-      693,
-      2106,
-      863,
-      820,
-      254,
+      476,
+      993,
+      621,
+      708,
+      792,
+      680,
+      2078,
+      852,
+      785,
+      320,
       0
     ],
     "totalReached": 2210
   },
   "hotMeals": {
-    "plates": 5202,
+    "plates": 5323,
     "families": 346,
     "monthly": [
       72,
-      272,
-      663,
-      323,
-      484,
-      435,
-      416,
-      504,
-      388,
-      500,
-      222,
+      270,
+      658,
+      319,
+      472,
+      429,
+      403,
+      476,
+      377,
+      465,
+      288,
       0
     ],
     "familiesMonthly": [
@@ -48,7 +48,7 @@
       124,
       113,
       114,
-      78,
+      91,
       0
     ],
     "people": {
@@ -286,7 +286,7 @@
     "schoolKitCost": 20.32,
     "backpacks": 363,
     "backpackCost": 16.01,
-    "vbsCamps": 42,
+    "vbsCamps": 43,
     "kitsMonthly": [
       1,
       0,
@@ -627,7 +627,7 @@
       143,
       144,
       155,
-      36,
+      39,
       0
     ],
     "fund": {
@@ -726,7 +726,7 @@
       228,
       204,
       207,
-      36,
+      39,
       0
     ]
   },
@@ -751,8 +751,8 @@
   },
   "evangelism": {
     "bibles": 404,
-    "vbsCamps": 42,
-    "childrenVBS": 1695,
+    "vbsCamps": 43,
+    "childrenVBS": 1746,
     "vbsUnique": 463,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
@@ -782,7 +782,7 @@
       409,
       107,
       139,
-      109,
+      160,
       0
     ],
     "pofMonthly": [
@@ -824,7 +824,7 @@
       5,
       3,
       3,
-      3,
+      4,
       0
     ],
     "personasMonthly": [
@@ -838,7 +838,7 @@
       1619,
       986,
       1065,
-      458,
+      504,
       0
     ]
   },
@@ -1001,7 +1001,7 @@
       396,
       142,
       155,
-      86,
+      99,
       0
     ],
     "totalCost": 16575.24
@@ -1019,7 +1019,7 @@
       410,
       186,
       147,
-      78,
+      88,
       0
     ],
     "totalCost": 50373.46000000001
@@ -1037,11 +1037,11 @@
       143,
       144,
       155,
-      36,
+      39,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-14T17:09:50.054Z",
+  "lastUpdated": "2026-11-15T17:44:14.747Z",
   "syncWarnings": []
 }
