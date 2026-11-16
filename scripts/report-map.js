@@ -273,12 +273,28 @@ function extractHealth(r, m = {}) {
     : total(r.health_clinic_monto, 1);
   const clinicPDV = total(r.health_clinic_pdv_cost);  // aggregate[0] = Sum of Cost PDV = $62
 
-  const otherAids = total(r.health_other);
-  // aggregate[2] of the report is its Record Count (delivery ROWS, not people), so
-  // the distinct-people count (contacts + not-registered) comes from live SOQL;
-  // the report is the last fallback.
-  const otherUB = m.cardUB?.healthOther ?? m.monthlySeries?.healthOtherUBYear ?? total(r.health_other, 2);
-  const otherInvested = total(r.health_other, 1); // aggregate[1] = total cost
+  // Aid outside the clinic is split into budget lines by live SOQL (healthParts):
+  // other medical assistance, hygiene kits, vitamins and diapers. The "Otras
+  // ayudas médicas" report lumps all of them together, so it is only the fallback
+  // — when the split is missing, `other` carries the combined figures and the
+  // hygiene / vitamins / diapers lines are null (the UI hides them).
+  //   report aggregate[1] = total cost; aggregate[2] = Record Count (delivery
+  //   ROWS, not people), hence the SOQL distinct-people count ahead of it.
+  const hp = m.healthParts;
+  const line = (part, series) => ({
+    qty: part.qty,
+    ub: part.ub,
+    cost: part.cost,
+    qtyMonthly: series?.qty ?? null,
+    ubMonthly: series?.ub ?? null,
+    costMonthly: series?.cost ?? null,
+  });
+  const otherSeries = hp ? ms.healthOtherMedical : ms.healthOther;
+  const otherAids = hp ? hp.other.qty : total(r.health_other);
+  const otherUB = hp
+    ? hp.other.ub
+    : m.cardUB?.healthOther ?? m.monthlySeries?.healthOtherUBYear ?? total(r.health_other, 2);
+  const otherInvested = hp ? hp.other.cost : total(r.health_other, 1);
 
   // Program-wide totals come from live SOQL (fetchSectionMetrics): total services =
   // sum of quantity across the Health program this year; total people = distinct
@@ -306,10 +322,20 @@ function extractHealth(r, m = {}) {
       aids: otherAids,
       ub: otherUB,
       invested: otherInvested,
-      aidsMonthly: ms.healthOther?.qty ?? null,
-      ubMonthly: ms.healthOther?.ub ?? null,
-      investedMonthly: ms.healthOther?.cost ?? null,
+      aidsMonthly: otherSeries?.qty ?? null,
+      ubMonthly: otherSeries?.ub ?? null,
+      investedMonthly: otherSeries?.cost ?? null,
     },
+    hygiene: hp ? line(hp.hygiene, ms.hygiene) : null,
+    vitamins: hp ? line(hp.vitamins, ms.vitamins) : null,
+    // Adults vs. babies (0–2); `ub` = distinct people across both kinds.
+    diapers: hp ? {
+      adult: line(hp.diapersAdult, ms.diapersAdult),
+      child: line(hp.diapersChild, ms.diapersChild),
+      ub: hp.diapers.ub,
+      ubMonthly: ms.diapers?.ub ?? null,
+      cost: hp.diapers.cost,
+    } : null,
     ubMonthly: ms.healthUB ?? null, // distinct people per month, program-wide (months overlap)
     monthly: m.healthMonthly ?? sumMonthly(
       monthlyByDate(r.health_clinic_atenciones),
@@ -328,6 +354,11 @@ function extractEducation(r) {
     const qty = total(report, 0);
     return qty > 0 ? Math.round((total(report, 1) / qty) * 100) / 100 : 0;
   };
+  // A school kit handed to a child = school supplies ("Kit de útiles escolares")
+  // + a backpack ("Mochila") + vitamins (recorded under Health). Salesforce costs
+  // the three separately, so `schoolKits` / `schoolKitCost` are the SUPPLIES line
+  // only, and the dashboard labels them "school supplies".
+  const cents = (v) => Math.round(v * 100) / 100;
   const kits = total(r.education_kits);
   const kitCost = unitCost(r.education_kits_cost);
   const backpacks = total(r.education_backpacks);
@@ -339,12 +370,16 @@ function extractEducation(r) {
   return {
     schoolKits: kits,
     schoolKitCost: kitCost,
+    schoolKitTotalCost: cents(total(r.education_kits_cost, 1)), // exact sum, not units × rounded unit cost
     backpacks,
     backpackCost,
+    backpackTotalCost: cents(total(r.education_backpacks_cost, 1)),
     vbsCamps,
     kitsMonthly,
     backpacksMonthly,
-    monthly: sumMonthly(kitsMonthly, backpacksMonthly),
+    // Kits per month. This used to be supplies + backpacks, which counted every
+    // kit twice (628 in Aug 2026 for 314 kits): the two travel together.
+    monthly: kitsMonthly,
   };
 }
 
@@ -356,27 +391,44 @@ function extractShelter(r, m = {}) {
   // as fallbacks:
   //   aggregate[0] = Sum of Quantity (total items/services)
   //   aggregate[1] = Unique Count (registered contacts only)
+  //
+  // Each category also carries `deliveries` (delivery records — a family can have
+  // several) and `cost` (SUM of Total Cost: purchases only, in-kind donations are
+  // recorded at $0). Both are SOQL-only: null when the fallback reports are used.
+  // `construction` (Hit Squads + donated building materials) has no report at all.
   const sm = m.monthlySeries?.shelter;
   const cat = (key, report) => ({
-    ...(m.shelterCategories?.[key] ?? { services: total(report), ub: total(report, 1) }),
+    ...(m.shelterCategories?.[key]
+      ?? { services: total(report), ub: total(report, 1), deliveries: null, cost: null }),
     monthly: sm?.[key]?.qty ?? null,
-    ubMonthly: sm?.[key]?.ub ?? null, // distinct contacts per month (months overlap)
+    ubMonthly: sm?.[key]?.ub ?? null, // distinct people per month (months overlap)
+    costMonthly: sm?.[key]?.cost ?? null,
   });
   const furniture = cat("furniture", r.shelter_furniture);
   const appliances = cat("appliances", r.shelter_appliances);
   const household = cat("household", r.shelter_household);
   const electronics = cat("electronics", r.shelter_electronics);
+  const construction = cat("construction", null);
+  const cats = [furniture, appliances, household, electronics, construction];
 
-  const services = furniture.services + appliances.services + household.services + electronics.services;
-  const ub = furniture.ub + appliances.ub + household.ub + electronics.ub;
+  const services = cats.reduce((a, c) => a + c.services, 0);
+  const ub = cats.reduce((a, c) => a + c.ub, 0);
+  const cost = m.shelterCategories
+    ? Math.round(cats.reduce((a, c) => a + (c.cost ?? 0), 0) * 100) / 100
+    : null;
 
   return {
     services,
     ub,
+    cost,
     furniture,
     appliances,
     household,
     electronics,
+    construction,
+    costMonthly: sm
+      ? sumMonthly(...Object.values(sm).map((s) => s?.cost)).map((v) => Math.round(v * 100) / 100)
+      : null,
     // The four shelter reports have no delivery-date column, so their rows can't
     // be binned by month (this is why the tab's chart was empty). The monthly
     // series comes from live SOQL over the same four service categories.
@@ -387,9 +439,7 @@ function extractShelter(r, m = {}) {
       monthlyByDate(r.shelter_electronics),
     ),
     // Sum of the category series — same construction as the `ub` headline above
-    ubMonthly: sm
-      ? sumMonthly(sm.furniture?.ub, sm.appliances?.ub, sm.household?.ub, sm.electronics?.ub)
-      : null,
+    ubMonthly: sm ? sumMonthly(...Object.values(sm).map((s) => s?.ub)) : null,
   };
 }
 
@@ -514,6 +564,13 @@ function extractEvangelism(r, m = {}) {
   // was permanently empty.
   return {
     bibles: ev.bibles ?? (biblesES + biblesQU + biblesNinos),
+    // By kind: adult (Spanish, service "Biblias"), Quichua, children. Live SOQL
+    // gives each its monthly series; the three bible reports are the fallback.
+    biblesByType: {
+      adult:    { qty: ev.biblesByType?.adult?.qty ?? biblesES,       monthly: ev.biblesByType?.adult?.monthly ?? null },
+      quichua:  { qty: ev.biblesByType?.quichua?.qty ?? biblesQU,     monthly: ev.biblesByType?.quichua?.monthly ?? null },
+      children: { qty: ev.biblesByType?.children?.qty ?? biblesNinos, monthly: ev.biblesByType?.children?.monthly ?? null },
+    },
     vbsCamps,
     childrenVBS: ev.vbsAttendees ?? total(r.education_vbs, 0), // total attendances (children can repeat camps)
     vbsUnique: ev.vbsUnique ?? null,                           // distinct children who attended a VBS camp
@@ -684,8 +741,13 @@ export function transformAll(r, metrics = {}) {
     (health?.clinic?.paidVozManos ?? 0) +
     (health?.clinic?.paidPDV ?? 0) +
     (health?.other?.invested ?? 0) +
-    ((education?.schoolKits ?? 0) * (education?.schoolKitCost ?? 0)) +
-    ((education?.backpacks ?? 0) * (education?.backpackCost ?? 0));
+    // Split out of "other medical" in Nov 2026 — still part of the level's cost.
+    (health?.hygiene?.cost ?? 0) +
+    (health?.vitamins?.cost ?? 0) +
+    (health?.diapers?.cost ?? 0) +
+    (education?.schoolKitTotalCost ?? 0) +
+    (education?.backpackTotalCost ?? 0) +
+    (shelter?.cost ?? 0);
   const level3Cost = 0; // no cost components tracked yet (life farms / MEPs)
 
   const level1 = {

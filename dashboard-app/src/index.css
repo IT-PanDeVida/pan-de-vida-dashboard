@@ -768,6 +768,12 @@ p { margin: 0; }
   text-align: center;
 }
 
+/* Same box for every figure, clickable (.pdv-summary-metric) or not, so a mix
+   of the two still lines up on one baseline. */
+.pdv-summary-inner > * {
+  padding: var(--sp-2) var(--sp-4);
+}
+
 .pdv-summary-lbl {
   font-size: var(--text-sm);
   font-weight: 600;
@@ -782,6 +788,16 @@ p { margin: 0; }
   font-weight: 500;
   color: var(--blue);
   letter-spacing: -0.04em;
+}
+
+/* Clarifying line under the summary figures (e.g. "unique people, not a sum"). */
+.pdv-summary-note {
+  margin: var(--sp-4) auto 0;
+  max-width: 760px;
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--text-3);
+  text-align: center;
 }
 
 /* ── INFO TEXT ───────────────────────────────────────── */

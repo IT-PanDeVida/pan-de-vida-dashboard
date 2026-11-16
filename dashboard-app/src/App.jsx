@@ -116,17 +116,27 @@ const i18n = {
     health: "Health", education: "Education", shelter: "Living Conditions",
     medicalAttention: "Medical appointments", ubMedical: "Individuals served",
     paidByVozManos: "Paid by Voz y Manos", paidByPDV: "Paid by Pan de Vida",
-    otherMedicalAidsTitle: "Other Medical Assistance",
-    otherMedicalAids: "Medical Assistance (Specialist appointment, medicine, etc)", ubOtherMedical: "Individuals served",
+    otherMedicalAidsTitle: "Other Health Assistance",
+    otherMedicalAids: "Other medical assistance (specialists, exams, treatment, medicines)", ubOtherMedical: "Individuals served",
+    otherMedicalAidsAll: "Medical Assistance (Specialist appointment, medicine, etc)",
     investedOther: "Invested in other medical",
+    hygieneKits: "Hygiene kits delivered", hygieneCost: "Hygiene kits cost",
+    vitaminsDelivered: "Vitamins delivered", vitaminsCost: "Vitamins cost",
+    diapers: "Diapers", diapersAdult: "Adult diapers delivered", diapersChild: "Children's diapers delivered (babies 0–2)",
+    healthUBNote: "The {n} individuals served are unique beneficiaries: someone who received several kinds of help counts only once, so this total is not the sum of the partial figures below.",
     totalHealthServices: "Total Health Services Provided", totalHealthUB: "Individuals served",
-    schoolKits: "School kits distributed", backpacks: "Backpacks distributed",
+    schoolKits: "School supplies distributed", backpacks: "Backpacks distributed",
+    schoolSuppliesShort: "school supplies",
+    schoolKitsFull: "School kits delivered", schoolKitsFullCost: "Total cost (supplies + backpacks)",
+    educationMonthlyTitle: "School Kits Delivered Per Month",
     totalEducationServices: "Total Education Services Provided", totalEducationUB: "Individuals served",
     unitCost: "Unit cost", totalCostLabel: "Total cost",
     vbsCamps: "VBS camps held", shelterServices: "Total services",
     shelterUB: "Families served",
-    shelterFurniture: "Furniture", shelterAppliances: "Appliances",
+    shelterFurniture: "Furniture (beds, mattresses, furnishings)", shelterAppliances: "Appliances",
     shelterHousehold: "Household goods", shelterElectronics: "Electronics & supplies",
+    shelterConstruction: "Construction projects / Hit Squads",
+    shelterCost: "Cost (purchases)", shelterTotalCost: "Total cost (purchases)",
     shelterItemsDelivered: "Items delivered", shelterFamiliesServed: "Families served",
     lifeFarms: "Life Farms", sharkTank: "Shark Tank PDV",
     revolvingFund: "Revolving Fund",
@@ -174,6 +184,8 @@ const i18n = {
     byLocation: "By Location",
     quito: "Quito", otavalo: "Otavalo", mantaRiobamba: "Manta & Riobamba",
     biblesDelivered: "Bibles distributed",
+    biblesByTypeTitle: "Bibles by Type",
+    biblesAdult: "Adult Bibles (Spanish)", biblesQuichua: "Quichua Bibles", biblesChildren: "Children's Bibles",
     vbsCampsHeld: "VBS CAMPS HELD",
     childrenVBS: "VBS attendances (total)",
     personasAlcanzadas: "Individuals reached by the gospel",
@@ -214,7 +226,7 @@ const i18n = {
     christmasTabDesc: "Annual Christmas program providing hot meals, toys, and candy bags to children and families across our communities.",
     healthTabDesc: "Medical care through Clínica la Y, plus specialist appointments, medicines, and other health assistance for beneficiaries.",
     educationTabDesc: "School kits, backpacks, and educational support that keep beneficiary children enrolled and ready for the school year.",
-    shelterTabDesc: "Furniture, appliances, household goods, and electronics donated to improve the daily living environment of beneficiary families.",
+    shelterTabDesc: "Furniture, appliances, household goods, electronics, and construction projects that improve the daily living environment of beneficiary families.",
     lifeFarmsTabDesc: "Family-run home gardens with seedlings, training, and supplies that produce food and generate income.",
     revolvingFundTabDesc: "Micro-Entrepreneurial Projects (MEPs) backed by seed capital and accompaniment so families can launch sustainable businesses.",
     sharkTankTabDesc: "Pitch and accelerator program connecting promising MEPs with mentorship, exposure, and additional investment.",
@@ -225,14 +237,14 @@ const i18n = {
       totalBeneficiaries: "Active beneficiaries in Salesforce (Beneficiary contacts with status active), each counted once. A current snapshot, not limited to this year.",
       totalAccounts: "Families (household accounts, by APA number) with at least one active beneficiary. A current snapshot.",
       newFamilies: "Families whose household account was created in Salesforce this year (reports “NUEVOS APAs” Quito + Imbabura).",
-      totalDeliveries: "Services delivered this year: hot-meal plates + food kits + clothing + health services + school kits + backpacks + living-conditions items.",
+      totalDeliveries: "Services delivered this year: hot-meal plates + food kits + clothing + health services + school supplies + backpacks + living-conditions items and projects.",
       l1Served: "Unique people who received any Hunger Relief or Emergency Relief service this year: registered beneficiaries plus walk-ins identified by their ID. Each person counts once across programs.",
       l2Served: "Unique people who received any Health, Education or Living Conditions service this year (registered + walk-ins by ID). Each person counts once across programs.",
       l3Served: "Unique people who received any Microbusiness program service this year (registered + walk-ins by ID).",
       l1Cost: "Costs recorded in Salesforce for this level: the total cost of this year's food kits. Other level 1 costs are not recorded yet.",
-      l2Cost: "Clinic payments (Voz y Manos + Pan de Vida) + other medical aid + school kits and backpacks (units × unit cost), this year.",
+      l2Cost: "Clinic payments (Voz y Manos + Pan de Vida) + other medical assistance + hygiene kits + vitamins + school supplies and backpacks + living-conditions purchases, this year.",
       l3Cost: "No costs are recorded in Salesforce yet for life farms or microbusinesses.",
-      education: "School kits + backpacks distributed this year.",
+      education: "School kits delivered this year. Each kit (school supplies + backpack) counts once.",
       lifeFarmsTotal: "All life farms set up to date, every type (reports “HUERTOS DE VIDA …”).",
       mepTotal: "Microbusiness accounts in Salesforce, all statuses (active, inactive, finished, aborted).",
       marketReady: "Active businesses running for more than 9 months, counted once each.",
@@ -250,23 +262,37 @@ const i18n = {
       chartClothing: "Clothing donations delivered each month this year.",
       chartEmergency: "Emergency food kits delivered each month this year (report “Víveres Emergencia”).",
       chartChristmas: "Christmas hot meals, food kits, toys and other donations per month (the four Christmas reports).",
-      healthServices: "Every Health program service delivered this year (sum of quantities): clinic appointments plus other medical aid.",
-      healthUB: "Unique people who received any health service this year (registered + walk-ins by ID). Someone served by the clinic and by other aid counts once, so this is less than the two cards below added together.",
+      healthServices: "Every Health program service delivered this year (sum of quantities): clinic appointments plus other medical assistance, hygiene kits, vitamins and diapers.",
+      healthUB: "Unique people who received any health service this year (registered + walk-ins by ID). Someone served by the clinic and also given vitamins or a hygiene kit counts once, so this is less than the “individuals served” cards below added together.",
       clinicAppointments: "Medical, physiotherapy and dental appointments at Clínica la Y this year (report “Atenciones Médicas Clínica la Y”).",
       clinicVozManos: "Amount Voz y Manos paid for this year's clinic services (cost per unit recorded on each appointment).",
       clinicPDV: "Clinic costs paid by Pan de Vida (report “COSTO A.MEDICA PDV”).",
-      otherAids: "Specialist appointments, medicines and other health aid outside the clinic, delivered this year.",
-      otherInvested: "Total cost recorded for this year's other medical aid.",
-      chartHealth: "Health services delivered each month this year (clinic + other medical aid).",
-      schoolKits: "School kits distributed this year (report “Kits Escolares”).",
+      otherAids: "Health services outside the clinic delivered this year: specialists, medical exams, medicines, nutritionist, health talks and fairs, and other health donations. Hygiene kits, vitamins and diapers are counted apart, in the rows below.",
+      otherAidsAll: "Specialist appointments, medicines and other health aid outside the clinic, delivered this year.",
+      otherInvested: "Total cost recorded for this year's other medical assistance. Hygiene kits and vitamins have their own cost cards.",
+      hygieneKits: "Hygiene kits delivered this year (Health program service “Kit de higiene”).",
+      hygieneCost: "Total cost recorded on this year's hygiene-kit deliveries.",
+      vitamins: "Vitamins delivered this year. Most of them go inside the school kits (school supplies + backpack + vitamins) and are counted here, under Health.",
+      vitaminsCost: "Total cost recorded on this year's vitamin deliveries.",
+      diapersAdult: "Adult diaper donations delivered this year (sum of the quantities recorded in Salesforce).",
+      diapersChild: "Diaper donations for babies aged 0–2 delivered this year (sum of the quantities recorded in Salesforce).",
+      chartHealth: "Health services delivered each month this year (clinic + all other health assistance).",
+      schoolKits: "School-supplies sets distributed this year (Salesforce service “Kit de útiles escolares”). The backpack and the vitamins of each school kit are counted separately.",
+      schoolKitsFull: "Complete school kits given to children this year. Each kit = school supplies + a backpack + vitamins.",
+      schoolKitsFullCost: "School supplies ({supplies}) + backpacks ({backpacks}). The vitamins are recorded under Health ({vitamins} this year), so they are not added here.",
       unitCost: "Total cost ÷ units delivered (report “{report}”), so unit cost × units = total cost.",
-      totalCostUnits: "Units distributed × unit cost.",
+      totalCostUnits: "Sum of the total cost recorded on this year's deliveries (report “{report}”).",
       backpacks: "Backpacks distributed this year (report “Mochilas”).",
-      chartEducation: "School kits + backpacks distributed each month this year.",
-      shelterServices: "Items delivered this year in the four categories: furniture, appliances, household goods, and electronics & supplies.\n\nService providers include Joshua Expeditions, Staff PDV, Grace Baptist Church Wilmington, and New Life Church.",
-      shelterUB: "The four categories' “families served” added together. Someone who received items in two categories counts in both.",
+      chartEducation: "School kits delivered each month this year. Each kit (school supplies + backpack) counts once.",
+      shelterServices: "Items and projects delivered this year in the five categories: furniture, appliances, household goods, electronics & supplies, and construction projects.\n\nService providers include Joshua Expeditions, Staff PDV, Grace Baptist Church Wilmington, and New Life Church.",
+      shelterUB: "The five categories' “families served” added together. Someone who received items in two categories counts in both.",
       shelterItems: "{category} items delivered this year (sum of quantities).",
-      chartShelter: "Living-conditions items delivered each month this year (all four categories).",
+      shelterFurniture: "Furniture delivered this year (sum of quantities). Beds, bunk beds, mattresses, bedding and tables are recorded here — mattresses do not have a category of their own.",
+      shelterConstruction: "Construction and home-improvement projects carried out this year, most of them with mission teams (Hit Squads), plus donations of construction materials.",
+      shelterFamilies: "Unique families: {deliveries} deliveries were recorded for {ub} different recipients. Anyone who received more than once counts a single time.",
+      shelterCost: "Total cost recorded in Salesforce for this category this year. Most items are in-kind donations, recorded at $0; only what Pan de Vida purchased (beds, mattresses, etc.) carries a cost.",
+      shelterTotalCost: "Sum of the costs recorded in the five categories this year. In-kind donations are recorded at $0, so this is what was purchased.",
+      chartShelter: "Living-conditions items and projects delivered each month this year (all categories).",
       lifeFarmsNew: "Farms set up this year, every type. Each farm service delivery recorded in Salesforce = one farm.",
       farmProgress: "Farms of this type set up to date, against the goal. “New this year” counts the ones set up this year.",
       championsProgress: "Ideal + full-size farms set up to date, against the goal.",
@@ -288,6 +314,9 @@ const i18n = {
       sharkCost: "What Pan de Vida has paid for Shark Tank winners, all time.",
       chartShark: "New Shark Tank winners each month this year.",
       bibles: "Bibles distributed this year: Spanish, Quichua and children's bibles.",
+      biblesAdult: "Spanish Bibles for adults and youth distributed this year (Salesforce service “Biblias”).",
+      biblesQuichua: "Quichua Bibles distributed this year (Salesforce service “Biblias Quichua”).",
+      biblesChildren: "Children's Bibles distributed this year (Salesforce service “Biblia de niño”).",
       vbsCamps: "VBS camps held this year (each camp date counts once).",
       vbsAttendances: "Total VBS attendances this year. A child who attended several camps counts each time.",
       vbsUnique: "Different children who attended at least one VBS camp this year.",
@@ -335,17 +364,27 @@ const i18n = {
     health: "Salud", education: "Educación", shelter: "Condiciones de Vida",
     medicalAttention: "Citas médicas", ubMedical: "Individuos servidos",
     paidByVozManos: "Pagado por Voz y Manos", paidByPDV: "Pagado por Pan de Vida",
-    otherMedicalAidsTitle: "Otra asistencia médica",
-    otherMedicalAids: "Asistencia médica (Citas de especialidad, medicinas, etc.)", ubOtherMedical: "Individuos servidos",
-    investedOther: "Invertido en otras ayudas",
+    otherMedicalAidsTitle: "Otras asistencias de salud",
+    otherMedicalAids: "Otras asistencias médicas (especialistas, exámenes, tratamiento, medicamentos)", ubOtherMedical: "Individuos servidos",
+    otherMedicalAidsAll: "Asistencia médica (Citas de especialidad, medicinas, etc.)",
+    investedOther: "Invertido en otras asistencias médicas",
+    hygieneKits: "Kits de higiene entregados", hygieneCost: "Costo de kits de higiene",
+    vitaminsDelivered: "Vitaminas entregadas", vitaminsCost: "Costo de vitaminas",
+    diapers: "Pañales", diapersAdult: "Pañales de adulto entregados", diapersChild: "Pañales de niño entregados (bebés 0–2)",
+    healthUBNote: "Los {n} individuos servidos son beneficiarios únicos: quien recibió varios tipos de ayuda cuenta una sola vez, por eso este total no es la suma de los números parciales de abajo.",
     totalHealthServices: "Total de servicios de salud provistos", totalHealthUB: "Individuos servidos",
-    schoolKits: "Kits escolares distribuidos", backpacks: "Mochilas distribuidas",
+    schoolKits: "Útiles escolares distribuidos", backpacks: "Mochilas distribuidas",
+    schoolSuppliesShort: "útiles escolares",
+    schoolKitsFull: "Kits escolares entregados", schoolKitsFullCost: "Costo total (útiles + mochilas)",
+    educationMonthlyTitle: "Kits Escolares Entregados por Mes",
     totalEducationServices: "Total de servicios educativos provistos", totalEducationUB: "Individuos servidos",
     unitCost: "Costo unitario", totalCostLabel: "Costo total",
     vbsCamps: "Campamentos EBV", shelterServices: "Total servicios",
     shelterUB: "Familias servidas",
-    shelterFurniture: "Mobiliario", shelterAppliances: "Electrodomésticos",
+    shelterFurniture: "Mobiliario (camas, colchones, muebles)", shelterAppliances: "Electrodomésticos",
     shelterHousehold: "Enseres del hogar", shelterElectronics: "Electrónicos y suministros",
+    shelterConstruction: "Proyectos de construcción / Hit Squads",
+    shelterCost: "Costo (compras)", shelterTotalCost: "Costo total (compras)",
     shelterItemsDelivered: "Items entregados", shelterFamiliesServed: "Familias servidas",
     lifeFarms: "Huertos de Vida", sharkTank: "Shark Tank PDV",
     revolvingFund: "Fondo Rotativo",
@@ -393,6 +432,8 @@ const i18n = {
     byLocation: "Por Ubicación",
     quito: "Quito", otavalo: "Otavalo", mantaRiobamba: "Manta y Riobamba",
     biblesDelivered: "Biblias distribuidas",
+    biblesByTypeTitle: "Biblias por tipo",
+    biblesAdult: "Biblias de adulto (español)", biblesQuichua: "Biblias en quichua", biblesChildren: "Biblias de niños",
     vbsCampsHeld: "CAMPAMENTOS EBV REALIZADOS",
     childrenVBS: "Asistencias EBV (total)",
     personasAlcanzadas: "Individuos alcanzados por el evangelio",
@@ -433,7 +474,7 @@ const i18n = {
     christmasTabDesc: "Programa navideño anual que provee comidas calientes, juguetes y fundas de caramelos a niños y familias de nuestras comunidades.",
     healthTabDesc: "Atención médica en Clínica la Y, además de citas con especialistas, medicinas y otras ayudas de salud para los beneficiarios.",
     educationTabDesc: "Kits escolares, mochilas y apoyo educativo que mantienen a los niños beneficiarios matriculados y listos para el año escolar.",
-    shelterTabDesc: "Mobiliario, electrodomésticos, enseres del hogar y electrónicos donados para mejorar el entorno diario de las familias beneficiarias.",
+    shelterTabDesc: "Mobiliario, electrodomésticos, enseres del hogar, electrónicos y proyectos de construcción que mejoran el entorno diario de las familias beneficiarias.",
     lifeFarmsTabDesc: "Huertos familiares con plántulas, capacitación y suministros para producir alimentos y generar ingresos.",
     revolvingFundTabDesc: "Proyectos Micro-Empresariales (MEPs) con capital semilla y acompañamiento para que las familias inicien negocios sostenibles.",
     sharkTankTabDesc: "Programa de pitch y aceleración que conecta MEPs prometedores con mentoría, exposición e inversión adicional.",
@@ -443,14 +484,14 @@ const i18n = {
       totalBeneficiaries: "Beneficiarios activos en Salesforce (contactos tipo Beneficiary con estado activo), cada uno contado una vez. Es una foto actual, no solo de este año.",
       totalAccounts: "Familias (cuentas de hogar, por número de APA) con al menos un beneficiario activo. Es una foto actual.",
       newFamilies: "Familias cuya cuenta de hogar se creó en Salesforce este año (reportes “NUEVOS APAs” Quito + Imbabura).",
-      totalDeliveries: "Servicios entregados este año: platos de comida caliente + víveres + ropa + servicios de salud + kits escolares + mochilas + artículos de condiciones de vida.",
+      totalDeliveries: "Servicios entregados este año: platos de comida caliente + víveres + ropa + servicios de salud + útiles escolares + mochilas + artículos y proyectos de condiciones de vida.",
       l1Served: "Personas únicas que recibieron algún servicio de Mitigación del Hambre o Ayuda de Emergencia este año: beneficiarios registrados más personas no registradas identificadas por su cédula. Cada persona cuenta una vez entre programas.",
       l2Served: "Personas únicas que recibieron algún servicio de Salud, Educación o Condiciones de Vida este año (registrados + no registrados por cédula). Cada persona cuenta una vez entre programas.",
       l3Served: "Personas únicas que recibieron algún servicio del programa de Microemprendimiento este año (registrados + no registrados por cédula).",
       l1Cost: "Costos registrados en Salesforce para este nivel: el costo total de los víveres de este año. Los demás costos del nivel 1 aún no se registran.",
-      l2Cost: "Pagos de la clínica (Voz y Manos + Pan de Vida) + otras ayudas médicas + kits escolares y mochilas (unidades × costo unitario), este año.",
+      l2Cost: "Pagos de la clínica (Voz y Manos + Pan de Vida) + otras asistencias médicas + kits de higiene + vitaminas + útiles escolares y mochilas + compras de condiciones de vida, este año.",
       l3Cost: "Aún no se registran costos en Salesforce para huertos de vida ni microemprendimientos.",
-      education: "Kits escolares + mochilas entregados este año.",
+      education: "Kits escolares entregados este año. Cada kit (útiles escolares + mochila) cuenta una vez.",
       lifeFarmsTotal: "Todos los huertos de vida instalados a la fecha, de todo tipo (reportes “HUERTOS DE VIDA …”).",
       mepTotal: "Cuentas de Micronegocio en Salesforce, en todos los estados (activo, inactivo, finalizado, abortado).",
       marketReady: "Negocios activos con más de 9 meses de funcionamiento, cada uno contado una vez.",
@@ -468,23 +509,37 @@ const i18n = {
       chartClothing: "Donaciones de ropa entregadas cada mes de este año.",
       chartEmergency: "Víveres de emergencia entregados cada mes de este año (reporte “Víveres Emergencia”).",
       chartChristmas: "Comida caliente, víveres, juguetes y otras donaciones de Navidad por mes (los cuatro reportes de Navidad).",
-      healthServices: "Todos los servicios del programa de Salud entregados este año (suma de cantidades): atenciones en la clínica más otras ayudas médicas.",
-      healthUB: "Personas únicas que recibieron algún servicio de salud este año (registrados + no registrados por cédula). Quien fue atendido en la clínica y con otras ayudas cuenta una vez, por eso es menor que la suma de las dos tarjetas de abajo.",
+      healthServices: "Todos los servicios del programa de Salud entregados este año (suma de cantidades): atenciones en la clínica más otras asistencias médicas, kits de higiene, vitaminas y pañales.",
+      healthUB: "Personas únicas que recibieron algún servicio de salud este año (registrados + no registrados por cédula). Quien fue atendido en la clínica y además recibió vitaminas o un kit de higiene cuenta una vez, por eso es menor que la suma de las tarjetas de “individuos servidos” de abajo.",
       clinicAppointments: "Atenciones médicas, de fisioterapia y odontología en la Clínica la Y este año (reporte “Atenciones Médicas Clínica la Y”).",
       clinicVozManos: "Monto que pagó Voz y Manos por los servicios de la clínica de este año (costo unitario registrado en cada atención).",
       clinicPDV: "Costos de la clínica pagados por Pan de Vida (reporte “COSTO A.MEDICA PDV”).",
-      otherAids: "Citas con especialistas, medicinas y otras ayudas de salud fuera de la clínica, entregadas este año.",
-      otherInvested: "Costo total registrado en las otras ayudas médicas de este año.",
-      chartHealth: "Servicios de salud entregados cada mes de este año (clínica + otras ayudas médicas).",
-      schoolKits: "Kits escolares entregados este año (reporte “Kits Escolares”).",
+      otherAids: "Servicios de salud fuera de la clínica entregados este año: especialistas, exámenes médicos, medicinas, nutricionista, charlas y ferias de salud, y otras donaciones de salud. Los kits de higiene, las vitaminas y los pañales se cuentan aparte, en las filas de abajo.",
+      otherAidsAll: "Citas con especialistas, medicinas y otras ayudas de salud fuera de la clínica, entregadas este año.",
+      otherInvested: "Costo total registrado en las otras asistencias médicas de este año. Los kits de higiene y las vitaminas tienen sus propias tarjetas de costo.",
+      hygieneKits: "Kits de higiene entregados este año (servicio “Kit de higiene” del programa de Salud).",
+      hygieneCost: "Costo total registrado en las entregas de kits de higiene de este año.",
+      vitamins: "Vitaminas entregadas este año. La mayoría va dentro de los kits escolares (útiles + mochila + vitaminas) y se cuenta aquí, en Salud.",
+      vitaminsCost: "Costo total registrado en las entregas de vitaminas de este año.",
+      diapersAdult: "Donaciones de pañales para adulto entregadas este año (suma de las cantidades registradas en Salesforce).",
+      diapersChild: "Donaciones de pañales para bebés de 0 a 2 años entregadas este año (suma de las cantidades registradas en Salesforce).",
+      chartHealth: "Servicios de salud entregados cada mes de este año (clínica + todas las demás asistencias de salud).",
+      schoolKits: "Juegos de útiles escolares entregados este año (servicio “Kit de útiles escolares” en Salesforce). La mochila y las vitaminas de cada kit escolar se cuentan aparte.",
+      schoolKitsFull: "Kits escolares completos entregados a niños este año. Cada kit = útiles escolares + mochila + vitaminas.",
+      schoolKitsFullCost: "Útiles escolares ({supplies}) + mochilas ({backpacks}). Las vitaminas se registran en Salud ({vitamins} este año), por eso no se suman aquí.",
       unitCost: "Costo total ÷ unidades entregadas (reporte “{report}”), así costo unitario × unidades = costo total.",
-      totalCostUnits: "Unidades entregadas × costo unitario.",
+      totalCostUnits: "Suma del costo total registrado en las entregas de este año (reporte “{report}”).",
       backpacks: "Mochilas entregadas este año (reporte “Mochilas”).",
-      chartEducation: "Kits escolares + mochilas entregados cada mes de este año.",
-      shelterServices: "Artículos entregados este año en las cuatro categorías: mobiliario, electrodomésticos, enseres del hogar y electrónicos y suministros.\n\nProveedores de servicio: Joshua Expeditions, Staff PDV, Grace Baptist Church Wilmington y New Life Church.",
-      shelterUB: "Suma de las “familias servidas” de las cuatro categorías. Quien recibió artículos de dos categorías cuenta en ambas.",
+      chartEducation: "Kits escolares entregados cada mes de este año. Cada kit (útiles escolares + mochila) cuenta una vez.",
+      shelterServices: "Artículos y proyectos entregados este año en las cinco categorías: mobiliario, electrodomésticos, enseres del hogar, electrónicos y suministros, y proyectos de construcción.\n\nProveedores de servicio: Joshua Expeditions, Staff PDV, Grace Baptist Church Wilmington y New Life Church.",
+      shelterUB: "Suma de las “familias servidas” de las cinco categorías. Quien recibió artículos de dos categorías cuenta en ambas.",
       shelterItems: "Artículos de {category} entregados este año (suma de cantidades).",
-      chartShelter: "Artículos de condiciones de vida entregados cada mes de este año (las cuatro categorías).",
+      shelterFurniture: "Mobiliario entregado este año (suma de cantidades). Aquí se registran camas, literas, colchones, ropa de cama y mesas: los colchones no tienen una categoría propia.",
+      shelterConstruction: "Proyectos de construcción y mejora de vivienda realizados este año, la mayoría con equipos misioneros (Hit Squads), más las donaciones de materiales de construcción.",
+      shelterFamilies: "Familias únicas: se registraron {deliveries} entregas para {ub} beneficiarios distintos. Quien recibió más de una vez cuenta una sola vez.",
+      shelterCost: "Costo total registrado en Salesforce para esta categoría este año. La mayoría son donaciones en especie, registradas en $0; solo lo que Pan de Vida compró (camas, colchones, etc.) lleva costo.",
+      shelterTotalCost: "Suma de los costos registrados en las cinco categorías este año. Las donaciones en especie se registran en $0, así que es lo que se compró.",
+      chartShelter: "Artículos y proyectos de condiciones de vida entregados cada mes de este año (todas las categorías).",
       lifeFarmsNew: "Huertos instalados este año, de todo tipo. Cada entrega de servicio de huerto registrada en Salesforce = un huerto.",
       farmProgress: "Huertos de este tipo instalados a la fecha, frente a la meta. “Nuevos este año” cuenta los instalados este año.",
       championsProgress: "Huertos ideales + completos instalados a la fecha, frente a la meta.",
@@ -506,6 +561,9 @@ const i18n = {
       sharkCost: "Lo que Pan de Vida ha pagado por los ganadores de Shark Tank, desde el inicio.",
       chartShark: "Ganadores nuevos de Shark Tank cada mes de este año.",
       bibles: "Biblias entregadas este año: en español, en quichua y para niños.",
+      biblesAdult: "Biblias en español para adultos y jóvenes entregadas este año (servicio “Biblias” en Salesforce).",
+      biblesQuichua: "Biblias en quichua entregadas este año (servicio “Biblias Quichua” en Salesforce).",
+      biblesChildren: "Biblias para niños entregadas este año (servicio “Biblia de niño” en Salesforce).",
       vbsCamps: "Campamentos VBS realizados este año (cada fecha de campamento cuenta una vez).",
       vbsAttendances: "Asistencias totales a VBS este año. Un niño que asistió a varios campamentos cuenta cada vez.",
       vbsUnique: "Niños distintos que asistieron al menos a un campamento VBS este año.",
@@ -673,6 +731,10 @@ function InfoTip({ text }) {
     </>
   );
 }
+
+// $1,234.50 — every dollar figure on the cards.
+const money = (n) =>
+  `$${(n ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 // Fills {name} placeholders in an i18n string.
 const fill = (str, vars) =>
@@ -1004,8 +1066,8 @@ function NavItem({ iconEl, label, sublabel, active, onClick }) {
 
 // One figure inside a blue summary card (health / shelter headers); opens the
 // monthly popup when its series exists.
-function SummaryStat({ label, value, monthly, note, info }) {
-  const trigger = useMetricTrigger({ title: label, monthly, color: C.blue, note, total: (value ?? 0).toLocaleString() });
+function SummaryStat({ label, value, monthly, note, info, format }) {
+  const trigger = useMetricTrigger({ title: label, monthly, color: C.blue, note, format, total: (value ?? 0).toLocaleString() });
   return (
     <div className={trigger ? "pdv-summary-metric" : undefined} {...trigger}>
       <div className="pdv-summary-lbl">{label}{trigger && <> <Icon.bars /></>}<InfoTip text={info} /></div>
@@ -1152,7 +1214,9 @@ function LevelTile({ item, color, t, onNavigate }) {
 
 function OverviewPage({ t, onNavigate, data }) {
   const D = data ?? FALLBACK_DATA;
-  const eduTotal = (D.education?.schoolKits ?? 0) + (D.education?.backpacks ?? 0);
+  // School kits, each counted once: supplies and backpack are two parts of the
+  // same kit, and adding them (as this did before) doubled the figure.
+  const eduTotal = D.education?.schoolKits ?? 0;
   const lifeFarmsTotal =
     (D.lifeFarms?.idealFarm?.done      ?? 0) +
     (D.lifeFarms?.fullSizeFarm?.done   ?? 0) +
@@ -1367,6 +1431,12 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
   const [tab, setTab] = useState(initialTab);
   const D = data ?? FALLBACK_DATA;
   const I = t.info;
+  // Health: true when the sync split "other assistance" into its budget lines.
+  const split = Boolean(D.health?.hygiene);
+  // Education: exact totals from the sync; units × unit cost only as a fallback.
+  const edu = D.education ?? {};
+  const suppliesCost = edu.schoolKitTotalCost ?? (edu.schoolKits ?? 0) * (edu.schoolKitCost ?? 0);
+  const backpacksCost = edu.backpackTotalCost ?? (edu.backpacks ?? 0) * (edu.backpackCost ?? 0);
   return (
     <div>
       <LevelBadge level="2" name={t.level2Name} color={C.blue} />
@@ -1384,6 +1454,8 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
               <SummaryStat label={t.totalHealthServices} value={D.health?.totalServices ?? 0} monthly={D.health?.monthly} info={I.healthServices} />
               <SummaryStat label={t.totalHealthUB} value={D.health?.totalUB ?? 0} monthly={D.health?.ubMonthly} note={t.uniqueMonthlyNote} info={I.healthUB} />
             </div>
+            {/* Shown in the open (not only in the "i"): the total was being read as a wrong sum of the cards below. */}
+            <p className="pdv-summary-note">{fill(t.healthUBNote, { n: D.health?.totalUB ?? 0 })}</p>
           </div>
 
           <SectionTitle>{t.clinicTitle}</SectionTitle>
@@ -1395,11 +1467,38 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
           </Grid>
 
           <SectionTitle style={{ marginTop: 4 }}>{t.otherMedicalAidsTitle}</SectionTitle>
+          {/* One row per budget line. Without the split (sync fallback) the first
+              row carries everything, under its old label, and the rest are hidden. */}
           <Grid cols={3}>
-            <StatCard label={t.otherMedicalAids} value={D.health?.other?.aids     ?? 0}  color={C.orange} iconEl={<Icon.doctor />} delay={0} monthly={D.health?.other?.aidsMonthly} info={I.otherAids} />
-            <StatCard label={t.ubOtherMedical}   value={D.health?.other?.ub       ?? 0}  color={C.teal}   iconEl={<Icon.people />} delay={60} monthly={D.health?.other?.ubMonthly} note={t.uniqueMonthlyNote} info={I.uniquePeople} />
-            <StatCard label={t.investedOther}     value={(D.health?.other?.invested ?? 0).toFixed(2)} prefix="$" color={C.green} iconEl={<Icon.dollar />} delay={120} monthly={D.health?.other?.investedMonthly} format="money" info={I.otherInvested} />
+            <StatCard label={split ? t.otherMedicalAids : t.otherMedicalAidsAll} value={D.health?.other?.aids ?? 0} color={C.orange} iconEl={<Icon.doctor />} delay={0} monthly={D.health?.other?.aidsMonthly} info={split ? I.otherAids : I.otherAidsAll} />
+            <StatCard label={t.ubOtherMedical}   value={D.health?.other?.ub       ?? 0}  color={C.teal}   iconEl={<Icon.people />} delay={60} monthly={D.health?.other?.ubMonthly}
+              modalTitle={`${t.otherMedicalAidsTitle} — ${t.ubOtherMedical}`} note={t.uniqueMonthlyNote} info={I.uniquePeople} />
+            <StatCard label={t.investedOther}     value={money(D.health?.other?.invested)} color={C.green} iconEl={<Icon.dollar />} delay={120} monthly={D.health?.other?.investedMonthly} format="money" info={I.otherInvested} />
           </Grid>
+          {D.health?.hygiene && (
+            <Grid cols={3}>
+              <StatCard label={t.hygieneKits}    value={D.health.hygiene.qty} color={C.purple} iconEl={<Icon.box />}    delay={0} monthly={D.health.hygiene.qtyMonthly} info={I.hygieneKits} />
+              <StatCard label={t.ubOtherMedical} value={D.health.hygiene.ub}  color={C.teal}   iconEl={<Icon.people />} delay={60} monthly={D.health.hygiene.ubMonthly}
+                modalTitle={`${t.hygieneKits} — ${t.ubOtherMedical}`} note={t.uniqueMonthlyNote} info={I.uniquePeople} />
+              <StatCard label={t.hygieneCost}    value={money(D.health.hygiene.cost)} color={C.green} iconEl={<Icon.dollar />} delay={120} monthly={D.health.hygiene.costMonthly} format="money" info={I.hygieneCost} />
+            </Grid>
+          )}
+          {D.health?.vitamins && (
+            <Grid cols={3}>
+              <StatCard label={t.vitaminsDelivered} value={D.health.vitamins.qty} color={C.yellow} iconEl={<Icon.bag />}    delay={0} monthly={D.health.vitamins.qtyMonthly} info={I.vitamins} />
+              <StatCard label={t.ubOtherMedical}    value={D.health.vitamins.ub}  color={C.teal}   iconEl={<Icon.people />} delay={60} monthly={D.health.vitamins.ubMonthly}
+                modalTitle={`${t.vitaminsDelivered} — ${t.ubOtherMedical}`} note={t.uniqueMonthlyNote} info={I.uniquePeople} />
+              <StatCard label={t.vitaminsCost}      value={money(D.health.vitamins.cost)} color={C.green} iconEl={<Icon.dollar />} delay={120} monthly={D.health.vitamins.costMonthly} format="money" info={I.vitaminsCost} />
+            </Grid>
+          )}
+          {D.health?.diapers && (
+            <Grid cols={3}>
+              <StatCard label={t.diapersAdult}   value={D.health.diapers.adult.qty} color={C.blue} iconEl={<Icon.box />}    delay={0}  monthly={D.health.diapers.adult.qtyMonthly} info={I.diapersAdult} />
+              <StatCard label={t.diapersChild}   value={D.health.diapers.child.qty} color={C.pink} iconEl={<Icon.child />}  delay={60} monthly={D.health.diapers.child.qtyMonthly} info={I.diapersChild} />
+              <StatCard label={t.ubOtherMedical} value={D.health.diapers.ub}        color={C.teal} iconEl={<Icon.people />} delay={120} monthly={D.health.diapers.ubMonthly}
+                modalTitle={`${t.diapers} — ${t.ubOtherMedical}`} note={t.uniqueMonthlyNote} info={I.uniquePeople} />
+            </Grid>
+          )}
 
           <MonthlyDistribution t={t} monthly={D.health?.monthly} color={C.blue} info={I.chartHealth} />
         </div>
@@ -1408,17 +1507,26 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
       {tab === "education" && (
         <div className={highlightKey === 'education' ? 'pdv-highlight' : ''} style={{ display: "flex", flexDirection: "column", gap: 20, padding: highlightKey === 'education' ? 8 : 0, borderRadius: 24 }}>
           <TabDescription>{t.educationTabDesc}</TabDescription>
+          {/* A school kit = supplies + backpack (+ vitamins, counted under Health):
+              the header counts each kit once, the rows below cost its two parts. */}
+          <div className="pdv-card pdv-summary-card">
+            <div className="pdv-summary-inner">
+              <SummaryStat label={t.schoolKitsFull} value={edu.schoolKits ?? 0} monthly={edu.kitsMonthly} info={I.schoolKitsFull} />
+              <SummaryStat label={t.schoolKitsFullCost} value={money(suppliesCost + backpacksCost)}
+                info={fill(I.schoolKitsFullCost, { supplies: money(suppliesCost), backpacks: money(backpacksCost), vitamins: money(D.health?.vitamins?.cost) })} />
+            </div>
+          </div>
           <Grid cols={3}>
-            <StatCard label={t.schoolKits}                 value={D.education?.schoolKits   ?? 0}   color={C.red}    iconEl={<Icon.backpack />} delay={0} monthly={D.education?.kitsMonthly} info={I.schoolKits} />
-            <StatCard label={`${t.unitCost} (kit)`}        value={(D.education?.schoolKitCost ?? 0).toFixed(2)} prefix="$" color={C.yellow} iconEl={<Icon.dollar />} delay={60} info={fill(I.unitCost, { report: "Útiles Escolares AVG Cost" })} />
-            <StatCard label={`${t.totalCostLabel} (kits)`} value={((D.education?.schoolKits ?? 0) * (D.education?.schoolKitCost ?? 0)).toFixed(2)} prefix="$" color={C.green}  iconEl={<Icon.money />}  delay={120} info={I.totalCostUnits} />
+            <StatCard label={t.schoolKits}                                     value={edu.schoolKits ?? 0}   color={C.red}    iconEl={<Icon.backpack />} delay={0} monthly={edu.kitsMonthly} info={I.schoolKits} />
+            <StatCard label={`${t.unitCost} (${t.schoolSuppliesShort})`}       value={money(edu.schoolKitCost)} color={C.yellow} iconEl={<Icon.dollar />} delay={60} info={fill(I.unitCost, { report: "Útiles Escolares AVG Cost" })} />
+            <StatCard label={`${t.totalCostLabel} (${t.schoolSuppliesShort})`} value={money(suppliesCost)}      color={C.green}  iconEl={<Icon.money />}  delay={120} info={fill(I.totalCostUnits, { report: "Útiles Escolares AVG Cost" })} />
           </Grid>
           <Grid cols={3}>
-            <StatCard label={t.backpacks}                                          value={D.education?.backpacks    ?? 0}   color={C.blue}   iconEl={<Icon.backpack />} delay={180} monthly={D.education?.backpacksMonthly} info={I.backpacks} />
-            <StatCard label={`${t.unitCost} (${t.backpacks.toLowerCase()})`}       value={(D.education?.backpackCost ?? 0).toFixed(2)} prefix="$" color={C.yellow} iconEl={<Icon.dollar />} delay={240} info={fill(I.unitCost, { report: "Mochilas AVG Cost" })} />
-            <StatCard label={`${t.totalCostLabel} (${t.backpacks.toLowerCase()})`} value={((D.education?.backpacks ?? 0) * (D.education?.backpackCost ?? 0)).toFixed(2)} prefix="$" color={C.green}  iconEl={<Icon.money />}  delay={300} info={I.totalCostUnits} />
+            <StatCard label={t.backpacks}                                          value={edu.backpacks ?? 0}   color={C.blue}   iconEl={<Icon.backpack />} delay={180} monthly={edu.backpacksMonthly} info={I.backpacks} />
+            <StatCard label={`${t.unitCost} (${t.backpacks.toLowerCase()})`}       value={money(edu.backpackCost)} color={C.yellow} iconEl={<Icon.dollar />} delay={240} info={fill(I.unitCost, { report: "Mochilas AVG Cost" })} />
+            <StatCard label={`${t.totalCostLabel} (${t.backpacks.toLowerCase()})`} value={money(backpacksCost)}    color={C.green}  iconEl={<Icon.money />}  delay={300} info={fill(I.totalCostUnits, { report: "Mochilas AVG Cost" })} />
           </Grid>
-          <MonthlyDistribution t={t} monthly={D.education?.monthly} color={C.blue} info={I.chartEducation} />
+          <MonthlyDistribution t={t} monthly={edu.kitsMonthly ?? edu.monthly} color={C.blue} title={t.educationMonthlyTitle} info={I.chartEducation} />
         </div>
       )}
 
@@ -1429,22 +1537,38 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
             <div className="pdv-summary-inner">
               <SummaryStat label={t.shelterServices} value={D.shelter?.services ?? 0} monthly={D.shelter?.monthly} info={I.shelterServices} />
               <SummaryStat label={t.shelterUB} value={D.shelter?.ub ?? 0} monthly={D.shelter?.ubMonthly} note={t.uniqueFamiliesMonthlyNote} info={I.shelterUB} />
+              {D.shelter?.cost != null && (
+                <SummaryStat label={t.shelterTotalCost} value={money(D.shelter.cost)} monthly={D.shelter?.costMonthly} format="money" info={I.shelterTotalCost} />
+              )}
             </div>
           </div>
 
+          {/* items · families · cost per category. `cost` and `deliveries` only
+              exist when the sync computed them (not in the report fallback, nor
+              for a category the loaded data doesn't have yet). */}
           {[
-            ["furniture",   t.shelterFurniture,   C.blue],
-            ["appliances",  t.shelterAppliances,  C.orange],
-            ["household",   t.shelterHousehold,   C.green],
-            ["electronics", t.shelterElectronics, C.purple],
-          ].map(([key, name, color], i) => (
-            <Grid cols={2} key={key}>
-              <StatCard label={name} value={D.shelter?.[key]?.services ?? 0} color={color} iconEl={<Icon.home />} delay={i * 120} monthly={D.shelter?.[key]?.monthly}
-                info={fill(I.shelterItems, { category: name })} />
-              <StatCard label={t.shelterFamiliesServed} value={D.shelter?.[key]?.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={i * 120 + 60} monthly={D.shelter?.[key]?.ubMonthly}
-                modalTitle={`${name} — ${t.shelterFamiliesServed}`} note={t.uniqueFamiliesMonthlyNote} info={I.uniquePeople} />
-            </Grid>
-          ))}
+            ["furniture",    t.shelterFurniture,    C.blue,   I.shelterFurniture],
+            ["appliances",   t.shelterAppliances,   C.orange],
+            ["household",    t.shelterHousehold,    C.green],
+            ["electronics",  t.shelterElectronics,  C.purple],
+            ["construction", t.shelterConstruction, C.red,    I.shelterConstruction],
+          ].map(([key, name, color, info], i) => {
+            const cat = D.shelter?.[key];
+            if (!cat) return null;
+            return (
+              <Grid cols={cat.cost != null ? 3 : 2} key={key}>
+                <StatCard label={name} value={cat.services ?? 0} color={color} iconEl={<Icon.home />} delay={i * 90} monthly={cat.monthly}
+                  info={info ?? fill(I.shelterItems, { category: name })} />
+                <StatCard label={t.shelterFamiliesServed} value={cat.ub ?? 0} color={C.teal} iconEl={<Icon.people />} delay={i * 90 + 45} monthly={cat.ubMonthly}
+                  modalTitle={`${name} — ${t.shelterFamiliesServed}`} note={t.uniqueFamiliesMonthlyNote}
+                  info={cat.deliveries != null ? fill(I.shelterFamilies, { deliveries: cat.deliveries, ub: cat.ub ?? 0 }) : I.uniquePeople} />
+                {cat.cost != null && (
+                  <StatCard label={t.shelterCost} value={money(cat.cost)} color={C.green} iconEl={<Icon.dollar />} delay={i * 90 + 90} monthly={cat.costMonthly}
+                    modalTitle={`${name} — ${t.shelterCost}`} format="money" info={I.shelterCost} />
+                )}
+              </Grid>
+            );
+          })}
 
           <MonthlyDistribution t={t} monthly={D.shelter?.monthly} color={C.purple} info={I.chartShelter} />
         </div>
@@ -1608,6 +1732,7 @@ function Level3Page({ t, initialTab = "lifefarms", data, highlightKey }) {
 function EvangelismPage({ t, data, highlightKey }) {
   const D = data ?? FALLBACK_DATA;
   const I = t.info;
+  const bt = D.evangelism?.biblesByType; // adult (Spanish) / Quichua / children
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       <div className="pdv-level-badge" style={{ background: C.purpleBg, alignSelf: "flex-start" }}>
@@ -1634,6 +1759,16 @@ function EvangelismPage({ t, data, highlightKey }) {
         <StatCard label={`${t.professionsOfFaith} (${t.thisYear.toLowerCase()})`} value={D.evangelism?.professionsOfFaith ?? "—"} color={C.yellow} iconEl={<Icon.star />} delay={60} monthly={D.evangelism?.pofMonthly} info={I.pofYear} />
         <StatCard label={`${t.professionsOfFaith} (${t.professionsOfFaithAllTime})`} value={D.evangelism?.professionsOfFaithAllTime ?? "—"} color={C.teal} iconEl={<Icon.check />} delay={120} info={I.pofAllTime} />
       </Grid>
+      {bt && (
+        <div>
+          <SectionTitle>{t.biblesByTypeTitle}</SectionTitle>
+          <Grid cols={3}>
+            <StatCard label={t.biblesAdult}    value={bt.adult?.qty    ?? 0} color={C.purple} iconEl={<Icon.book />}  delay={0}   monthly={bt.adult?.monthly}    info={I.biblesAdult} />
+            <StatCard label={t.biblesQuichua}  value={bt.quichua?.qty  ?? 0} color={C.teal}   iconEl={<Icon.book />}  delay={60}  monthly={bt.quichua?.monthly}  info={I.biblesQuichua} />
+            <StatCard label={t.biblesChildren} value={bt.children?.qty ?? 0} color={C.orange} iconEl={<Icon.child />} delay={120} monthly={bt.children?.monthly} info={I.biblesChildren} />
+          </Grid>
+        </div>
+      )}
       <MonthlyDistribution t={t} monthly={D.evangelism?.biblesMonthly ?? D.evangelism?.monthly} color={C.purple} title={t.biblesMonthlyTitle} info={I.chartBibles} />
       <MonthlyDistribution t={t} monthly={D.evangelism?.vbsMonthly} color={C.red} title={t.vbsMonthlyTitle} info={I.chartVbs} />
       <MonthlyDistribution t={t} monthly={D.evangelism?.pofMonthly} color={C.yellow} title={t.pofMonthlyTitle} info={I.chartPof} />
@@ -1914,6 +2049,8 @@ const GOALS_2026 = [
         ],
         bu: { en: "8 people", es: "8 personas" },
         where: { en: "Quito & Otavalo", es: "Quito y Otavalo" },
+        goal: 8,
+        live: (D) => D.shelter?.construction?.services, // Hit Squads + construction materials
       },
     ],
   },

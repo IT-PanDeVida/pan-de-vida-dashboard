@@ -203,6 +203,46 @@ const svcLike = (...parts) =>
 // Clinic services, as the "Clínica la Y" reports define them.
 const CLINIC_FILTER = svcLike("Atencion", "fisio", "odon");
 
+// Health aid outside the clinic, split into the budget lines Oscar asked for
+// (Nov 2026): hygiene kits, vitamins and diapers are tracked apart from "other
+// medical assistance" (specialists, exams, treatment, medicines). All of them
+// live in the Health program, so every filter is anchored to the "(Salud)"
+// services and the parts add up to the old combined "otras ayudas médicas" figure.
+const SALUD = svcLike("salud");
+const HEALTH_PARTS = {
+  hygiene:      `${SALUD} AND ${svcLike("Kit de higiene")}`,
+  vitamins:     `${SALUD} AND ${svcLike("Vitaminas")}`,
+  diapersAdult: `${SALUD} AND ${svcLike("Pañales adulto")}`,
+  diapersChild: `${SALUD} AND ${svcLike("Pañales para bebe")}`,
+  diapers:      `${SALUD} AND ${svcLike("Pañales")}`,
+};
+const HEALTH_OTHER_MEDICAL =
+  `${SALUD} AND (NOT ${CLINIC_FILTER}) AND (NOT ${svcLike("Kit de higiene", "Vitaminas", "Pañales")})`;
+
+// Living-conditions categories → the Salesforce services each one adds up.
+// "construction" = Hit Squads (building projects run with mission teams) plus
+// donated construction materials. Mattresses and beds have no service of their
+// own in this program: the team records them under Mobiliario.
+const SHELTER_CATEGORIES = {
+  furniture:    ["Mobiliario (Condiciones de Vida)"],
+  appliances:   ["Electrodomésticos (Condiciones de Vida)"],
+  household:    ["Enseres del hogar (Condiciones de Vida)"],
+  electronics:  ["Electrónicos y suministros (Condiciones de Vida)"],
+  construction: [
+    "Hit Squads (proyecto en Construccion con equipos) (Condiciones de Vida)",
+    "Donacion de materiales de construccion (Condiciones de Vida)",
+  ],
+};
+const svcIn = (names) => `pmdm__Service__r.Name IN ('${names.join("','")}')`;
+const SHELTER_ALL = svcIn(Object.values(SHELTER_CATEGORIES).flat());
+
+// Bible services → the three kinds the team distributes.
+const BIBLE_KEYS = {
+  "Biblias": "adult",
+  "Biblias Quichua": "quichua",
+  "Biblia de niño (Educación)": "children",
+};
+
 // ─── Cross-level "individuals served" + grand-total reached (live SOQL) ─────────
 // No single Salesforce report provides these deduplicated distinct-people counts,
 // so we compute them directly from pmdm__ServiceDelivery__c:
@@ -309,6 +349,25 @@ async function fetchSectionMetrics(instanceUrl, accessToken) {
     };
   } catch (err) { console.warn(`  ✗ per-card unique beneficiaries: ${err.message}`); }
 
+  // ── Health aid outside the clinic, by budget line ───────────────────────────
+  // qty = units delivered, ub = distinct people, cost = SUM(Total_Cost__c).
+  // `diapers` covers both diaper services, so its ub counts someone who received
+  // adult and baby diapers once.
+  try {
+    const part = async (filter) => {
+      const rec = (await runSoql(instanceUrl, accessToken,
+        `SELECT SUM(pmdm__Quantity__c) q, SUM(Total_Cost__c) c FROM ${SD} WHERE ${win} AND ${filter}`)).records?.[0] ?? {};
+      return {
+        qty: Number(rec.q) || 0,
+        cost: Math.round((Number(rec.c) || 0) * 100) / 100,
+        ub: await peopleCount(instanceUrl, accessToken, `${win} AND ${filter}`),
+      };
+    };
+    const parts = { other: await part(HEALTH_OTHER_MEDICAL) };
+    for (const [key, filter] of Object.entries(HEALTH_PARTS)) parts[key] = await part(filter);
+    out.healthParts = parts;
+  } catch (err) { console.warn(`  ✗ health budget lines: ${err.message}`); }
+
   // ── People represented by the hot-meal families (estimate) ──────────────────
   // Registered: sum of npsp__Number_of_Household_Members__c over the distinct
   // households served (an NPSP rollup — equals the Contact count of each
@@ -336,48 +395,58 @@ async function fetchSectionMetrics(instanceUrl, accessToken) {
     };
   } catch (err) { console.warn(`  ✗ hot-meal people estimate: ${err.message}`); }
 
-  // ── Shelter: the four categories the dashboard tracks ───────────────────────
+  // ── Shelter: the categories the dashboard tracks (SHELTER_CATEGORIES) ───────
   // The Salesforce reports filter on the delivery NAME ("CUST_NAME contains ..."),
   // which silently drops records whose auto-name was edited, and they lack a date
-  // column. Totals, unique beneficiaries, and the monthly series are all computed
-  // here from the service lookup instead so the tab stays internally consistent.
+  // column. Totals, unique beneficiaries, costs and the monthly series are all
+  // computed here from the service lookup instead so the tab stays internally
+  // consistent. Per category:
+  //   services   = SUM(Quantity)      → items delivered
+  //   deliveries = COUNT(Id)          → delivery records; a family can have several
+  //                (Nov 2026: 39 electronics deliveries went to 34 families)
+  //   ub         = distinct people (contacts + not-registered), like every card
+  //   cost       = SUM(Total_Cost__c) → purchases only; in-kind donations are
+  //                recorded without a cost
+  // An aggregate without GROUP BY always returns one row, so a category with no
+  // deliveries this year reads 0 rather than going missing.
   try {
-    const SHELTER_KEYS = {
-      "Mobiliario (Condiciones de Vida)": "furniture",
-      "Electrodomésticos (Condiciones de Vida)": "appliances",
-      "Enseres del hogar (Condiciones de Vida)": "household",
-      "Electrónicos y suministros (Condiciones de Vida)": "electronics",
-    };
-    const SHELTER4 = `pmdm__Service__r.Name IN ('${Object.keys(SHELTER_KEYS).join("','")}')`;
-    const shelterMonthly = await monthlySoql(SHELTER4);
-    // Pre-seed all four keys: the GROUP BY only returns categories with rows this
-    // year, and a missing key must mean "0 this year", not "fall back to reports".
-    const shelterCategories = Object.fromEntries(
-      Object.values(SHELTER_KEYS).map((k) => [k, { services: 0, ub: 0 }]));
-    const sc = await runSoql(instanceUrl, accessToken,
-      `SELECT pmdm__Service__r.Name s, SUM(pmdm__Quantity__c) q, COUNT_DISTINCT(pmdm__Contact__c) u ` +
-      `FROM ${SD} WHERE ${win} AND ${SHELTER4} GROUP BY pmdm__Service__r.Name`);
-    for (const rec of sc.records ?? []) {
-      const key = SHELTER_KEYS[rec.s];
-      if (key) shelterCategories[key] = { services: Number(rec.q) || 0, ub: Number(rec.u) || 0 };
+    const shelterCategories = {};
+    for (const [key, names] of Object.entries(SHELTER_CATEGORIES)) {
+      const filter = svcIn(names);
+      const rec = (await runSoql(instanceUrl, accessToken,
+        `SELECT SUM(pmdm__Quantity__c) q, COUNT(Id) n, SUM(Total_Cost__c) c FROM ${SD} WHERE ${win} AND ${filter}`)).records?.[0] ?? {};
+      shelterCategories[key] = {
+        services: Number(rec.q) || 0,
+        deliveries: Number(rec.n) || 0,
+        cost: Math.round((Number(rec.c) || 0) * 100) / 100,
+        ub: await peopleCount(instanceUrl, accessToken, `${win} AND ${filter}`),
+      };
     }
-    // Not-registered beneficiaries, same definition as peopleCount / the other cards.
-    const snr = await runSoql(instanceUrl, accessToken,
-      `SELECT pmdm__Service__r.Name s, COUNT_DISTINCT(N_r_Identification__c) u ` +
-      `FROM ${SD} WHERE ${win} AND ${SHELTER4} AND pmdm__Contact__c = null GROUP BY pmdm__Service__r.Name`);
-    for (const rec of snr.records ?? []) {
-      const key = SHELTER_KEYS[rec.s];
-      if (key) shelterCategories[key].ub += Number(rec.u) || 0;
-    }
-    out.shelterMonthly = shelterMonthly;
+    out.shelterMonthly = await monthlySoql(SHELTER_ALL);
     out.shelterCategories = shelterCategories;
   } catch (err) { console.warn(`  ✗ shelter metrics: ${err.message}`); }
 
   // ── Evangelism ───────────────────────────────────────────────────────────────
   try {
-    const BIBLES = `pmdm__Service__r.Name IN ('Biblias','Biblias Quichua','Biblia de niño (Educación)')`;
+    const BIBLES = svcIn(Object.keys(BIBLE_KEYS));
     const bibles = await agg(`SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${win} AND ${BIBLES}`);
     const biblesMonthly = await monthlySoql(BIBLES);
+    // The same bibles split by kind (adult/Spanish, Quichua, children), each with
+    // its monthly series. All three keys are pre-seeded so a kind with no
+    // deliveries this year reads 0 instead of going missing.
+    const biblesByType = Object.fromEntries(
+      Object.values(BIBLE_KEYS).map((k) => [k, { qty: 0, monthly: new Array(12).fill(0) }]));
+    const bt = await runSoql(instanceUrl, accessToken,
+      `SELECT pmdm__Service__r.Name s, CALENDAR_MONTH(pmdm__DeliveryDate__c) m, SUM(pmdm__Quantity__c) e FROM ${SD} ` +
+      `WHERE ${win} AND ${BIBLES} GROUP BY pmdm__Service__r.Name, CALENDAR_MONTH(pmdm__DeliveryDate__c)`);
+    for (const rec of bt.records ?? []) {
+      const key = BIBLE_KEYS[rec.s];
+      const idx = (Number(rec.m) || 0) - 1;
+      if (!key || idx < 0 || idx > 11) continue;
+      const n = Number(rec.e) || 0;
+      biblesByType[key].monthly[idx] += n;
+      biblesByType[key].qty += n;
+    }
     const VBS = `pmdm__Service__r.Name = 'Campamentos VBS (Educación)'`;
     const vbsAttendees = await agg(`SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${win} AND ${VBS}`);
     // Unique attendees intentionally ignores the Quantity >= 1 convention: ~2,700
@@ -393,7 +462,7 @@ async function fetchSectionMetrics(instanceUrl, accessToken) {
       `SELECT SUM(pmdm__Quantity__c) e FROM ${SD} WHERE ${POF} AND pmdm__Quantity__c >= 1`);
     const pofMonthly = await monthlySoql(POF);
     out.evangelism = {
-      bibles, biblesMonthly,
+      bibles, biblesMonthly, biblesByType,
       vbsAttendees, vbsUnique, vbsMonthly,
       professionsOfFaith, professionsOfFaithAllTime, pofMonthly,
     };
@@ -698,37 +767,20 @@ async function fetchMonthlySeries(instanceUrl, accessToken) {
   // Kept as the fallback for metrics.cardUB.healthOther, hence the same definition.
   ms.healthOtherUBYear = await trySeries("healthOtherUBYear", () =>
     peopleCount(instanceUrl, accessToken, `${win} AND ${svc("salud")} AND (NOT ${CLINIC})`));
+  // The same aid split by budget line (see HEALTH_PARTS). healthOther above stays
+  // as the combined series, used only when the split itself failed.
+  ms.healthOtherMedical = await trySeries("healthOtherMedical", () =>
+    monthlyStats(HEALTH_OTHER_MEDICAL, { cost: "Total_Cost__c" }));
+  for (const key of Object.keys(HEALTH_PARTS)) {
+    ms[key] = await trySeries(key, () => monthlyStats(HEALTH_PARTS[key], { cost: "Total_Cost__c" }));
+  }
   ms.healthUB = await trySeries("healthUB", () =>
     monthlyPeople(`${prog} = 'Programa de Salud (Health)'`));
+  // One { qty, ub, cost } set per living-conditions category.
   ms.shelter = await trySeries("shelter", async () => {
-    const KEYS = {
-      "Mobiliario (Condiciones de Vida)": "furniture",
-      "Electrodomésticos (Condiciones de Vida)": "appliances",
-      "Enseres del hogar (Condiciones de Vida)": "household",
-      "Electrónicos y suministros (Condiciones de Vida)": "electronics",
-    };
-    const out = Object.fromEntries(Object.values(KEYS).map((k) => [k, { qty: zeros(), ub: zeros() }]));
-    const IN4 = `pmdm__Service__r.Name IN ('${Object.keys(KEYS).join("','")}')`;
-    const j = await soql(
-      `SELECT pmdm__Service__r.Name s, ${MONTH} m, SUM(pmdm__Quantity__c) qty, COUNT_DISTINCT(pmdm__Contact__c) ub ` +
-      `FROM ${SD} WHERE ${win} AND ${IN4} GROUP BY pmdm__Service__r.Name, ${MONTH}`);
-    for (const rec of j.records ?? []) {
-      const key = KEYS[rec.s];
-      const idx = (Number(rec.m) || 0) - 1;
-      if (!key || idx < 0 || idx > 11) continue;
-      out[key].qty[idx] = Number(rec.qty) || 0;
-      out[key].ub[idx] = Number(rec.ub) || 0;
-    }
-    // Not-registered people per month, same definition as every other ub series.
-    const nr = await soql(
-      `SELECT pmdm__Service__r.Name s, ${MONTH} m, COUNT_DISTINCT(N_r_Identification__c) e ` +
-      `FROM ${SD} WHERE ${win} AND ${IN4} AND pmdm__Contact__c = null ` +
-      `GROUP BY pmdm__Service__r.Name, ${MONTH}`);
-    for (const rec of nr.records ?? []) {
-      const key = KEYS[rec.s];
-      const idx = (Number(rec.m) || 0) - 1;
-      if (!key || idx < 0 || idx > 11) continue;
-      out[key].ub[idx] += Number(rec.e) || 0;
+    const out = {};
+    for (const [key, names] of Object.entries(SHELTER_CATEGORIES)) {
+      out[key] = await monthlyStats(svcIn(names), { cost: "Total_Cost__c" });
     }
     return out;
   });
@@ -887,6 +939,15 @@ async function main() {
     if (hp) console.log(
       `  ✓ hot-meal people ≈${hp.estimate} (${hp.registered} in ${hp.households} registered households + ` +
       `${hp.notRegistered} not-registered × ${hp.avgHouseholdSize}, avg of ${hp.activeHouseholds} active households)`,
+    );
+    const hpt = sectionMetrics.healthParts;
+    if (hpt) console.log(
+      `  ✓ health lines: otherMedical=${hpt.other.qty} hygiene=${hpt.hygiene.qty} vitamins=${hpt.vitamins.qty} ` +
+      `diapers adult=${hpt.diapersAdult.qty} child=${hpt.diapersChild.qty}`,
+    );
+    const shc = sectionMetrics.shelterCategories;
+    if (shc) console.log(
+      `  ✓ shelter: ` + Object.entries(shc).map(([k, v]) => `${k}=${v.services} (${v.ub} fam, $${v.cost})`).join(" | "),
     );
     console.log(
       `  ✓ health: services=${sectionMetrics.healthServices} people=${sectionMetrics.healthUB} | ` +
