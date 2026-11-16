@@ -1119,3 +1119,778 @@ p { margin: 0; }
     font-size: var(--text-sm);
   }
 }
+
+/* ── FIGURE (a labelled number inside a card) ────────── */
+.pdv-figure {
+  display: inline-block;
+  vertical-align: top;
+  padding: 10px 12px;
+  margin: -10px -12px;
+  border-radius: var(--radius-lg);
+  transition: background var(--fast) var(--ease);
+}
+
+.pdv-figure--btn { cursor: pointer; }
+
+.pdv-figure--btn:hover { background: var(--surface-2); }
+
+.pdv-figure--btn:focus-visible {
+  outline: 2px solid rgba(27, 62, 140, 0.35);
+  outline-offset: 0;
+}
+
+.pdv-figure--btn[aria-pressed="true"] { background: var(--blue-bg); }
+
+.pdv-figure-hint {
+  display: inline-flex;
+  vertical-align: -2px;
+  opacity: 0.6;
+}
+
+.pdv-figure--btn[aria-pressed="true"] .pdv-figure-hint {
+  color: var(--blue);
+  opacity: 1;
+}
+
+.pdv-figure-value {
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text-1);
+}
+
+.pdv-figure--md .pdv-figure-value {
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
+
+/* Supporting figures under a card's headline figure. */
+.pdv-figure-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-5) var(--sp-10);
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--border-card);
+}
+
+.pdv-card-sub {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  margin-top: 3px;
+}
+
+/* ── SEGMENT BAR (a total split into its parts) ──────── */
+.pdv-segbar {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  margin-top: var(--sp-6);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.pdv-segbar > div { min-width: 4px; }
+
+.pdv-segbar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-5);
+  margin-top: var(--sp-3);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+.pdv-segbar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pdv-segbar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pdv-segbar-val {
+  font-weight: 600;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.pdv-segbar-pct { color: var(--text-4); }
+
+/* ── SERIES CHART (the page's single chart) ──────────── */
+.pdv-chart-card { scroll-margin: var(--sp-5); }
+
+.pdv-chart-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-6);
+  margin-bottom: var(--sp-4);
+}
+
+.pdv-chart-hdr .pdv-section-title { margin: 0; }
+
+.pdv-chart-total {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+
+.pdv-chart-total-val {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.pdv-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--sp-5);
+}
+
+.pdv-seg-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-3);
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+
+.pdv-seg-btn:hover { background: var(--surface-2); }
+
+.pdv-seg-btn[aria-pressed="true"] {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.pdv-chart-empty {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background: var(--surface-2);
+  color: var(--text-4);
+  font-size: var(--text-sm);
+}
+
+.pdv-chart-note {
+  margin: var(--sp-4) 0 0;
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  line-height: 1.55;
+  max-width: 760px;
+}
+
+.pdv-bar--stack {
+  display: flex;
+  flex-direction: column-reverse;
+  overflow: hidden;
+}
+
+.pdv-summary-metric[aria-pressed="true"] { background: rgba(27, 62, 140, 0.12); }
+
+/* ── METRIC TABLE (line items × measures) ────────────── */
+.pdv-table-wrap { overflow-x: auto; }
+
+.pdv-table {
+  width: 100%;
+  min-width: 540px;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.pdv-table th,
+.pdv-table td {
+  padding: 12px var(--sp-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pdv-table th:first-child { padding-left: 0; }
+.pdv-table .num { text-align: right; }
+
+.pdv-table thead th {
+  padding-top: 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.pdv-table-group th {
+  padding-top: var(--sp-5);
+  padding-bottom: var(--sp-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.pdv-table-row > * { border-top: 1px solid var(--border-card); }
+
+.pdv-table-row th,
+.pdv-table-subtotal th {
+  font-weight: 500;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
+.pdv-table-hint {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--text-4);
+}
+
+.pdv-table-subtotal > * {
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.pdv-table-subtotal th {
+  padding-left: var(--sp-3) !important;
+  font-weight: 600;
+  color: var(--text-1);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.pdv-table-subtotal td:last-child { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+
+.pdv-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pdv-cell-btn,
+.pdv-cell-val {
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+}
+
+.pdv-cell-btn {
+  border: 0;
+  background: transparent;
+  padding: 3px 8px;
+  margin: -3px -8px -3px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+
+.pdv-cell-btn:hover { background: var(--surface-3); }
+
+.pdv-cell-btn[aria-pressed="true"] {
+  background: var(--blue);
+  color: #fff;
+}
+
+.pdv-cell-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--text-xs);
+  color: var(--text-4);
+}
+
+/* ── 2026 PLAN (goal rows) ───────────────────────────── */
+.pdv-goals-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-5) var(--sp-10);
+  align-items: center;
+}
+
+.pdv-goals-summary .pdv-segbar { margin-top: 0; }
+
+.pdv-goals-big {
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--text-1);
+}
+
+.pdv-goals-big small {
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--text-4);
+  letter-spacing: -0.02em;
+}
+
+.pdv-goals-section-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-2);
+}
+
+.pdv-goals-section-hdr .pdv-section-title { margin: 0; }
+
+.pdv-goal + .pdv-goal { border-top: 1px solid var(--border-card); }
+
+.pdv-goal-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: var(--sp-8);
+  align-items: center;
+  padding: var(--sp-4) 0;
+}
+
+.pdv-goal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  margin: -8px -10px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--fast) var(--ease);
+}
+
+.pdv-goal-head:hover { background: var(--surface-2); }
+
+.pdv-goal-chev {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: var(--text-4);
+  transition: transform var(--mid) var(--ease);
+}
+
+.pdv-goal-head[aria-expanded="true"] .pdv-goal-chev { transform: rotate(90deg); }
+
+.pdv-goal-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-1);
+  line-height: 1.35;
+}
+
+.pdv-goal-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  color: var(--text-3);
+}
+
+.pdv-goal-nums {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+  margin-bottom: 8px;
+}
+
+.pdv-goal-live {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.pdv-goal-of {
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+.pdv-goal-pct {
+  margin-right: 8px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.pdv-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pdv-goal-track {
+  position: relative;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+}
+
+.pdv-goal-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 1s var(--ease);
+}
+
+/* Where the goal would be today at an even pace through the year. */
+.pdv-goal-tick {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--text-2);
+}
+
+.pdv-goal-detail {
+  max-width: 760px;
+  padding: 0 0 var(--sp-5) 26px;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-3);
+}
+
+.pdv-goal-detail p { margin: 0 0 var(--sp-3); }
+
+.pdv-goal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.pdv-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: var(--sp-2);
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.pdv-link-btn:hover { background: var(--blue-bg); }
+
+@media (max-width: 760px) {
+  .pdv-goal-main {
+    grid-template-columns: 1fr;
+    gap: var(--sp-4);
+  }
+
+  .pdv-goals-summary { grid-template-columns: 1fr; }
+  .pdv-figure-value { font-size: var(--text-2xl); }
+}
+
+@media (max-width: 600px) {
+  /* On a phone each row stacks: the line item on top, its figures beneath,
+     each under its own column name (td::before) instead of the table header. */
+  .pdv-table,
+  .pdv-table tbody,
+  .pdv-table th,
+  .pdv-table td { display: block; }
+
+  .pdv-table { min-width: 0; }
+  .pdv-table thead { display: none; }
+
+  .pdv-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: var(--sp-2) var(--sp-3);
+  }
+
+  .pdv-table th,
+  .pdv-table td { padding: 0; }
+
+  .pdv-table th { grid-column: 1 / -1; }
+  .pdv-table .num { text-align: left; }
+
+  .pdv-table td::before {
+    content: attr(data-label);
+    display: flex;
+    align-items: flex-end;
+    min-height: 2.6em; /* two lines, so the figures of a row share a baseline */
+    margin-bottom: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-4);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+  }
+
+  .pdv-table-row > *,
+  .pdv-table-subtotal > * { border-top: 0; }
+
+  .pdv-table-row {
+    padding: var(--sp-3) 0;
+    border-top: 1px solid var(--border-card);
+  }
+
+  .pdv-table-group th { padding: var(--sp-5) 0 var(--sp-2); }
+
+  .pdv-table-wrap { overflow-x: visible; }
+
+  /* Bleeds into the card padding so its figures stay in the rows' columns. */
+  .pdv-table-subtotal {
+    margin: 0 calc(-1 * var(--sp-3));
+    padding: var(--sp-3);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+  }
+
+  .pdv-table-subtotal > * { background: transparent; }
+  .pdv-table-subtotal th { padding-left: 0 !important; }
+
+  .pdv-cell { flex-direction: row-reverse; }
+
+  .pdv-cell-btn,
+  .pdv-cell-val { font-size: 15px; }
+
+  .pdv-cell-btn {
+    padding: 3px 6px;
+    margin: -3px 0 -3px -6px;
+  }
+
+  .pdv-goals-section-hdr { flex-wrap: wrap; }
+}
+
+/* Table extras: a row's colour key, a non-numeric cell ("in kind"). */
+.pdv-table-dot {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: 1px;
+}
+
+.pdv-cell-val--muted {
+  font-weight: 500;
+  color: var(--text-4);
+}
+
+/* ── PROGRESS ROWS (life farms by type) ──────────────── */
+.pdv-goal-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pdv-goal-label > .pdv-segbar-dot { margin-top: 7px; }
+.pdv-goal--child .pdv-goal-label { padding-left: var(--sp-6); }
+
+.pdv-group-label {
+  margin-top: var(--sp-5);
+  padding-bottom: var(--sp-1);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pdv-chart-hdr + .pdv-group-label { margin-top: 0; }
+.pdv-group-label + .pdv-goal { border-top: 0; }
+
+.pdv-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 3px 10px 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+
+.pdv-chip-btn:hover { background: var(--surface-2); }
+
+.pdv-chip-btn[aria-pressed="true"] {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+/* ── REPAYMENT RATE (bar + the two figures it relates) ─ */
+.pdv-rate { margin-top: var(--sp-6); }
+
+.pdv-rate-caps {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-5);
+  margin-top: var(--sp-3);
+  font-size: var(--text-sm);
+  color: var(--text-3);
+}
+
+.pdv-rate-caps strong {
+  font-weight: 600;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.pdv-loc-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0 var(--sp-10);
+  margin-top: var(--sp-2);
+}
+
+/* ── OVERVIEW ────────────────────────────────────────── */
+.pdv-overview-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: var(--sp-3);
+}
+
+.pdv-card-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--sp-4);
+}
+
+.pdv-card-foot .pdv-link-btn,
+.pdv-level-hdr .pdv-link-btn { margin: 0 -6px 0 0; }
+
+.pdv-level-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-5);
+}
+
+.pdv-level-hdr .pdv-level-badge { margin-bottom: 0; }
+
+/* A level's programs: each row jumps to its tab. */
+.pdv-nav-rows {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--border-card);
+}
+
+.pdv-nav-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: calc(100% + 20px);
+  margin: 0 -10px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--fast) var(--ease);
+}
+
+.pdv-nav-row:hover { background: var(--surface-2); }
+.pdv-nav-row-label { flex: 1; }
+
+.pdv-nav-row-val {
+  color: var(--text-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.pdv-nav-row-val strong {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.pdv-nav-row > svg,
+.pdv-nav-stat .pdv-stat-label svg {
+  flex-shrink: 0;
+  color: var(--text-4);
+}
+
+.pdv-nav-row:hover > svg,
+.pdv-nav-stat:hover .pdv-stat-label svg { color: var(--blue); }
+
+.pdv-nav-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--sp-1);
+}
+
+.pdv-nav-stat {
+  display: block;
+  padding: var(--sp-3);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--fast) var(--ease);
+}
+
+.pdv-nav-stat:hover { background: var(--surface-2); }
+.pdv-nav-stat .pdv-stat-label { display: block; }
+.pdv-nav-stat .pdv-figure-value { display: block; color: var(--purple); }
+
+@media (max-width: 1000px) {
+  .pdv-overview-top { grid-template-columns: 1fr; }
+}
+
+/* Supporting figures in equal columns, so long labels wrap inside their own. */
+.pdv-figure-row--cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-5) var(--sp-6);
+}
+
+/* Twelve months on a phone: tighter columns so the chart stays inside its card. */
+.pdv-bar-col { min-width: 0; }
+
+@media (max-width: 600px) {
+  .pdv-barchart { gap: var(--sp-1); }
+
+  .pdv-bar-val {
+    font-size: 10px;
+    letter-spacing: -0.04em;
+  }
+
+  .pdv-bar-lbl { font-size: 10px; }
+}
