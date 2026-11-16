@@ -120,6 +120,7 @@ const i18n = {
     otherMedicalAids: "Other medical assistance (specialists, exams, treatment, medicines)", ubOtherMedical: "Individuals served",
     otherMedicalAidsAll: "Medical Assistance (Specialist appointment, medicine, etc)",
     investedOther: "Invested in other medical",
+    otherHealthTotalCost: "Total invested in other health assistance",
     hygieneKits: "Hygiene kits delivered", hygieneCost: "Hygiene kits cost",
     vitaminsDelivered: "Vitamins delivered", vitaminsCost: "Vitamins cost",
     diapers: "Diapers", diapersAdult: "Adult diapers delivered", diapersChild: "Children's diapers delivered (babies 0–2)",
@@ -270,6 +271,7 @@ const i18n = {
       otherAids: "Health services outside the clinic delivered this year: specialists, medical exams, medicines, nutritionist, health talks and fairs, and other health donations. Hygiene kits, vitamins and diapers are counted apart, in the rows below.",
       otherAidsAll: "Specialist appointments, medicines and other health aid outside the clinic, delivered this year.",
       otherInvested: "Total cost recorded for this year's other medical assistance. Hygiene kits and vitamins have their own cost cards.",
+      otherHealthTotalCost: "The cost of every line above added together: other medical assistance ({other}) + hygiene kits ({hygiene}) + vitamins ({vitamins}) + diapers ({diapers}). Clinic payments are not included.",
       hygieneKits: "Hygiene kits delivered this year (Health program service “Kit de higiene”).",
       hygieneCost: "Total cost recorded on this year's hygiene-kit deliveries.",
       vitamins: "Vitamins delivered this year. Most of them go inside the school kits (school supplies + backpack + vitamins) and are counted here, under Health.",
@@ -368,6 +370,7 @@ const i18n = {
     otherMedicalAids: "Otras asistencias médicas (especialistas, exámenes, tratamiento, medicamentos)", ubOtherMedical: "Individuos servidos",
     otherMedicalAidsAll: "Asistencia médica (Citas de especialidad, medicinas, etc.)",
     investedOther: "Invertido en otras asistencias médicas",
+    otherHealthTotalCost: "Total invertido en otras asistencias de salud",
     hygieneKits: "Kits de higiene entregados", hygieneCost: "Costo de kits de higiene",
     vitaminsDelivered: "Vitaminas entregadas", vitaminsCost: "Costo de vitaminas",
     diapers: "Pañales", diapersAdult: "Pañales de adulto entregados", diapersChild: "Pañales de niño entregados (bebés 0–2)",
@@ -517,6 +520,7 @@ const i18n = {
       otherAids: "Servicios de salud fuera de la clínica entregados este año: especialistas, exámenes médicos, medicinas, nutricionista, charlas y ferias de salud, y otras donaciones de salud. Los kits de higiene, las vitaminas y los pañales se cuentan aparte, en las filas de abajo.",
       otherAidsAll: "Citas con especialistas, medicinas y otras ayudas de salud fuera de la clínica, entregadas este año.",
       otherInvested: "Costo total registrado en las otras asistencias médicas de este año. Los kits de higiene y las vitaminas tienen sus propias tarjetas de costo.",
+      otherHealthTotalCost: "La suma del costo de todos los rubros de arriba: otras asistencias médicas ({other}) + kits de higiene ({hygiene}) + vitaminas ({vitamins}) + pañales ({diapers}). No incluye los pagos de la clínica.",
       hygieneKits: "Kits de higiene entregados este año (servicio “Kit de higiene” del programa de Salud).",
       hygieneCost: "Costo total registrado en las entregas de kits de higiene de este año.",
       vitamins: "Vitaminas entregadas este año. La mayoría va dentro de los kits escolares (útiles + mochila + vitaminas) y se cuenta aquí, en Salud.",
@@ -1433,6 +1437,25 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
   const I = t.info;
   // Health: true when the sync split "other assistance" into its budget lines.
   const split = Boolean(D.health?.hygiene);
+  // Combined cost of every "other health assistance" line (medical + hygiene
+  // kits + vitamins + diapers), with its month-by-month series when all exist.
+  const otherHealth = (() => {
+    const h = D.health ?? {};
+    const parts = [
+      [h.other?.invested, h.other?.investedMonthly],
+      [h.hygiene?.cost, h.hygiene?.costMonthly],
+      [h.vitamins?.cost, h.vitamins?.costMonthly],
+      [h.diapers?.cost, h.diapers ? h.diapers.adult?.costMonthly?.map((v, i) => v + (h.diapers.child?.costMonthly?.[i] ?? 0)) : null],
+    ];
+    const cents = (v) => Math.round(v * 100) / 100;
+    const series = parts.map(([, m]) => m);
+    return {
+      cost: cents(parts.reduce((a, [c]) => a + (c ?? 0), 0)),
+      costMonthly: series.every(Array.isArray)
+        ? series[0].map((_, i) => cents(series.reduce((a, m) => a + (m[i] ?? 0), 0)))
+        : null,
+    };
+  })();
   // Education: exact totals from the sync; units × unit cost only as a fallback.
   const edu = D.education ?? {};
   const suppliesCost = edu.schoolKitTotalCost ?? (edu.schoolKits ?? 0) * (edu.schoolKitCost ?? 0);
@@ -1498,6 +1521,16 @@ function Level2Page({ t, initialTab = "health", data, highlightKey }) {
               <StatCard label={t.ubOtherMedical} value={D.health.diapers.ub}        color={C.teal} iconEl={<Icon.people />} delay={120} monthly={D.health.diapers.ubMonthly}
                 modalTitle={`${t.diapers} — ${t.ubOtherMedical}`} note={t.uniqueMonthlyNote} info={I.uniquePeople} />
             </Grid>
+          )}
+          {/* The budget lines above added back together (what the single
+              "invested in other medical" card showed before the split). */}
+          {split && (
+            <StatCard label={t.otherHealthTotalCost} value={money(otherHealth.cost)} color={C.green} iconEl={<Icon.money />} delay={0}
+              monthly={otherHealth.costMonthly} format="money"
+              info={fill(I.otherHealthTotalCost, {
+                other: money(D.health?.other?.invested), hygiene: money(D.health?.hygiene?.cost),
+                vitamins: money(D.health?.vitamins?.cost), diapers: money(D.health?.diapers?.cost),
+              })} />
           )}
 
           <MonthlyDistribution t={t} monthly={D.health?.monthly} color={C.blue} info={I.chartHealth} />
