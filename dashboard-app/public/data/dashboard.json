@@ -1,8 +1,8 @@
 {
   "overview": {
-    "totalBeneficiaries": 2816,
-    "totalAccounts": 758,
-    "newFamilies": 156,
+    "totalBeneficiaries": 2821,
+    "totalAccounts": 759,
+    "newFamilies": 157,
     "totalDeliveries": 9684,
     "deliveriesMonthly": [
       272,
@@ -52,11 +52,11 @@
       0
     ],
     "people": {
-      "estimate": 1225,
+      "estimate": 1226,
       "registered": 731,
       "households": 212,
       "notRegistered": 133,
-      "activeHouseholds": 764,
+      "activeHouseholds": 765,
       "avgHouseholdSize": 3.72
     }
   },
@@ -1232,12 +1232,12 @@
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 758,
-      "beneficiaries": 2816,
-      "girls": 430,
+      "accounts": 759,
+      "beneficiaries": 2821,
+      "girls": 433,
       "boys": 421,
-      "newFamilies": 156,
-      "newUB": 565,
+      "newFamilies": 157,
+      "newUB": 570,
       "newFamiliesMonthly": [
         2,
         9,
@@ -1249,7 +1249,7 @@
         19,
         22,
         14,
-        15,
+        16,
         0
       ],
       "newUBMonthly": [
@@ -1263,17 +1263,17 @@
         63,
         76,
         62,
-        58,
+        63,
         0
       ]
     },
     "quito": {
-      "accounts": 421,
-      "beneficiaries": 1418,
-      "girls": 259,
+      "accounts": 422,
+      "beneficiaries": 1423,
+      "girls": 262,
       "boys": 259,
-      "newFamilies": 89,
-      "newUB": 313,
+      "newFamilies": 90,
+      "newUB": 318,
       "newFamiliesMonthly": [
         0,
         3,
@@ -1285,7 +1285,7 @@
         9,
         11,
         5,
-        9,
+        10,
         0
       ],
       "newUBMonthly": [
@@ -1299,7 +1299,7 @@
         26,
         38,
         19,
-        35,
+        40,
         0
       ]
     },
@@ -1430,6 +1430,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-16T21:04:59.322Z",
+  "lastUpdated": "2026-11-17T19:54:12.208Z",
   "syncWarnings": []
 }
