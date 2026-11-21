@@ -1235,7 +1235,7 @@
       "accounts": 766,
       "beneficiaries": 2847,
       "girls": 439,
-      "boys": 428,
+      "boys": 427,
       "newFamilies": 164,
       "newUB": 595,
       "newFamiliesMonthly": [
@@ -1307,7 +1307,7 @@
       "accounts": 319,
       "beneficiaries": 1353,
       "girls": 171,
-      "boys": 161,
+      "boys": 160,
       "newFamilies": 69,
       "newUB": 264,
       "newFamiliesMonthly": [
@@ -1430,6 +1430,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-20T19:07:48.095Z",
+  "lastUpdated": "2026-11-21T18:01:34.049Z",
   "syncWarnings": []
 }
