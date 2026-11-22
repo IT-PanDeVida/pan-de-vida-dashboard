@@ -3,38 +3,38 @@
     "totalBeneficiaries": 2847,
     "totalAccounts": 766,
     "newFamilies": 164,
-    "totalDeliveries": 9733,
+    "totalDeliveries": 9761,
     "deliveriesMonthly": [
       272,
       476,
-      981,
+      978,
       621,
       707,
-      792,
-      680,
-      1764,
+      788,
+      679,
+      1759,
       805,
-      784,
-      375,
+      783,
+      395,
       0
     ],
     "totalReached": 2265
   },
   "hotMeals": {
-    "plates": 5339,
+    "plates": 5367,
     "families": 352,
     "monthly": [
       72,
       270,
-      646,
+      643,
       319,
       469,
-      429,
-      403,
-      476,
+      425,
+      402,
+      471,
       377,
-      465,
-      300,
+      464,
+      320,
       0
     ],
     "familiesMonthly": [
@@ -494,7 +494,7 @@
     "backpacks": 363,
     "backpackCost": 16.01,
     "backpackTotalCost": 5810.14,
-    "vbsCamps": 43,
+    "vbsCamps": 44,
     "kitsMonthly": [
       1,
       0,
@@ -1139,8 +1139,8 @@
         ]
       }
     },
-    "vbsCamps": 43,
-    "childrenVBS": 1742,
+    "vbsCamps": 44,
+    "childrenVBS": 1750,
     "vbsUnique": 463,
     "professionsOfFaith": 0,
     "professionsOfFaithAllTime": 2,
@@ -1170,7 +1170,7 @@
       409,
       107,
       139,
-      156,
+      164,
       0
     ],
     "pofMonthly": [
@@ -1212,7 +1212,7 @@
       5,
       3,
       3,
-      4,
+      5,
       0
     ],
     "personasMonthly": [
@@ -1430,6 +1430,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-21T18:01:34.049Z",
+  "lastUpdated": "2026-11-22T18:33:23.871Z",
   "syncWarnings": []
 }
