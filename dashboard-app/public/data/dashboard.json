@@ -1,40 +1,40 @@
 {
   "overview": {
-    "totalBeneficiaries": 2847,
-    "totalAccounts": 766,
-    "newFamilies": 164,
-    "totalDeliveries": 9761,
+    "totalBeneficiaries": 2849,
+    "totalAccounts": 767,
+    "newFamilies": 165,
+    "totalDeliveries": 9818,
     "deliveriesMonthly": [
       272,
-      476,
-      978,
-      621,
-      707,
-      788,
-      679,
-      1759,
-      805,
-      783,
-      395,
+      472,
+      964,
+      617,
+      702,
+      775,
+      673,
+      1752,
+      799,
+      777,
+      447,
       0
     ],
     "totalReached": 2265
   },
   "hotMeals": {
-    "plates": 5367,
-    "families": 352,
+    "plates": 5396,
+    "families": 359,
     "monthly": [
       72,
-      270,
-      643,
-      319,
-      469,
-      425,
-      402,
-      471,
-      377,
+      266,
+      629,
+      315,
       464,
-      320,
+      412,
+      396,
+      464,
+      371,
+      458,
+      344,
       0
     ],
     "familiesMonthly": [
@@ -48,15 +48,15 @@
       124,
       113,
       114,
-      97,
+      108,
       0
     ],
     "people": {
-      "estimate": 1247,
-      "registered": 752,
-      "households": 217,
-      "notRegistered": 133,
-      "activeHouseholds": 772,
+      "estimate": 1270,
+      "registered": 772,
+      "households": 223,
+      "notRegistered": 134,
+      "activeHouseholds": 773,
       "avgHouseholdSize": 3.72
     }
   },
@@ -109,8 +109,8 @@
     ]
   },
   "clothing": {
-    "donations": 683,
-    "ub": 240,
+    "donations": 711,
+    "ub": 246,
     "monthly": [
       0,
       60,
@@ -122,7 +122,7 @@
       54,
       77,
       93,
-      21,
+      49,
       0
     ],
     "ubMonthly": [
@@ -136,7 +136,7 @@
       34,
       52,
       49,
-      21,
+      40,
       0
     ]
   },
@@ -840,11 +840,11 @@
     },
     "basicFarm": {
       "goal": 118,
-      "done": 166
+      "done": 167
     },
     "multiplication": {
       "goal": 108,
-      "done": 140
+      "done": 139
     },
     "urbanFarm": {
       "goal": null,
@@ -854,7 +854,7 @@
     "newThisYear": {
       "ideal": 12,
       "full": 12,
-      "basic": 33,
+      "basic": 34,
       "multiplication": 67,
       "urban": 36
     },
@@ -869,7 +869,7 @@
       17,
       13,
       12,
-      1,
+      2,
       0
     ],
     "urbanMonthly": [
@@ -925,7 +925,7 @@
       4,
       3,
       3,
-      1,
+      2,
       0
     ],
     "multiplicationMonthly": [
@@ -962,7 +962,7 @@
       143,
       144,
       155,
-      69,
+      74,
       0
     ],
     "fund": {
@@ -1061,7 +1061,7 @@
       228,
       204,
       207,
-      74,
+      79,
       0
     ]
   },
@@ -1226,18 +1226,18 @@
       1620,
       986,
       1066,
-      713,
+      732,
       0
     ]
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 766,
-      "beneficiaries": 2847,
+      "accounts": 767,
+      "beneficiaries": 2849,
       "girls": 439,
       "boys": 427,
-      "newFamilies": 164,
-      "newUB": 595,
+      "newFamilies": 165,
+      "newUB": 597,
       "newFamiliesMonthly": [
         2,
         9,
@@ -1249,7 +1249,7 @@
         19,
         22,
         14,
-        23,
+        24,
         0
       ],
       "newUBMonthly": [
@@ -1263,7 +1263,7 @@
         63,
         76,
         62,
-        88,
+        90,
         0
       ]
     },
@@ -1304,12 +1304,12 @@
       ]
     },
     "imbabura": {
-      "accounts": 319,
-      "beneficiaries": 1353,
+      "accounts": 320,
+      "beneficiaries": 1355,
       "girls": 171,
       "boys": 160,
-      "newFamilies": 69,
-      "newUB": 264,
+      "newFamilies": 70,
+      "newUB": 266,
       "newFamiliesMonthly": [
         2,
         6,
@@ -1321,7 +1321,7 @@
         10,
         11,
         9,
-        8,
+        9,
         0
       ],
       "newUBMonthly": [
@@ -1335,7 +1335,7 @@
         37,
         38,
         43,
-        35,
+        37,
         0
       ]
     }
@@ -1377,7 +1377,7 @@
     ]
   },
   "level1": {
-    "individualsServed": 783,
+    "individualsServed": 788,
     "servedMonthly": [
       37,
       128,
@@ -1389,7 +1389,7 @@
       396,
       142,
       155,
-      109,
+      117,
       0
     ],
     "totalCost": 16575.24
@@ -1425,11 +1425,11 @@
       143,
       144,
       155,
-      69,
+      74,
       0
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-22T18:33:23.871Z",
+  "lastUpdated": "2026-11-23T22:42:52.803Z",
   "syncWarnings": []
 }
