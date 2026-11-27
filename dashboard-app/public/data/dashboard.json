@@ -1,8 +1,8 @@
 {
   "overview": {
-    "totalBeneficiaries": 2864,
-    "totalAccounts": 771,
-    "newFamilies": 169,
+    "totalBeneficiaries": 2829,
+    "totalAccounts": 762,
+    "newFamilies": 168,
     "totalDeliveries": 9990,
     "deliveriesMonthly": [
       268,
@@ -52,12 +52,12 @@
       0
     ],
     "people": {
-      "estimate": 1297,
+      "estimate": 1296,
       "registered": 780,
       "households": 226,
       "notRegistered": 139,
-      "activeHouseholds": 777,
-      "avgHouseholdSize": 3.72
+      "activeHouseholds": 768,
+      "avgHouseholdSize": 3.71
     }
   },
   "groceries": {
@@ -1226,25 +1226,25 @@
       1620,
       986,
       1066,
-      845,
+      850,
       0
     ]
   },
   "beneficiaries": {
     "combined": {
-      "accounts": 771,
-      "beneficiaries": 2864,
-      "girls": 439,
-      "boys": 431,
-      "newFamilies": 169,
-      "newUB": 612,
+      "accounts": 762,
+      "beneficiaries": 2829,
+      "girls": 425,
+      "boys": 426,
+      "newFamilies": 168,
+      "newUB": 609,
       "newFamiliesMonthly": [
         2,
         9,
         14,
         12,
         13,
-        17,
+        16,
         19,
         19,
         22,
@@ -1258,7 +1258,7 @@
         46,
         48,
         44,
-        70,
+        67,
         61,
         63,
         76,
@@ -1268,19 +1268,19 @@
       ]
     },
     "quito": {
-      "accounts": 430,
-      "beneficiaries": 1445,
-      "girls": 262,
-      "boys": 266,
-      "newFamilies": 98,
-      "newUB": 340,
+      "accounts": 421,
+      "beneficiaries": 1410,
+      "girls": 248,
+      "boys": 261,
+      "newFamilies": 97,
+      "newUB": 337,
       "newFamiliesMonthly": [
         0,
         3,
         10,
         12,
         9,
-        9,
+        8,
         12,
         9,
         11,
@@ -1294,7 +1294,7 @@
         35,
         48,
         28,
-        34,
+        31,
         43,
         26,
         38,
@@ -1389,7 +1389,7 @@
       396,
       142,
       155,
-      134,
+      135,
       0
     ],
     "totalCost": 16575.24
@@ -1430,6 +1430,6 @@
     ],
     "totalCost": null
   },
-  "lastUpdated": "2026-11-26T20:13:28.869Z",
+  "lastUpdated": "2026-11-27T20:00:12.668Z",
   "syncWarnings": []
 }
